@@ -5,28 +5,783 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="theme-color" content="#0d0212">
     <title>السوق الكبير | الشاشة الرئيسية</title>
-    
-    <!-- خطوط وأيقونات -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- ملف التصميم المنفصل -->
-    <link rel="stylesheet" href="style.css">
-    
-    <!-- تجهيز لتطبيق الأندرويد مستقبلاً (PWA) -->
-    <link rel="manifest" href="manifest.json">
+    <style>
+        /* ============================================
+            المتغيرات الأساسية - الهوية البصرية
+        ============================================ */
+        :root {
+            --gold: #ffbd59;
+            --gold-light: #ffd699;
+            --gold-dark: #cc9533;
+            --gold-glow: rgba(255, 189, 89, 0.4);
+            --bg-primary: #0d0212;
+            --bg-secondary: #1a0a2e;
+            --bg-card: #161616;
+            --bg-card-hover: #1f1f1f;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --shadow-gold: 0 8px 32px rgba(255, 189, 89, 0.3);
+            --shadow-dark: 0 4px 20px rgba(0, 0, 0, 0.5);
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ============================================
+           🔄 إعادة الضبط العامة
+        ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            background-attachment: fixed;
+        }
+
+        /* ============================================
+           ✨ الهيدر الاحترافي مع تأثير الزجاج
+        ============================================ */
+        .master-header {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--gold);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(255, 189, 89, 0.2);
+        }
+
+        .header-top {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-btn {
+            background: rgba(255, 189, 89, 0.1);
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            font-size: 1.4rem;
+            cursor: pointer;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(255, 189, 89, 0.2);
+        }
+
+        .header-btn:active {
+            transform: scale(0.9);
+            background: var(--gold);
+            color: #000;
+        }
+
+        .master-header img {
+            width: 140px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 10px rgba(255, 189, 89, 0.3));
+        }
+
+        .geo-indicator {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 700;
+            background: rgba(255, 189, 89, 0.1);
+            padding: 8px 20px;
+            border-radius: 50px;
+            border: 1.5px solid var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(255, 189, 89, 0.15);
+        }
+
+        .geo-indicator:active {
+            background: var(--gold);
+            color: #000;
+            transform: scale(0.95);
+        }
+
+        /* ============================================
+           📢 شريط الإعلانات المتحرك
+        ============================================ */
+        .ticker-container {
+            background: linear-gradient(90deg, #1a0a2e 0%, #0d0212 50%, #1a0a2e 100%);
+            height: 42px;
+            overflow: hidden;
+            position: relative;
+            border-bottom: 1px solid rgba(255, 189, 89, 0.3);
+            cursor: pointer;
+        }
+
+        .ticker-container::before,
+        .ticker-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 50px;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ticker-container::before {
+            right: 0;
+            background: linear-gradient(to left, #1a0a2e, transparent);
+        }
+
+        .ticker-container::after {
+            left: 0;
+            background: linear-gradient(to right, #1a0a2e, transparent);
+        }
+
+        .ticker-text {
+            display: flex;
+            white-space: nowrap;
+            position: absolute;
+            animation: ticker 35s linear infinite;
+        }
+
+        .ticker-text span {
+            padding: 0 50px;
+            color: var(--gold);
+            font-weight: 700;
+            line-height: 42px;
+            font-size: 0.95rem;
+            text-shadow: 0 2px 8px rgba(255, 189, 89, 0.5);
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* ============================================
+           🏷️ عناوين الأقسام
+        ============================================ */
+        .sec-header {
+            padding: 25px 20px 15px;
+            color: var(--gold);
+            font-weight: 900;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sec-header i {
+            margin-left: 8px;
+            filter: drop-shadow(0 2px 8px var(--gold-glow));
+        }
+
+        .sec-header a {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 2px dashed var(--gold);
+            transition: var(--transition);
+            padding-bottom: 2px;
+        }
+
+        .sec-header a:active {
+            color: var(--gold);
+        }
+
+        /* ============================================
+           🎠 السلايدر البريميوم
+        ============================================ */
+        .premium-slider {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 0 20px 25px;
+            scrollbar-width: none;
+            scroll-snap-type: x mandatory;
+        }
+
+        .premium-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .p-card {
+            min-width: 85%;
+            height: 180px;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--gold);
+            position: relative;
+            overflow: hidden;
+            background: #000;
+            cursor: pointer;
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .p-card:active {
+            transform: scale(0.98);
+        }
+
+        .p-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.7;
+            transition: var(--transition);
+        }
+
+        .p-card:active img {
+            opacity: 0.5;
+        }
+
+        .p-card .p-info {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.95));
+            font-weight: 800;
+            color: #fff;
+            font-size: 1.1rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        /* ============================================
+           🎯 شبكة الأقسام - اللمسة السحرية
+        ============================================ */
+        .grid-matrix {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 10px 15px 30px;
+            width: 100%;
+        }
+
+        .cat-box {
+            background: linear-gradient(145deg, var(--bg-card) 0%, #0f0f0f 100%);
+            border-radius: var(--radius-md);
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid rgba(255, 189, 89, 0.2);
+            text-decoration: none;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-dark);
+        }
+
+        /* تأثير اللمعان المتحرك */
+        .cat-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 189, 89, 0.1) 50%,
+                transparent 70%
+            );
+            transform: rotate(45deg);
+            transition: all 0.6s;
+            opacity: 0;
+        }
+
+        .cat-box:active::before {
+            opacity: 1;
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+
+        .cat-box:active {
+            transform: scale(0.95);
+            border-color: var(--gold);
+            box-shadow: var(--shadow-gold);
+        }
+
+        .cat-icon-circle {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            border: 2.5px solid var(--gold);
+            box-shadow: 0 4px 20px var(--shadow-gold), inset 0 0 20px rgba(255, 189, 89, 0.2);
+            position: relative;
+            z-index: 1;
+            transition: var(--transition);
+        }
+
+        .cat-box:active .cat-icon-circle {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .cat-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+            التدرجات اللونية الاحترافية
+        ============================================ */
+        .grad-mobiles { 
+            background: linear-gradient(145deg, #1e1b4b, #000); 
+            color: #60a5fa !important; 
+        }
+        .grad-computers { 
+            background: linear-gradient(145deg, #062f4f, #000); 
+            color: #38bdf8 !important; 
+        }
+        .grad-starlink { 
+            background: linear-gradient(145deg, #2e1065, #000); 
+            color: #c084fc !important; 
+        }
+        .grad-electronics { 
+            background: linear-gradient(145deg, #14532d, #000); 
+            color: #4ade80 !important; 
+        }
+        .grad-fashion { 
+            background: linear-gradient(145deg, #701a75, #000); 
+            color: #f472b6 !important; 
+        }
+        .grad-furniture { 
+            background: linear-gradient(145deg, #7c2d12, #000); 
+            color: #fb923c !important; 
+        }
+        .grad-building { 
+            background: linear-gradient(145deg, #451a03, #000); 
+            color: #f59e0b !important; 
+        }
+        .grad-realestate { 
+            background: linear-gradient(145deg, #115e59, #000); 
+            color: #2dd4bf !important; 
+        }
+        .grad-cars { 
+            background: linear-gradient(145deg, #1f2937, #000); 
+            color: #e5e7eb !important; 
+        }
+        .grad-motors { 
+            background: linear-gradient(145deg, #991b1b, #000); 
+            color: #f87171 !important; 
+        }
+        .grad-crops { 
+            background: linear-gradient(145deg, #064e3b, #000); 
+            color: #34d399 !important; 
+        }
+        .grad-livestock { 
+            background: linear-gradient(145deg, #3f2b12, #000); 
+            color: #fbbf24 !important; 
+        }
+
+        /* ============================================
+           📱 القائمة الجانبية الاحترافية
+        ============================================ */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .sidebar-overlay.active {
+            right: 0;
+        }
+
+        .sidebar-panel {
+            width: 85%;
+            max-width: 320px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border-left: 3px solid var(--gold);
+            display: flex;
+            flex-direction: column;
+            padding: 25px 20px;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.9);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-title {
+            color: var(--gold);
+            font-size: 1.2rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-sidebar-btn {
+            background: rgba(255, 189, 89, 0.1);
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            border-radius: var(--radius-sm);
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.2rem;
+        }
+
+        .close-sidebar-btn:active {
+            background: var(--gold);
+            color: #000;
+            transform: rotate(90deg);
+        }
+
+        .user-card-side {
+            background: rgba(255, 189, 89, 0.08);
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .user-card-side:active {
+            background: rgba(255, 189, 89, 0.15);
+            transform: scale(0.98);
+        }
+
+        .user-avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 15px var(--shadow-gold);
+        }
+
+        .user-info h4 {
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .user-info p {
+            font-size: 0.8rem;
+            color: var(--gold);
+        }
+
+        .side-menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .side-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .side-item i {
+            width: 25px;
+            text-align: center;
+            color: var(--gold);
+            font-size: 1.2rem;
+        }
+
+        .side-item:active {
+            background: rgba(255, 189, 89, 0.2);
+            border-color: var(--gold);
+            transform: translateX(-5px);
+        }
+
+        .side-item.highlight {
+            background: linear-gradient(90deg, rgba(255, 189, 89, 0.2), transparent);
+            border-color: var(--gold);
+        }
+
+        /* ============================================
+            تأثيرات الظهور المتتابع
+        ============================================ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cat-box {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .cat-box:nth-child(1) { animation-delay: 0.05s; }
+        .cat-box:nth-child(2) { animation-delay: 0.1s; }
+        .cat-box:nth-child(3) { animation-delay: 0.15s; }
+        .cat-box:nth-child(4) { animation-delay: 0.2s; }
+        .cat-box:nth-child(5) { animation-delay: 0.25s; }
+        .cat-box:nth-child(6) { animation-delay: 0.3s; }
+        .cat-box:nth-child(7) { animation-delay: 0.35s; }
+        .cat-box:nth-child(8) { animation-delay: 0.4s; }
+        .cat-box:nth-child(9) { animation-delay: 0.45s; }
+        .cat-box:nth-child(10) { animation-delay: 0.5s; }
+        .cat-box:nth-child(11) { animation-delay: 0.55s; }
+        .cat-box:nth-child(12) { animation-delay: 0.6s; }
+
+        /* ============================================
+           📐 التجاوب الذكي مع كل الشاشات
+        ============================================ */
+        
+        /* تابلت */
+        @media (min-width: 768px) {
+            .grid-matrix {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                padding: 15px 25px 40px;
+            }
+            
+            .cat-icon-circle {
+                width: 75px;
+                height: 75px;
+                font-size: 1.8rem;
+            }
+            
+            .cat-label {
+                font-size: 0.95rem;
+            }
+            
+            .p-card {
+                min-width: 45%;
+                height: 200px;
+            }
+            
+            .master-header img {
+                width: 160px;
+            }
+        }
+
+        /* ديسكتوب */
+        @media (min-width: 1024px) {
+            .grid-matrix {
+                grid-template-columns: repeat(4, 1fr);
+                max-width: 1200px;
+                margin: 0 auto;
+                gap: 25px;
+            }
+            
+            .cat-icon-circle {
+                width: 85px;
+                height: 85px;
+                font-size: 2rem;
+            }
+            
+            .cat-label {
+                font-size: 1rem;
+            }
+            
+            .p-card {
+                min-width: 30%;
+                height: 220px;
+            }
+            
+            .master-header img {
+                width: 180px;
+            }
+        }
+
+        /* شاشات كبيرة جداً */
+        @media (min-width: 1440px) {
+            .grid-matrix {
+                max-width: 1400px;
+            }
+        }
+
+        /* الوضع الأفقي */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .grid-matrix {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 10px;
+            }
+            
+            .cat-box {
+                padding: 12px 5px;
+            }
+            
+            .cat-icon-circle {
+                width: 45px;
+                height: 45px;
+                font-size: 1.2rem;
+            }
+            
+            .cat-label {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* شاشات صغيرة جداً */
+        @media (max-width: 360px) {
+            .grid-matrix {
+                gap: 10px;
+            }
+            
+            .cat-icon-circle {
+                width: 55px;
+                height: 55px;
+                font-size: 1.4rem;
+            }
+            
+            .cat-label {
+                font-size: 0.75rem;
+            }
+            
+            .master-header img {
+                width: 110px;
+            }
+        }
+
+        /* ============================================
+           🌟 تأثيرات إضافية للفخامة
+        ============================================ */
+        
+        /* تأثير النبض للأيقونات */
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 20px var(--shadow-gold); }
+            50% { box-shadow: 0 4px 30px var(--gold-glow), 0 0 40px rgba(255, 189, 89, 0.3); }
+        }
+
+        .cat-icon-circle {
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        /* تأثير التوهج للنصوص الذهبية */
+        .sec-header, .geo-indicator {
+            text-shadow: 0 2px 10px rgba(255, 189, 89, 0.3);
+        }
+
+        /* تحسين التمرير */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 10px;
+        }
+
+        /* تأثير التحميل */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .loading {
+            background: linear-gradient(90deg, var(--bg-card) 0%, var(--bg-card-hover) 50%, var(--bg-card) 100%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+    </style>
 </head>
 <body>
 
     <header class="master-header">
         <div class="header-top">
-            <button class="header-btn" id="openSidebarBtn" aria-label="فتح القائمة"><i class="fas fa-bars"></i></button>
-            <img src="long.png" alt="شعار السوق الكبير" loading="lazy">
-            <button class="header-btn" onclick="location.href='profile.html'" aria-label="الملف الشخصي"><i class="fas fa-user-circle"></i></button>
+            <button class="header-btn" id="openSidebarBtn" aria-label="فتح القائمة">
+                <i class="fas fa-bars"></i>
+            </button>
+            <img src="long.png" alt="السوق الكبير" loading="lazy">
+            <button class="header-btn" onclick="location.href='profile.html'" aria-label="الملف الشخصي">
+                <i class="fas fa-user-circle"></i>
+            </button>
         </div>
         <div class="geo-indicator" onclick="openLocationPicker()">
-            <i class="fas fa-map-marker-alt"></i> <span id="currentGeoLabel">جاري التحديد...</span>
-        </div</header>
+            <i class="fas fa-map-marker-alt"></i>
+            <span id="currentGeoLabel">جاري التحديد...</span>
+        </div>
+    </header>
 
     <div class="ticker-container" onclick="fastNavigate('ads-center.html')">
         <div class="ticker-text" id="ticker-box">
@@ -50,33 +805,78 @@
         </div>
     </div>
 
-    <div class="sec-header"><span><i class="fas fa-th-large"></i> أقسام السوق</span></div>
+    <div class="sec-header">
+        <span><i class="fas fa-th-large"></i> أقسام السوق</span>
+    </div>
     
     <div class="grid-matrix">
-        <a href="category-mobiles.html?cat=1" class="cat-box data-turbo"><div class="cat-icon-circle grad-mobiles"><i class="fas fa-mobile-alt"></i></div><span class="cat-label">الهواتف والملحقات</span></a>
-        <a href="computers.html?cat=2" class="cat-box data-turbo"><div class="cat-icon-circle grad-computers"><i class="fas fa-desktop"></i></div><span class="cat-label">الحواسيب والطابعات</span></a>
-        <a href="category-starlink.html?cat=3" class="cat-box data-turbo"><div class="cat-icon-circle grad-starlink"><i class="fas fa-satellite-dish"></i></div><span class="cat-label">ستارلينك وملحقاته</span></a>
-        <a href="electronics.html?cat=4" class="cat-box data-turbo"><div class="cat-icon-circle grad-electronics"><i class="fas fa-plug"></i></div><span class="cat-label">الأجهزة الإلكترونية</span></a>
-        <a href="fashion_mall.html?cat=5" class="cat-box data-turbo"><div class="cat-icon-circle grad-fashion"><i class="fas fa-shirt"></i></div><span class="cat-label">الملبوسات والأحذية</span></a>
-        <a href="furniture.html?cat=6" class="cat-box data-turbo"><div class="cat-icon-circle grad-furniture"><i class="fas fa-couch"></i></div><span class="cat-label">الأثاث والأواني</span></a>
-        <a href="building_materials.html?cat=7" class="cat-box data-turbo"><div class="cat-icon-circle grad-building"><i class="fas fa-tools"></i></div><span class="cat-label">أدوات البناء</span></a>
-        <a href="realestate.html?cat=9" class="cat-box data-turbo"><div class="cat-icon-circle grad-realestate"><i class="fas fa-home"></i></div><span class="cat-label">العقارات والأراضي</span></a>
-        <a href="category-cars.html?cat=10" class="cat-box data-turbo"><div class="cat-icon-circle grad-cars"><i class="fas fa-car"></i></div><span class="cat-label">العرَبات والاسبيرات</span></a>
-        <a href="motors.html?cat=11" class="cat-box data-turbo"><div class="cat-icon-circle grad-motors"><i class="fas fa-motorcycle"></i></div><span class="cat-label">المواتر والملحقات</span></a>
-        <a href="grains_and_crops.html?cat=12" class="cat-box data-turbo"><div class="cat-icon-circle grad-crops"><i class="fas fa-seedling"></i></div><span class="cat-label">الحبوب والمحاصيل</span></a>
-        <a href="livestock_and_feed.html?cat=13" class="cat-box data-turbo"><div class="cat-icon-circle grad-livestock"><i class="fas fa-cow"></i></div><span class="cat-label">المواشي والأعلاف</span></a>
+        <a href="category-mobiles.html?cat=1" class="cat-box">
+            <div class="cat-icon-circle grad-mobiles"><i class="fas fa-mobile-alt"></i></div>
+            <span class="cat-label">الهواتف والملحقات</span>
+        </a>
+        <a href="computers.html?cat=2" class="cat-box">
+            <div class="cat-icon-circle grad-computers"><i class="fas fa-desktop"></i></div>
+            <span class="cat-label">الحواسيب والطابعات</span>
+        </a>
+        <a href="category-starlink.html?cat=3" class="cat-box">
+            <div class="cat-icon-circle grad-starlink"><i class="fas fa-satellite-dish"></i></div>
+            <span class="cat-label">ستارلينك وملحقاته</span>
+        </a>
+        <a href="electronics.html?cat=4" class="cat-box">
+            <div class="cat-icon-circle grad-electronics"><i class="fas fa-plug"></i></div>
+            <span class="cat-label">الأجهزة الإلكترونية</span>
+        </a>
+        <a href="fashion_mall.html?cat=5" class="cat-box">
+            <div class="cat-icon-circle grad-fashion"><i class="fas fa-shirt"></i></div>
+            <span class="cat-label">الملبوسات والأحذية</span>
+        </a>
+        <a href="furniture.html?cat=6" class="cat-box">
+            <div class="cat-icon-circle grad-furniture"><i class="fas fa-couch"></i></div>
+            <span class="cat-label">الأثاث والأواني</span>
+        </a>
+        <a href="building_materials.html?cat=7" class="cat-box">
+            <div class="cat-icon-circle grad-building"><i class="fas fa-tools"></i></div>
+            <span class="cat-label">أدوات البناء</span>
+        </a>
+        <a href="realestate.html?cat=9" class="cat-box">
+            <div class="cat-icon-circle grad-realestate"><i class="fas fa-home"></i></div>
+            <span class="cat-label">العقارات والأراضي</span>
+        </a>
+        <a href="category-cars.html?cat=10" class="cat-box">
+            <div class="cat-icon-circle grad-cars"><i class="fas fa-car"></i></div>
+            <span class="cat-label">العرَبات والاسبيرات</span>
+        </a>
+        <a href="motors.html?cat=11" class="cat-box">
+            <div class="cat-icon-circle grad-motors"><i class="fas fa-motorcycle"></i></div>
+            <span class="cat-label">المواتر والملحقات</span>
+        </a>
+        <a href="grains_and_crops.html?cat=12" class="cat-box">
+            <div class="cat-icon-circle grad-crops"><i class="fas fa-seedling"></i></div>
+            <span class="cat-label">الحبوب والمحاصيل</span>
+        </a>
+        <a href="livestock_and_feed.html?cat=13" class="cat-box">
+            <div class="cat-icon-circle grad-livestock"><i class="fas fa-cow"></i></div>
+            <span class="cat-label">المواشي والأعلاف</span>
+        </a>
     </div>
 
     <!-- القائمة الجانبية -->
     <div class="sidebar-overlay" id="sidebarOverlay">
         <div class="sidebar-panel">
             <div class="sidebar-header">
-                <div class="sidebar-title"><i class="fas fa-sliders-h"></i> مركز الخدمات</div>
-                <div class="close-sidebar-btn" id="closeSidebarBtn"><i class="fas fa-times"></i></div>
+                <div class="sidebar-title">
+                    <i class="fas fa-sliders-h"></i>
+                    مركز الخدمات
+                </div>
+                <div class="close-sidebar-btn" id="closeSidebarBtn">
+                    <i class="fas fa-times"></i>
+                </div>
             </div>
 
             <div class="user-card-side" onclick="fastNavigate('profile.html')">
-                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
                 <div class="user-info">
                     <h4>المطور محمد حبيب</h4>
                     <p><i class="fas fa-check-circle"></i> تاجر معتمد • نيالا</p>
@@ -84,17 +884,84 @@
             </div>
 
             <div class="side-menu-list">
-                <a href="add-ad.html" class="side-item highlight"><i class="fas fa-plus-circle"></i><span>إضافة إعلان جديد</span></a>
-                <a href="chat-list.html" class="side-item"><i class="fas fa-comments"></i><span>المحادثات المباشرة</span></a>
-                <a href="my-ads.html" class="side-item"><i class="fas fa-list-alt"></i><span>إعلاناتي المعروضة</span></a>
-                <a href="verify-receipt.html" class="side-item"><i class="fas fa-shield-alt"></i><span>الفحص الجنائي للإشعارات</span></a>
-                <a href="plans.html" class="side-item"><i class="fas fa-crown"></i><span>خطط الباقات والاشتراكات</span></a>
-                <a href="profile.html" class="side-item"><i class="fas fa-user-cog"></i><span>إعدادات الحساب والبروفايل</span></a>
+                <a href="add-ad.html" class="side-item highlight">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>إضافة إعلان جديد</span>
+                </a>
+                <a href="chat-list.html" class="side-item">
+                    <i class="fas fa-comments"></i>
+                    <span>المحادثات المباشرة</span>
+                </a>
+                <a href="my-ads.html" class="side-item">
+                    <i class="fas fa-list-alt"></i>
+                    <span>إعلاناتي المعروضة</span>
+                </a>
+                <a href="verify-receipt.html" class="side-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>الفحص الجنائي للإشعارات</span>
+                </a>
+                <a href="plans.html" class="side-item">
+                    <i class="fas fa-crown"></i>
+                    <span>خطط الباقات والاشتراكات</span>
+                </a>
+                <a href="profile.html" class="side-item">
+                    <i class="fas fa-user-cog"></i>
+                    <span>إعدادات الحساب والبروفايل</span>
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- ملف الجافاسكربت المنفصل -->
-    <script type="module" src="main.js"></script>
-</body>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e",
+            measurementId: "G-WTC5HE9BB1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function loadActiveGeo() {
+            const savedState = localStorage.getItem('filteredState') || "جنوب دارفور";
+            const savedCity = localStorage.getItem('filteredCity') || "نيالا";
+            document.getElementById('currentGeoLabel').innerText = `${savedCity} - ${savedState}`;
+        }
+        loadActiveGeo();
+
+        onSnapshot(collection(db, "ads"), (snapshot) => {
+            let text = "مرحباً بكم في تطبيق السوق الكبير 🇸🇩";
+            snapshot.forEach((doc) => { 
+                if(doc.data().type === "إعلان متحرك في الشريط") {
+                    text = doc.data().text; 
+                } 
+            });
+            document.getElementById('ticker-box').innerHTML = `<span>${text}</span>`;
+        }, (error) => {
+            console.error("خطأ في Firebase:", error);
+        });
+
+        window.fastNavigate = function(url) { 
+            window.location.href = url; 
+        };
+
+        const sidebar = document.getElementById('sidebarOverlay');
+        document.getElementById('openSidebarBtn').addEventListener('click', () => sidebar.classList.add('active'));
+        document.getElementById('closeSidebarBtn').addEventListener('click', () => sidebar.classList.remove('active'));
+        sidebar.addEventListener('click', (e) => { 
+            if(e.target === sidebar) sidebar.classList.remove('active'); 
+        });
+
+        window.openLocationPicker = function() {
+            console.log("فتح نافذة اختيار الموقع...");
+        };
+    </script>
+</body><script src="shared-components.js"></script>
 </html>
