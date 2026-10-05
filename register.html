@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب | السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gold: #ffbd59; --bg: #0b0b0b; --card: #161616; }
+        
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            font-weight: 900; /* الخط العريض جداً الملكي */
+            background: var(--bg); 
+            color: #fff; 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            padding: 20px;
+        }
+
+        .reg-card { 
+            width: 100%; 
+            max-width: 420px; 
+            background: var(--card); 
+            padding: 30px; 
+            border-radius: 30px; 
+            border: 1px solid #333; 
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        .top-actions { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        .back-btn { 
+            width: 40px; height: 40px; background: #222; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            color: var(--gold); text-decoration: none; border: 1px solid #444;
+            transition: 0.3s;
+        }
+        .back-btn:active { transform: scale(0.9); }
+
+        .free-badge { 
+            background: #2ecc71; color: #000; padding: 5px 15px; 
+            border-radius: 20px; font-weight: 900; font-size: 0.8rem; 
+            display: inline-block; margin-bottom: 15px; 
+        }
+
+        h2 { color: var(--gold); font-size: 1.8rem; margin: 10px 0; }
+
+        /* خيارات نوع الحساب */
+        .user-type { display: flex; gap: 10px; margin: 20px 0; }
+        .type-btn { 
+            flex: 1; padding: 15px; border: 1px solid #444; border-radius: 15px; 
+            cursor: pointer; transition: 0.3s; font-size: 0.95rem; color: #aaa; font-weight: 900;
+        }
+        .type-btn.active { border-color: var(--gold); background: rgba(255,189,89,0.1); color: var(--gold); }
+
+        /* صندوق التعريف الذكي - السوق الكبير */
+        #smart-info { 
+            background: rgba(255,189,89,0.05); padding: 15px; border-radius: 15px; 
+            margin-bottom: 20px; font-size: 0.85rem; color: #ddd; 
+            border-right: 4px solid var(--gold); display: none; text-align: right;
+            line-height: 1.6; animation: fadeIn 0.5s; font-weight: 700;
+        }
+
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; right: 15px; top: 18px; color: var(--gold); font-size: 1.1rem; }
+        
+        input { 
+            width: 100%; padding: 16px 45px 16px 15px; background: #222; 
+            border: 1px solid #444; border-radius: 15px; color: #fff; 
+            font-family: 'Cairo'; font-weight: 700; box-sizing: border-box;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--gold); outline: none; background: #282828; }
+
+        /* سياسة الاستخدام والموافقة */
+        .policy-check { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px 0; font-size: 0.85rem; color: #ccc; font-weight: 700; }
+        .policy-check input { width: auto; margin: 0; cursor: pointer; }
+        .policy-check a { color: var(--gold); text-decoration: none; font-weight: 900; }
+
+        .btn-reg { 
+            width: 100%; padding: 18px; background: var(--gold); color: #000; 
+            border: none; border-radius: 15px; font-weight: 900; font-size: 1.1rem; 
+            cursor: pointer; margin-top: 10px; transition: 0.3s; font-family: 'Cairo';
+        }
+        .btn-reg:active { transform: scale(0.98); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="reg-card">
+        <!-- ربط زر الرجوع بالرئيسية مباشرة -->
+        <div class="top-actions">
+            <a href="index.html" class="back-btn"><i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="free-badge">عضوية السوق الكبير ✅</div>
+        <h2>إنشاء حساب جديد</h2>
+        <p style="color:#888; font-size: 0.9rem; margin-bottom: 5px;">انضم لأكبر سوق تجاري ذكي متكامل</p>
+
+        <div class="user-type">
+            <div class="type-btn" onclick="selectType('user', this)">
+                <i class="fas fa-user-circle"></i> مستفيد
+            </div>
+            <div class="type-btn" onclick="selectType('merchant', this)">
+                <i class="fas fa-store"></i> تاجر 🏪
+            </div>
+        </div>
+
+        <div id="smart-info"></div>
+
+        <!-- التوجيه التلقائي بعد نجاح النموذج إلى الواجهة الرئيسية index.html -->
+        <form onsubmit="event.preventDefault(); window.location.href='index.html';">
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" placeholder="الاسم الكامل" required>
+            </div>
+            
+            <div class="input-group">
+                <i class="fab fa-whatsapp"></i>
+                <input type="text" placeholder="رقم الواتساب لاستعادة الحساب تلقائياً" required>
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" placeholder="كلمة المرور الجديدة" required>
+            </div>
+
+            <!-- ربط واجهة الموافقة بصفحة الشروط والسياسة المكملة للمشروع -->
+            <div class="policy-check">
+                <input type="checkbox" id="agree" required>
+                <label for="agree">أوافق على <a href="policy.html">شروط الاستخدام وسياسة الخصوصية</a></label>
+            </div>
+
+            <button type="submit" class="btn-reg">تأكيد التسجيل ودخول المنصة</button>
+        </form>
+
+        <!-- ربط صفحة الدخول في حال امتلاك حساب مسبق -->
+        <p style="margin-top: 20px; font-size: 0.85rem; color: #888;">
+            لديك حساب بالفعل؟ <a href="login.html" style="color: var(--gold); text-decoration: none; font-weight: 900;">تسجيل الدخول</a>
+        </p>
+    </div>
+
+    <script>
+        function selectType(type, el) {
+            // تفعيل الزر المختار
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+
+            // إظهار التعريف الذكي الشامل للسوق الكبير
+            const infoBox = document.getElementById('smart-info');
+            infoBox.style.display = 'block';
+
+            if(type === 'merchant') {
+                infoBox.innerHTML = `<b>أنت المحرك الأساسي للمنصة!</b> كتاجر في <b>السوق الكبير</b> ستتمكن من إعلان وعرض بضائعك وخدماتك بأحدث الوسائل الذكية لضمان انتشار عروضك والوصول للمستهلكين فوراً وبكل سهولة.`;
+            } else {
+                infoBox.innerHTML = `<b>مرحباً بك في عالم الفخامة!</b> بصفتك مستفيداً، صُممت المنصة خصيصاً لتلبية احتياجاتك الاستهلاكية واليومية بأسرع وأسهل الطرق وبأعلى مستويات الأمان التجاري.`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>بروفايل السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --gold: #ffbd59; 
+            --gold-glow: rgba(255, 189, 89, 0.15);
+            --bg: #0b0b0b; 
+            --card: #161616; 
+            --input-bg: #222222;
+            --green: #2ecc71; 
+            --danger: #ff5959; 
+            --text-muted: #aaaaaa;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: var(--bg); 
+            color: #fff; 
+            font-weight: 700; 
+            overflow-x: hidden; 
+            line-height: 1.6;
+        }
+
+        /* زر التبديل السحري للتجربة */
+        .demo-switcher { 
+            background: #120d05; 
+            text-align: center; 
+            padding: 10px; 
+            border-bottom: 1px dashed var(--gold); 
+            position: relative; 
+            z-index: 101; 
+        }
+        .btn-switch { 
+            background: linear-gradient(135deg, var(--gold), #e0a343); 
+            border: none; 
+            padding: 6px 18px; 
+            border-radius: 25px; 
+            font-family: 'Cairo'; 
+            font-weight: 900; 
+            cursor: pointer; 
+            font-size: 0.8rem; 
+            color: #000;
+            box-shadow: 0 4px 12px var(--gold-glow); 
+            transition: transform 0.2s;
+        }
+        .btn-switch:active { transform: scale(0.95); }
+
+        /* الهيدر المدمج */
+        .header { 
+            padding: 15px 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            border-bottom: 1px solid #252525; 
+            background: var(--card); 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .header i { 
+            cursor: pointer; 
+            color: var(--gold); 
+            font-size: 1.25rem; 
+            width: 38px; 
+            height: 38px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 50%;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .header i:active { transform: scale(0.9); background: #222; }
+
+        /* الكارت الشخصي */
+        .profile-card { text-align: center; padding: 35px 20px 25px; background: linear-gradient(to bottom, var(--card), var(--bg)); }
+        .img-wrapper { 
+            position: relative; 
+            width: 115px; 
+            height: 115px; 
+            margin: 0 auto; 
+            border: 2px solid var(--gold); 
+            border-radius: 50%; 
+            padding: 4px; 
+            box-shadow: 0 0 20px var(--gold-glow); 
+        }
+        .profile-img { 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            background: #222; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 2.6rem; 
+            color: var(--gold); 
+        }
+        
+        /* الإحصائيات */
+        .stats { 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 18px; 
+            background: var(--card); 
+            margin: -10px 20px 20px; 
+            border-radius: 18px; 
+            border: 1px solid #252525; 
+            box-shadow: 0 12px 24px rgba(0,0,0,0.6); 
+        }
+        .stat-item { text-align: center; flex: 1; position: relative; }
+        .stat-item:not(:last-child)::after {
+            content: ''; position: absolute; left: 0; top: 25%; height: 50%; width: 1px; background: #333;
+        }
+        .stat-item b { display: block; color: var(--gold); font-size: 1.3rem; font-weight: 900; }
+        .stat-item span { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+
+        /* القائمة والمعلومات */
+        .info-list { padding: 5px 20px 40px; }
+        .info-item { 
+            background: var(--card); 
+            padding: 16px; 
+            border-radius: 16px; 
+            margin-bottom: 14px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-right: 4px solid var(--gold); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            transition: all 0.3s ease;
+        }
+        .info-item span { font-size: 0.85rem; color: #ccc; font-weight: 600; }
+        .info-item .val { font-size: 0.9rem; font-weight: 700; color: #fff; text-align: left; }
+        
+        /* تصميم حقول الإدخال المطور */
+        .info-input, .info-select { 
+            background: var(--input-bg); 
+            border: 1px solid #444; 
+            color: #fff; 
+            padding: 8px 12px; 
+            border-radius: 10px; 
+            width: 70%; 
+            display: none; 
+            font-family: 'Cairo'; 
+            font-weight: 700; 
+            font-size: 0.85rem; 
+            color-scheme: dark; 
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .info-input:focus, .info-select:focus { border-color: var(--gold); }
+
+        /* المنيو الجانبي (Sidebar) */
+        #sidebar { 
+            position: fixed; 
+            top: 0; 
+            right: -290px; 
+            width: 280px; 
+            height: 100%; 
+            background: var(--card); 
+            transition: 0.4s cubic-bezier(0.1, 0.8, 0.25, 1); 
+            z-index: 1000; 
+            border-left: 2px solid var(--gold); 
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+        }
+        #sidebar.active { right: 0; }
+        #menu-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.75); 
+            backdrop-filter: blur(5px); 
+            z-index: 999; 
+            animation: fadeIn 0.3s ease;
+        }
+        .menu-item { 
+            padding: 18px 20px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            color: #eee; 
+            text-decoration: none; 
+            border-bottom: 1px solid #202020; 
+            font-size: 0.9rem; 
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .menu-item:active { background: #222; }
+        .menu-item i { color: var(--gold); width: 22px; text-align: center; font-size: 1.1rem; }
+
+        /* الأزرار */
+        .btn-main { 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 16px; 
+            font-family: 'Cairo'; 
+            font-weight: 900; 
+            border: none; 
+            cursor: pointer; 
+            margin-top: 14px; 
+            font-size: 0.95rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            transition: transform 0.1s, box-shadow 0.2s; 
+        }
+        .btn-main:active { transform: scale(0.97); }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #e0a343); color: #000; box-shadow: 0 4px 15px var(--gold-glow); }
+        .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
+        
+        /* تأثير النبض لزر الواتساب */
+        .btn-whatsapp {
+            background: var(--green); 
+            color: white; 
+            text-align: center; 
+            text-decoration: none;
+            animation: pulseGlow 2s infinite;
+        }
+
+        /* مودال الإعدادات */
+        .modal { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.85); 
+            backdrop-filter: blur(6px); 
+            z-index: 2000; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal-content { 
+            background: var(--card); 
+            width: 85%; 
+            max-width: 340px; 
+            border-radius: 24px; 
+            padding: 25px; 
+            text-align: center; 
+            border: 1px solid #252525; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7); 
+            animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* حركات الأنميشن السحرية */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="demo-switcher">
+        <span style="font-size: 0.8rem; color: #aaa;">نوع الواجهة الحالي: </span>
+        <button class="btn-switch" onclick="switchUserType()">تبديل النمط تلقائياً</button>
+    </div>
+
+    <div class="header">
+        <i class="fas fa-cog" onclick="toggleModal('settingsModal')"></i>
+        <span id="headerTitle" style="color: var(--gold); font-weight: 900;">ملف التاجر - السوق الكبير</span>
+        <i class="fas fa-bars" onclick="toggleSidebar()"></i>
+    </div>
+
+    <div class="profile-card">
+        <div class="img-wrapper">
+            <div class="profile-img" id="profileIcon"><i class="fas fa-user-tie"></i></div>
+        </div>
+        <h2 id="profileName" style="margin: 15px 0 5px; font-weight: 900;">المطور محمد حبيب</h2>
+        <span id="profileBadge" style="color: var(--gold); font-size: 0.9rem;"><i class="fas fa-check-circle"></i> تاجر معتمد - السوق الكبير</span>
+    </div>
+
+    <div class="stats" id="traderStats">
+        <div class="stat-item"><b>24</b><span>إعلان نشط</span></div>
+        <div class="stat-item"><b>4.9</b><span>تقييم المحل</span></div>
+        <div class="stat-item"><b>1.2k</b><span>متابع</span></div>
+    </div>
+
+    <div class="info-list">
+        <div class="info-item field-trader">
+            <span class="label-text">فئة التجارة:</span>
+            <b class="val" id="lblMerchantType">تاجر جملة</b>
+            <select class="info-select" id="merchantTypeSelect">
+                <option value="تاجر جملة" selected>تاجر جملة</option>
+                <option value="تاجر قطاعي">تاجر قطاعي</option>
+            </select>
+        </div>
+        <div class="info-item field-trader"><span>نوع النشاط:</span><b class="val">معرض مواتر وأجهزة</b><input type="text" class="info-input" value="معرض مواتر وأجهزة"></div>
+        <div class="info-item field-trader"><span>اسم العمل:</span><b class="val">معرض الفخامة</b><input type="text" class="info-input" value="معرض الفخامة"></div>
+        
+        <div class="info-item">
+            <span>الولايـة:</span>
+            <b class="val" id="lblState">جنوب دارفور</b>
+            <select class="info-select" id="stateSelect" onchange="updateCities()">
+                <optgroup label="ولايات دارفور">
+                    <option value="جنوب دارفور" selected>جنوب دارفور</option>
+                    <option value="شمال دارفور">شمال دارفور</option>
+                    <option value="غرب دارفور">غرب دارفور</option>
+                    <option value="شرق دارفور">شرق دارفور</option>
+                    <option value="وسط دارفور">وسط دارفور</option>
+                </optgroup>
+                <optgroup label="ولايات كردفان">
+                    <option value="شمال كردفان">شمال كردفان</option>
+                    <option value="جنوب كردفان">جنوب كردفان</option>
+                    <option value="غرب كردفان">غرب كردفان</option>
+                </optgroup>
+                <optgroup label="ولايات الشرق">
+                    <option value="البحر الأحمر">البحر الأحمر</option>
+                    <option value="كسلا">كسلا</option>
+                    <option value="القضارف">القضارف</option>
+                </optgroup>
+                <optgroup label="الولايات الشمالية">
+                    <option value="الشمالية">الشمالية</option>
+                    <option value="نهر النيل">نهر النيل</option>
+                </optgroup>
+                <optgroup label="ولايات الوسط">
+                    <option value="الجزيرة">الجزيرة</option>
+                    <option value="النيل الأبيض">النيل الأبيض</option>
+                    <option value="النيل الأزرق">النيل الأزرق</option>
+                    <option value="سنار">سنار</option>
+                </optgroup>
+                <optgroup label="العاصمة">
+                    <option value="الخرطوم">الخرطوم</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="info-item">
+            <span>المنطقة / المدينة:</span>
+            <b class="val" id="lblCity">نيالا</b>
+            <select class="info-select" id="citySelect"></select>
+        </div>
+        
+        <div class="info-item field-user" style="display: none;"><span>رقم الهاتف:</span><b class="val">0912345678</b><input type="text" class="info-input" value="0912345678"></div>
+
+        <button class="btn-main btn-outline" id="editBtn" onclick="enableEdit()"><i class="fas fa-edit"></i> تعديل بيانات الحساب</button>
+        <button class="btn-main btn-gold" id="saveBtn" style="display:none;" onclick="saveEdit()"><i class="fas fa-save"></i> حفظ التغييرات وعرضها</button>
+        
+        <a href="https://wa.me/249923211001" id="whatsappBtn" class="btn-main btn-whatsapp">
+            <i class="fab fa-whatsapp"></i> تواصل مع المسؤول (تفعيل الحساب)
+        </a>
+    </div>
+
+    <div id="menu-overlay" onclick="toggleSidebar()"></div>
+    <div id="sidebar">
+        <div style="padding: 25px 20px; border-bottom: 1px solid #252525; color: var(--gold); font-size: 1.1rem; font-weight: 900;">قائمة السوق الكبير</div>
+        <a href="index.html" class="menu-item"><i class="fas fa-home"></i> الرئيسية</a>
+        <span id="sidebarLinks">
+            <a href="trader-dashboard.html" class="menu-item"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+            <a href="chat.html" class="menu-item"><i class="fas fa-comments"></i> الرسائل</a>
+            <a href="add-product.html" class="menu-item"><i class="fas fa-plus-circle"></i> أضف إعلان</a>
+        </span>
+        <div class="menu-item" style="color: var(--danger); cursor: pointer;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h3 style="color: var(--gold); margin-bottom: 15px; font-weight: 900;">إعدادات الحساب</h3>
+            <div class="menu-item" onclick="triggerEditFromModal()" style="cursor: pointer; border-radius: 10px; margin-bottom: 5px;"><i class="fas fa-user-edit"></i> تعديل بيانات الحساب</div>
+            <div class="menu-item" style="cursor: pointer; border-radius: 10px; margin-bottom: 5px;"><i class="fas fa-lock"></i> تغيير كلمة المرور</div>
+            <div class="menu-item" style="cursor: pointer; border-radius: 10px; margin-bottom: 5px;"><i class="fas fa-bell"></i> الإشعارات</div>
+            <button class="btn-main btn-gold" onclick="toggleModal('settingsModal')" style="margin-top:20px;">إغلاق النافذة</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUserType = "trader";
+
+        const citiesData = {
+            "جنوب دارفور": ["نيالا", "كاس", "برام", "رهيد البردي", "تلس", "عد الفرسان"],
+            "شمال دارفور": ["الفاشر", "كتم", "كبكابية", "مليط", "أم كدادة"],
+            "غرب دارفور": ["الجنينة", "فوربرنقا", "كلبس", "كرينك", "هبيلا"],
+            "شرق دارفور": ["الضعين", "عسلاية", "أبو كارنكا", "عديلة", "شعيرية"],
+            "وسط دارفور": ["زالنجي", "نيرتتي", "قارسيلا", "وادي صالح", "مكجر"],
+            "شمال كردفان": ["الأبيض", "بارا", "أم روابة", "الرهد", "جبرة الشيخ"],
+            "جنوب كردفان": ["كادوقلي", "الدلنج", "العباسية", "تلودي", "أبو جبيهة"],
+            "غرب كردفان": ["الفولة", "النهود", "بابنوسة", "المنصورة", "غبيش"],
+            "البحر الأحمر": ["بورتسودان", "سواكن", "طوكر", "هيا", "جبيت", "سنكات"],
+            "كسلا": ["كسلا", "حلفا الجديدة", "خشم القربة", "أروما", "وقر"],
+            "القضارف": ["القضارف", "الدوكة", "الفاو", "الحواتة", "قلع النحل", "المفازة"],
+            "الشمالية": ["دنقلا", "كريمة", "مروي", "وادي حلفا", "الدبة", "دنقلا العجوز"],
+            "نهر النيل": ["عطبرة", "الدامر", "شندي", "بربر", "أبو حمد", "المتمة"],
+            "الجزيرة": ["ود مدني", "المناقل", "الحصاحيصا", "الكاملين", "رفاعة", "العقدة"],
+            "النيل الأبيض": ["ربك", "كوستي", "الدويم", "القطينة", "تندلتي", "الجراري"],
+            "النيل الأزرق": ["الدمازين", "الروصيرص", "باو", "قيسان", "الكرمك"],
+            "سنار": ["سنار", "سنجة", "السوكي", "الدندر", "أبو حجار"],
+            "الخرطوم": ["الخرطوم", "أم درمان", "بحري", "شرق النيل", "جبل أولياء"]
+        };
+
+        function updateCities() {
+            const stateSelect = document.getElementById('stateSelect');
+            const citySelect = document.getElementById('citySelect');
+            const selectedState = stateSelect.value;
+            
+            citySelect.innerHTML = "";
+            if(citiesData[selectedState]) {
+                citiesData[selectedState].forEach(city => {
+                    let opt = document.createElement('option');
+                    opt.value = city;
+                    opt.innerText = city;
+                    citySelect.appendChild(opt);
+                });
+            }
+        }
+
+        function loadCurrentLocation() {
+            const savedState = localStorage.getItem('filteredState') || "جنوب دارفور";
+            const savedCity = localStorage.getItem('filteredCity') || "نيالا";
+            
+            document.getElementById('lblState').innerText = savedState;
+            document.getElementById('stateSelect').value = savedState;
+            
+            updateCities();
+            
+            document.getElementById('lblCity').innerText = savedCity;
+            document.getElementById('citySelect').value = savedCity;
+        }
+
+        loadCurrentLocation();
+
+        function switchUserType() {
+            currentUserType = (currentUserType === "trader") ? "user" : "trader";
+            applyUserTypeLayout();
+        }
+
+        function applyUserTypeLayout() {
+            const traderStats = document.getElementById('traderStats');
+            const traderFields = document.querySelectorAll('.field-trader');
+            const userFields = document.querySelectorAll('.field-user');
+            const headerTitle = document.getElementById('headerTitle');
+            const profileBadge = document.getElementById('profileBadge');
+            const profileIcon = document.getElementById('profileIcon');
+            const whatsappBtn = document.getElementById('whatsappBtn');
+            const sidebarLinks = document.getElementById('sidebarLinks');
+
+            if (currentUserType === "user") {
+                traderStats.style.display = 'none';
+                traderFields.forEach(el => el.style.display = 'none');
+                userFields.forEach(el => el.style.display = 'flex');
+                headerTitle.innerText = "ملف المستفيد - السوق الكبير";
+                profileBadge.innerHTML = '<i class="fas fa-user"></i> مستفيد معتمد';
+                profileIcon.innerHTML = '<i class="fas fa-user"></i>';
+                whatsappBtn.style.display = 'none';
+                sidebarLinks.innerHTML = `
+                    <a href="my-orders.html" class="menu-item"><i class="fas fa-box"></i> طلبات الشراء الخاصة بي</a>
+                    <a href="favorites.html" class="menu-item"><i class="fas fa-heart"></i> الإعلانات المفضلة</a>
+                `;
+            } else {
+                traderStats.style.display = 'flex';
+                traderFields.forEach(el => el.style.display = 'flex');
+                userFields.forEach(el => el.style.display = 'none');
+                headerTitle.innerText = "ملف التاجر - السوق الكبير";
+                profileBadge.innerHTML = '<i class="fas fa-check-circle"></i> تاجر معتمد - السوق الكبير';
+                profileIcon.innerHTML = '<i class="fas fa-user-tie"></i>';
+                whatsappBtn.style.display = 'block';
+                sidebarLinks.innerHTML = `
+                    <a href="trader-dashboard.html" class="menu-item"><i class="fas fa-chart-line"></i> لوحة التحكم</a>
+                    <a href="chat.html" class="menu-item"><i class="fas fa-comments"></i> الرسائل</a>
+                    <a href="add-product.html" class="menu-item"><i class="fas fa-plus-circle"></i> أضف إعلان</a>
+                `;
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('menu-overlay');
+            
+            sidebar.classList.toggle('active');
+            if (sidebar.classList.contains('active')) {
+                overlay.style.display = 'block';
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
+
+        function toggleModal(id) {
+            const m = document.getElementById(id);
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function triggerEditFromModal() {
+            toggleModal('settingsModal');
+            enableEdit();
+        }
+
+        function enableEdit() {
+            document.querySelectorAll('.info-item').forEach(item => {
+                if (item.style.display !== 'none') {
+                    const val = item.querySelector('.val');
+                    const input = item.querySelector('.info-input');
+                    const select = item.querySelector('.info-select');
+                    
+                    if (val) val.style.display = 'none';
+                    if (input) input.style.display = 'block';
+                    if (select) select.style.display = 'block';
+                }
+            });
+            document.getElementById('editBtn').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'block';
+        }
+
+        function saveEdit() {
+            const stateSelect = document.getElementById('stateSelect');
+            const citySelect = document.getElementById('citySelect');
+            const merchantTypeSelect = document.getElementById('merchantTypeSelect');
+
+            localStorage.setItem('filteredState', stateSelect.value);
+            localStorage.setItem('filteredCity', citySelect.value);
+            localStorage.setItem('merchantType', merchantTypeSelect.value);
+
+            document.querySelectorAll('.info-item').forEach(item => {
+                const val = item.querySelector('.val');
+                const input = item.querySelector('.info-input');
+                const select = item.querySelector('.info-select');
+                
+                if (val) {
+                    if (input && input.style.display === 'block') {
+                        val.innerText = input.value;
+                    } else if (select && select.style.display === 'block') {
+                        val.innerText = select.value;
+                    }
+                    val.style.display = 'block';
+                }
+                if (input) input.style.display = 'none';
+                if (select) select.style.display = 'none';
+            });
+
+            document.getElementById('editBtn').style.display = 'block';
+            document.getElementById('saveBtn').style.display = 'none';
+
+            alert("تم حفظ البيانات والموقع الفوري ومزامنتها بنجاح يا هندسة!");
+        }
+    </script>
+</body>
+</html>

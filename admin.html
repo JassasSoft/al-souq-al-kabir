@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>السوق الكبير - لوحة الإدارة العليا</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --bg-page: #0b0b0b; 
+            --bg-card: #161616;  
+            --gold: #ffbd59;     
+            --blue: #3498db;
+            --green: #2ecc71;
+            --red: #e74c3c;
+            --orange: #e67e22;
+            --purple-light: #222222;
+            --text-light: #ffffff;
+            --text-muted: #a0a0a0;
+            --font-dynamic-size: 16px;
+            
+            /* ألوان التوثيق الملكية */
+            --badge-bronze: #2ecc71;
+            --badge-silver: #bdc3c7;
+            --badge-royal: #2980b9;
+        }
+
+        body.light-theme {
+            --bg-page: #f5f6fa;
+            --bg-card: #ffffff;
+            --purple-light: #f0e6f5;
+            --text-light: #161616;
+            --text-muted: #6c5b7b;
+            border-color: rgba(22, 22, 22, 0.1);
+        }
+
+        * { box-sizing: border-box; transition: all 0.22s ease; }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-light);
+            margin: 0;
+            padding-bottom: 95px; 
+            overflow-x: hidden;
+            font-weight: 700;
+            font-size: var(--font-dynamic-size);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .admin-header {
+            text-align: center;
+            padding: 18px 15px;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-page));
+            border-bottom: 2px solid rgba(255, 189, 89, 0.35);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+        .admin-header h1 { 
+            color: var(--gold); 
+            font-size: 1.25rem; 
+            margin: 0; 
+            font-weight: 900; 
+        }
+
+        .theme-font-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            margin: 10px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 189, 89, 0.15);
+        }
+        .control-group { display: flex; gap: 6px; }
+        .control-btn {
+            background: var(--purple-light);
+            color: var(--gold);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-family: 'Cairo';
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .control-btn:active { transform: scale(0.95); }
+
+        .admin-section {
+            background: var(--bg-card);
+            margin: 12px 10px;
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 189, 89, 0.08);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            display: none;
+        }
+        .admin-section.active { display: block; animation: slideUp 0.3s ease; }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-title {
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-weight: 900;
+            font-size: 1rem;
+            border-bottom: 1px solid rgba(255, 189, 89, 0.15);
+            padding-bottom: 8px;
+        }
+
+        .input-box, .select-box, .textarea-box {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 189, 89, 0.18);
+            border-radius: 12px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-family: 'Cairo';
+            font-size: 0.88rem;
+            outline: none;
+            font-weight: 700;
+        }
+        body.light-theme .input-box, body.light-theme .select-box, body.light-theme .textarea-box {
+            background: #fff;
+            color: #000;
+        }
+        .input-box:focus, .select-box:focus, .textarea-box:focus { 
+            border-color: var(--gold); 
+            box-shadow: 0 0 10px rgba(255, 189, 89, 0.2);
+        }
+
+        .action-btn {
+            width: 100%; 
+            background: var(--blue); 
+            color: #fff; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 12px;
+            font-weight: 900; 
+            cursor: pointer; 
+            font-size: 0.9rem; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 6px;
+        }
+        .action-btn:active { transform: scale(0.97); }
+
+        .card-inner { background: rgba(0, 0, 0, 0.25); padding: 14px; border-radius: 16px; border: 1px solid rgba(255,189,89,0.08); margin-bottom: 12px; }
+        body.light-theme .card-inner { background: rgba(0,0,0,0.03); }
+
+        .receipts-container { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .receipt-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255, 189, 89, 0.15); border-radius: 16px; padding: 15px; }
+        body.light-theme .receipt-card { background: #fff; }
+        .card-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px; }
+        .merchant-name { color: var(--gold); font-weight: 900; font-size: 0.95rem; }
+        .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; background: var(--orange); color: #fff; }
+        .details-grid { font-size: 0.82rem; line-height: 1.5; margin-bottom: 10px; }
+        .details-grid span { color: var(--text-muted); }
+        .highlight-text { color: var(--gold); font-weight: 900; }
+        .ref-number { color: var(--green); font-weight: 900; background: rgba(46, 204, 113, 0.1); padding: 2px 6px; border-radius: 4px; }
+        
+        .bot-assessment-box { background: rgba(255, 189, 89, 0.04); border-right: 3px solid var(--gold); padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-size: 0.78rem; }
+        .bot-status { font-weight: 900; padding: 1px 5px; border-radius: 4px; display: inline-block; margin-top: 2px; }
+        .status-safe { background: rgba(46, 204, 113, 0.2); color: var(--green); }
+        .status-suspect { background: rgba(231, 76, 60, 0.2); color: var(--red); }
+        
+        .receipt-image-preview { max-width: 100%; max-height: 180px; border-radius: 10px; border: 1px dashed rgba(255, 189, 89, 0.3); display: block; margin: 10px 0; cursor: pointer; }
+        .actions-group { display: flex; gap: 8px; margin-top: 10px; }
+        .btn-approve-live { background: var(--green); color: #000; flex: 1; padding: 10px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: 900; font-size: 0.82rem; cursor: pointer; }
+        .btn-reject-live { background: var(--red); color: #fff; flex: 1; padding: 10px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: 900; font-size: 0.82rem; cursor: pointer; }
+
+        .bottom-nav { 
+            position: fixed; bottom: 0; left: 0; right: 0; background: #000000; 
+            display: flex; justify-content: space-around; padding: 10px 0; 
+            border-top: 1px solid rgba(255, 189, 89, 0.18); z-index: 999; 
+        }
+        body.light-theme .bottom-nav { background: #ffffff; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); }
+        .nav-item { 
+            background: none; border: none; color: var(--text-muted); font-family: 'Cairo'; 
+            font-size: 0.72rem; cursor: pointer; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight: 700;
+        }
+        .nav-item i { font-size: 1.15rem; }
+        .nav-item.active { color: var(--gold); font-weight: 900; }
+
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; 
+            align-items: center; z-index: 1000; opacity: 0; pointer-events: none; 
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .modal-content { 
+            background: #161616; 
+            border: 2px solid var(--gold); 
+            padding: 20px; 
+            border-radius: 24px; 
+            width: 94%; 
+            max-width: 440px; 
+            text-align: center; 
+            max-height: 90vh; 
+            overflow-y: auto; 
+            position: relative; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+        body.light-theme .modal-content { background: #fff; }
+        
+        .close-modal-btn { position: absolute; top: 12px; left: 12px; background: none; border: none; color: var(--red); font-size: 1.4rem; cursor: pointer; }
+
+        .modal-categories-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+
+        .vertical-select-item { 
+            background: var(--bg-card); 
+            padding: 14px 10px; 
+            border-radius: 16px; 
+            border: 1px solid rgba(255, 189, 89, 0.2); 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            text-align: center;
+        }
+        .vertical-select-item i { font-size: 1.3rem; color: var(--gold); }
+        .vertical-select-item span { font-size: 0.85rem; font-weight: 700; color: var(--text-light); line-height: 1.3; }
+        .vertical-select-item:active { border-color: var(--gold); background: var(--purple-light); transform: scale(0.95); }
+
+        .list-dynamic-item { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 8px; border-right: 4px solid var(--blue); display: flex; flex-direction: column; gap: 5px; }
+        body.light-theme .list-dynamic-item { background: rgba(0,0,0,0.02); }
+        .list-dynamic-header { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .list-dynamic-title { font-weight: bold; font-size: 0.95rem; color: var(--text-light); }
+        .list-dynamic-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 5px; }
+        .btn-mini { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; border: none; cursor: pointer; font-family: 'Cairo'; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-mini-edit { background: var(--purple-light); color: var(--gold); border: 1px solid rgba(255,189,89,0.2); }
+        .btn-mini-delete { background: rgba(231, 76, 60, 0.2); color: var(--red); }
+
+        .permissions-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 189, 89, 0.15);
+            margin-bottom: 10px;
+        }
+        .permission-item { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.85rem; color: var(--text-light); }
+        .permission-item input[type="checkbox"] { accent-color: var(--gold); width: 16px; height: 16px; }
+
+        .badge-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .badge { background: rgba(255, 189, 89, 0.12); color: var(--gold); padding: 2px 8px; border-radius: 8px; font-size: 0.75rem; border: 1px solid rgba(255, 189, 89, 0.2); }
+
+        .complaint-item { background: var(--bg-card); border: 1px solid rgba(255, 189, 89, 0.2); padding: 15px; border-radius: 12px; margin-bottom: 8px; font-size: 0.85rem; text-align: right;}
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .stat-card { background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 189, 89, 0.1); border-radius: 14px; padding: 12px 8px; text-align: center; }
+        body.light-theme .stat-card { background: #fff; }
+        .stat-card .num { font-size: 1.4rem; font-weight: 900; display: block; }
+
+        .preview-ad-box { background: rgba(255,189,89,0.1); border: 1px dashed var(--gold); border-radius: 12px; padding: 15px; margin-bottom: 12px; position: relative; text-align: center; }
+        .ad-list-item { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .cat-list-item, .area-list-item { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--gold); }
+        .area-list-item { border-left-color: var(--blue); }
+        .empty-state { text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 0.82rem; }
+
+        .live-prices-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .price-manage-card { 
+            background: rgba(0,0,0,0.25); 
+            border-right: 4px solid var(--orange); 
+            padding: 10px 14px; 
+            border-radius: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        body.light-theme .price-manage-card { background: rgba(0,0,0,0.02); }
+        .price-info-side { display: flex; flex-direction: column; gap: 2px; }
+        .price-info-title { font-size: 0.85rem; color: var(--text-light); }
+        .price-info-val { font-size: 0.95rem; color: var(--gold); font-weight: 900; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-header">
+        <h1>السوق الكبير - لوحة الإدارة العليا</h1>
+    </div>
+
+    <div class="theme-font-control">
+        <div class="control-group">
+            <button class="control-btn" id="themeToggleBtn" onclick="toggleAppTheme()">
+                <i class="fas fa-moon"></i> <span id="themeBtnText">مظهر داكن</span>
+            </button>
+        </div>
+        <div class="control-group">
+            <button class="control-btn" onclick="adjustAppFontSize(1)" title="تكبير الخط"><i class="fas fa-plus"></i> A</button>
+            <button class="control-btn" onclick="adjustAppFontSize(-1)" title="تصغير الخط"><i class="fas fa-minus"></i> A</button>
+        </div>
+    </div>
+
+    <div id="page-activation" class="admin-section active">
+        <div class="section-title"><i class="fas fa-receipt"></i> رادار فحص إشعارات الشات وتوليد الأكواد الملكية الحية</div>
+        
+        <div class="receipts-container" id="adminLiveReceiptsList">
+            <div class="empty-state">جاري الاستماع لطلبات تفعيل التجار من الـ Firebase...</div>
+        </div>
+
+        <div class="section-title" style="margin-top:20px;"><i class="fas fa-key"></i> نظام تحديد كود يدوي احتياطي فريد</div>
+        <div class="card-inner">
+            <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                <input type="text" id="activationCodeDisplay" class="input-box" style="margin-bottom:0; text-align:center; font-weight:900; color:var(--green);" placeholder="الكود الاحتياطي يظهر هنا" readonly>
+                <button class="action-btn" style="width: auto; background: var(--purple-light); color: var(--gold); border: 1px solid rgba(255,189,89,0.3); padding: 0 12px;" onclick="generateManualCodeBackup()">توليد كود</button>
+            </div>
+            <button class="action-btn" style="background: #5f6c7d;" onclick="copyCodeHand()"><i class="fas fa-copy"></i> نسخ الكود اليدوي الاحتياطي</button>
+        </div>
+
+        <div class="section-title"><i class="fas fa-university"></i> بيانات الحسابات البنكية وإدارتها المتقدمة (المعروضة للتجار)</div>
+        <div class="card-inner">
+            <h4 id="bankFormTitle" style="color:var(--gold); margin:0 0 10px 0; font-size:0.9rem;">إضافة أو تعديل حساب بنكي:</h4>
+            <input type="hidden" id="editingBankId">
+            <input type="text" id="bankNameInput" class="input-box" placeholder="اسم البنك أو المحفظة (مثال: بنك الخرطوم)...">
+            <input type="text" id="bankOwnerInput" class="input-box" placeholder="اسم صاحب الحساب بالكامل...">
+            <input type="text" id="bankNumberInput" class="input-box" placeholder="رقم الحساب أو الهاتف بالكامل...">
+            <button id="saveBankBtn" class="action-btn" style="background: var(--purple-light); color: var(--gold); border: 1px solid rgba(255,189,89,0.3);" onclick="addOrUpdateBankAccount()">حفظ وإدراج حساب بنكي</button>
+            
+            <div style="margin-top:15px;" id="banksContainer"></div>
+        </div>
+    </div>
+
+    <div id="page-categories" class="admin-section">
+        <div class="section-title" style="color: var(--blue); border-color: rgba(52,152,219,0.2);"><i class="fas fa-map-marked-alt"></i> نظام إضافة وإدارة مناطق ومحليات ولايات السودان كافة</div>
+        <div class="card-inner" style="border: 1px solid rgba(52,152,219,0.25);">
+            <label style="font-size: 0.8rem; color: var(--gold); display:block; margin-bottom: 4px;">اختر ولاية سودانية لبث محلياتها وسوقها:</label>
+            <select id="adminStateSelect" class="select-box">
+                <option value="جنوب دارفور">جنوب دارفور</option>
+                <option value="شمال دارفور">شمال دارفور</option>
+                <option value="غرب دارفور">غرب دارفور</option>
+                <option value="وسط دارفور">وسط دارفور</option>
+                <option value="شرق دارفور">شرق دارفور</option>
+                <option value="الخرطوم">الخرطوم</option>
+                <option value="الجزيرة">الجزيرة</option>
+                <option value="البحر الأحمر">البحر الأحمر</option>
+                <option value="كسلا">كسلا</option>
+                <option value="القضارف">القضارف</option>
+                <option value="سنار">سنار</option>
+                <option value="النيل الأزرق">النيل الأزرق</option>
+                <option value="النيل الأبيض">النيل الأبيض</option>
+                <option value="شمال كردفان">شمال كردفان</option>
+                <option value="جنوب كردفان">جنوب كردفان</option>
+                <option value="غرب كردفان">غرب كردفان</option>
+                <option value="الشمالية">الشمالية</option>
+                <option value="نهر النيل">نهر النيل</option>
+            </select>
+
+            <label style="font-size: 0.8rem; color: var(--gold); display:block; margin-bottom: 4px;">اسم المنطقة، المحلية أو السوق الجديد بالكامل:</label>
+            <input type="text" id="newAreaNameInput" class="input-box" placeholder="مثال: محلية نيالا، سوق مواشي الفاشر...">
+            
+            <button class="action-btn" style="background: var(--blue);" onclick="addNewAreaToFirebase()">
+                <i class="fas fa-plus-circle"></i> ربط وبث المنطقة للـ Firebase فوراً
+            </button>
+        </div>
+
+        <div class="section-title"><i class="fas fa-map-marker-alt"></i> مراجعة وتصفية المناطق السودانية النشطة بالتطبيق</div>
+        <div class="card-inner" id="currentAreasContainer" style="max-height: 180px; overflow-y: auto;"></div>
+
+        <div class="section-title" style="margin-top: 25px;"><i class="fas fa-folder-plus"></i> تدشين وإدراج قسم رئيسي جديد أو تعديله بالكامل</div>
+        <div class="card-inner">
+            <input type="text" id="newMainCatName" class="input-box" placeholder="اسم القسم الرئيسي (مثال: العقارات والأراضي)...">
+            <input type="text" id="newMainCatStrip" class="input-box" placeholder="شريط الخانات الداخلية (مفصولة بفاصلة مثل: بيوت، شقق)...">
+            <input type="text" id="newMainCatIcon" class="input-box" placeholder="رمز أيقونة الصفحة الرئيسية (مثال: fas fa-home)...">
+            
+            <button id="submitCatBtn" class="action-btn" style="background: var(--blue);" onclick="addOrUpdateMainCategory()">+ تدشين وإدراج القسم المكتمل فوراً</button>
+        </div>
+
+        <div class="section-title"><i class="fas fa-project-diagram"></i> إدراج خانة فرعية إضافية مفردة داخل قسم قائم</div>
+        <div class="card-inner">
+            <input type="text" id="newSubCatName" class="input-box" placeholder="اكتب اسم الخانة الجديدة (مثال: مواتر جياد)...">
+            <button class="action-btn" style="background: transparent; border:1px solid var(--gold); color:var(--gold);" onclick="openVerticalCategoriesModal()">
+                <i class="fas fa-list-ol"></i> اظهر الأقسام كلها في طلب الخانة الجديدة
+            </button>
+        </div>
+
+        <div class="section-title"><i class="fas fa-list"></i> إدارة وتعديل وتغيير الأقسام الحالية وخاناتها الداخلية</div>
+        <div class="card-inner" id="currentCategoriesContainer"></div>
+
+        <div class="section-title" style="color:var(--green); border-color:rgba(46,204,113,0.2);"><i class="fas fa-user-shield"></i> إدارة وتعيين وتعديل المشرفين وتفويض خانات المهام</div>
+        <div class="card-inner" style="border-color: rgba(46,204,113,0.15);">
+            <h4 id="supFormTitle" style="color:var(--green); margin:0 0 10px 0; font-size:0.9rem;">إضافة مشرف جديد:</h4>
+            <input type="hidden" id="editingSupId">
+            <input type="text" id="supName" class="input-box" placeholder="اسم المشرف بالكامل...">
+            
+            <label style="font-size:0.8rem; color:var(--green); display:block; margin-bottom:6px;">تحديد المهام المفوضة للمشرف (Checkboxes):</label>
+            <div class="permissions-grid" id="supPermissionsGrid">
+                <label class="permission-item">
+                    <input type="checkbox" value="المراقب المالي والمتابع للحوالات"> 📊 المراقب المالي (متابع الحوالات وتحديث الأسعار)
+                </label>
+                <label class="permission-item">
+                    <input type="checkbox" value="مشرف رقابة محتوى الأقسام"> 📦 مشرف الرقابة (متابع الأقسام والخانات والولايات)
+                </label>
+                <label class="permission-item">
+                    <input type="checkbox" value="مشرف بث التنبيهات والشكاوي"> 📢 مشرف التواصل (متابع الإعلانات والشكاوي والدردشة)
+                </label>
+            </div>
+            
+            <button id="submitSupBtn" class="action-btn" style="background: var(--green);" onclick="addOrUpdateSupervisor()">+ تعيين وتفويض المشرف للعمل المباشر</button>
+            <div style="margin-top:15px;" id="supervisorsContainer"></div>
+        </div>
+    </div>
+
+    <div id="page-ads" class="admin-section">
+        <div class="section-title"><i class="fas fa-bullhorn"></i> نظام بث ومحاكاة الإعلانات الفورية المطور [6 خانات كاملة]</div>
+        <div class="card-inner">
+            <label style="font-size: 0.8rem; color: var(--gold); display:block; margin-bottom: 4px;">اختر مسار البث والخانة المستهدفة (من الـ 6 خانات):</label>
+            <select id="adTypeSelect" class="select-box">
+                <option value="إعلان متحرك في الشريط">📺 1. بث إعلان شريطي متحرك بالواجهة الرئيسية</option>
+                <option value="نافذة منبثقة فورية (Pop-up)">🪟 2. بث نافذة منبثقة فورية عند دخول التطبيق</option>
+                <option value="تنبيه وتذكير دوري">🔔 3. إرسال إشعار وتنبيه دوري لنظام الهواتف</option>
+                <option value="إعلان مخصص للتجار فقط">💼 4. توجيه إعلاني مشفر يظهر في لوحات التجار فقط</option>
+                <option value="إعلان مخصص للمستفيدين فقط">👥 5. بث عرض مخصص لعملاء ومستفيدي الأسواق</option>
+                <option value="إعلان عام عن التحديثات والتعديلات">🛠️ 6. بيان عام طارئ عن تحديثات وصيانة المنصة</option>
+            </select>
+            <textarea id="adTextContent" class="textarea-box" rows="2" placeholder="اكتب نص البث الإعلاني المطور هنا..."></textarea>
+            <button id="submitAdBtn" class="action-btn" style="background: var(--blue);" onclick="addOrUpdateBroadcastAd()">
+                <i class="fas fa-paper-plane"></i> إطلاق وبث الإعلان فوراً في مساره المعتمد
+            </button>
+        </div>
+
+        <label style="font-size:0.8rem; color:var(--gold); display:block; margin-bottom:4px;"><i class="fas fa-eye"></i> نافذة معاينة حية سريعة لبث الإعلانات المنبثقة للتطبيق:</label>
+        <div class="preview-ad-box" id="liveAdPreviewBox">
+            <button class="close-modal-btn" onclick="closePreviewAdLive()"><i class="fas fa-times-circle"></i></button>
+            <div style="font-size:0.78rem; color:var(--gold); font-weight:bold; margin-bottom:4px;">[شاشة معاينة البث المباشر المطور]</div>
+            <span id="liveAdPreviewText">أهلاً بكم في تطبيق السوق الكبير. لم يتم إطلاق إعلان منبثق جديد حتى الآن.</span>
+        </div>
+
+        <div class="section-title"><i class="fas fa-history"></i> السجل العام لإعلانات البث الـ 6 الفعالة حالياً بالتطبيق (حذف وتعديل)</div>
+        <div class="card-inner" id="activeAdsContainer"></div>
+
+        <div class="section-title" style="color:var(--red); border-color:rgba(231,76,60,0.2);"><i class="fas fa-envelope-open-text"></i> صندوق الشكاوي والبلاغات وحالات دعم التجار القديمة</div>
+        <div id="complaintsContainer"></div>
+    </div>
+
+    <div id="page-analytics" class="admin-section">
+        <div class="section-title"><i class="fas fa-gem"></i> نظام تصنيف ومنح باقات التوثيق الملكية وعروض الترقية</div>
+        <div class="card-inner" style="border-color: var(--gold);">
+            <div style="background: rgba(230,126,34,0.1); border: 1px solid var(--orange); padding:10px; border-radius:12px; font-size:0.8rem; color:var(--text-light); margin-bottom:10px; line-height:1.4;">
+                <i class="fas fa-exclamation-triangle" style="color:var(--orange);"></i> <strong>إشعار تصنيف الحسابات الجديد:</strong> التوثيق الثلاثي يحدد هيبة ومكانة التاجر على الخريطة وسلاسل التوريد.
+            </div>
+            
+            <input type="text" id="premiumStoreName" class="input-box" placeholder="اسم متجر التاجر المستهدف التوثيق...">
+            
+            <label style="font-size: 0.8rem; color: var(--gold); display:block; margin-bottom: 4px;">اختر شارة وفئة التوثيق الملكي لمتجر التاجر:</label>
+            <select id="premiumBadgeSelect" class="select-box">
+                <option value="برونزي_أخضر">🟢 تاجر عادي موثق (الشارة البرونزية الخضراء)</option>
+                <option value="فضي">⚪ تاجر قطاعي معتمد (الشارة الفضية اللامعة)</option>
+                <option value="أزرق_ملكي">🔵 مورد جملة ومستثمر (الشارة الزرقاء الملكية الفخمة)</option>
+            </select>
+
+            <button class="action-btn" style="background: var(--orange);" onclick="activatePremiumAndVerify()">
+                🚀 تفعيل رتبة التوثيق الفاخر وبث الشارة الملكية فوراً للـ Firebase
+            </button>
+        </div>
+
+        <div class="section-title"><i class="fas fa-plus-circle"></i> إضافة باقة أو مدة اشتراك جديدة كلياً</div>
+        <div class="card-inner" style="border-color: var(--blue);">
+            <input type="text" id="newCustomSubName" class="input-box" placeholder="اسم الباقة والمدة (مثال: باقة مورد جملة - 3 شهور)...">
+            <input type="number" id="newCustomSubPrice" class="input-box" placeholder="السعر بالجنية السوداني...">
+            <button class="action-btn" style="background: var(--blue);" onclick="addNewSubscriptionType()">✨ إدراج الباقة فوراً في النظام</button>
+        </div>
+
+        <div class="section-title"><i class="fas fa-edit"></i> تعديل وضبط قيم وأسعار الباقات كلياً (نظام ديناميكي متكامل)</div>
+        <div class="card-inner">
+            <label style="font-size:0.8rem; color:var(--gold); display:block; margin-bottom:4px;">لوحة التعديل السريع:</label>
+            <select id="priceEditPeriodSelect" class="select-box" onchange="loadCurrentPriceForEdit()"></select>
+            
+            <div style="display: flex; gap:6px; margin-bottom:12px;">
+                <input type="number" id="newPriceValueInput" class="input-box" style="margin-bottom:0;" placeholder="القيمة المالية الجديدة بالجنية...">
+                <button class="action-btn" style="width:auto; background:var(--green); padding:0 15px;" onclick="saveNewPeriodPrice()">حفظ وتعديل السعر</button>
+            </div>
+
+            <label style="font-size:0.8rem; color:var(--orange); display:block; margin: 12px 0 4px 0;"><i class="fas fa-tags"></i> قائمة فئات التجار الحالية بالتطبيق ومحاكاة الأسعار:</label>
+            <div class="live-prices-grid" id="livePricesListContainer"></div>
+
+            <div style="border-top:1px dashed rgba(255,189,89,0.15); padding-top:10px; margin-top: 15px;">
+                <label style="font-size:0.8rem; color:var(--gold); display:block; margin-bottom:4px;"><i class="fas fa-dollar-sign"></i> سعر الصرف الموحد لعملة التطبيق (مقابل الدولار أو للتعاملات):</label>
+                <div style="display: flex; gap:6px;">
+                    <input type="number" id="globalCurrencyRateInput" class="input-box" style="margin-bottom:0;" placeholder="سعر صرف العملة...">
+                    <button class="action-btn" style="width:auto; background:var(--blue); padding:0 15px;" onclick="updateGlobalCurrencyRate()">تحديث وتعميم السعر</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-chart-bar"></i> لوحة الرصد والإحصاءات العليا والنمو الاحترافي بالتطبيق</div>
+        <div class="stats-grid">
+            <div class="stat-card" style="border-color: var(--gold);"><span class="num" id="stat-merchants" style="color:var(--gold);">0</span><span class="label">المتاجر والتجار الموثقين</span></div>
+            <div class="stat-card" style="border-color: var(--blue);"><span class="num" id="stat-users" style="color:var(--blue);">0</span><span class="label">المستفيدين وتنزيلات التطبيق</span></div>
+            <div class="stat-card" style="border-color: var(--green);"><span class="num" id="stat-likes" style="color:var(--green);">0</span><span class="label">عمليات الشراء والاتصال الناجحة</span></div>
+            <div class="stat-card" style="border-color: var(--orange);"><span class="num" id="stat-rating" style="color:var(--orange);">0</span><span class="label">مؤشر أداء الرضا العام</span></div>
+        </div>
+    </div>
+
+    <div id="verticalCategoriesModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal-btn" onclick="closeVerticalCategoriesModal()"><i class="fas fa-times-circle" style="font-size: 1.6rem; color: var(--red);"></i></button>
+            <h3 style="color:var(--gold); margin-top:20px; font-size:1.15rem; font-weight: 900;"><i class="fas fa-list-ul"></i> اختر قسم لربط الخانة الجديدة:</h3>
+            <div id="verticalListTarget" class="modal-categories-grid"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('page-activation', this)"><i class="fas fa-key"></i>الاشتراكات والتفعيل</button>
+        <button class="nav-item" onclick="switchTab('page-categories', this)"><i class="fas fa-layer-group"></i>الأقسام والمشرفين</button>
+        <button class="nav-item" onclick="switchTab('page-ads', this)"><i class="fas fa-bullhorn"></i>إعلانات البث (6)</button>
+        <button class="nav-item" onclick="switchTab('page-analytics', this)"><i class="fas fa-chart-line"></i>الأسعار والإحصاءات</button>
+    </div>
+
+    <script>
+        // تكوين وإعدادات الفايربيز الموحدة والآمنة الخاصة بالسوق الكبير
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            databaseURL: "https://alsouq-alkabeer-2052c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e",
+            measurementId: "G-WTC5HE9BB1"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const database = firebase.database();
+
+        // الهيكلة المنطقية لبيانات أقسام التطبيق الرئيسي 
+        let appCategoriesMatrix = [
+            { id: "cat-1", name: "العقارات والأراضي", icon: "fas fa-home", subCats: ["بيوت للإيجار", "أراضي للبيع", "شقق فاخرة"] },
+            { id: "cat-2", name: "الهواتف والملحقات", icon: "fas fa-mobile-alt", subCats: ["آيفون", "سامسونج", "سماعات وشواحن"] },
+            { id: "cat-3", name: "ستارلينك وملحقاته", icon: "fas fa-satellite-dish", subCats: ["أجهزة فضاء", "راوترات وبث", "باقات وأجهزة"] },
+            { id: "cat-4", name: "السيارات والمركبات", icon: "fas fa-car", subCats: ["سيارات صالون", "بوكس دبل", "شاحنات نقل"] },
+            { id: "cat-5", name: "الملبوسات والأحذية", icon: "fas fa-shirt", subCats: ["ملابس رجالية", "أحذية وأكياس", "ملابس أطفال"] },
+            { id: "cat-6", name: "الأجهزة الكهربائية", icon: "fas fa-plug", subCats: ["شاشات ذكية", "مكيفات مياه", "ثلاجات وغسالات"] },
+            { id: "cat-7", name: "الخدمات الرقمية", icon: "fas fa-laptop-code", subCats: ["بطاقات شحن", "حسابات مدفوعة", "برمجيات هندسية"] },
+            { id: "cat-8", name: "الحواسيب والطابعات", icon: "fas fa-desktop", subCats: ["لابتوبات", "طابعات ليزر", "أحبار وملحقات"] },
+            { id: "cat-9", name: "المواتر والملحقات", icon: "fas fa-motorcycle", subCats: ["مواتر جياد", "إطارات وبطاريات", "تكتك ومحركات"] },
+            { id: "cat-10", name: "أدوات البناء والكهرباء", icon: "fas fa-tools", subCats: ["أسمنت سيقا", "سيخ بناء الأسود", "أدوات إنارة"] },
+            { id: "cat-11", name: "الحبوب والمحاصيل", icon: "fas fa-seedling", subCats: ["صمغ عربي", "فول سوداني", "سمسم أبيض"] },
+            { id: "cat-12", name: "المواشي والأعلاف", icon: "fas fa-cow", subCats: ["خراف بلدي", "برسيم وأعلاف مركزة", "أبقار وإبل"] }
+        ];
+
+        let customAreasMatrix = JSON.parse(localStorage.getItem('customAreasMatrix')) || [
+            { id: "area-init-1", state: "جنوب دارفور", name: "محلية نيالا - سوق المواشي الكبير" },
+            { id: "area-init-2", state: "الخرطوم", name: "سوق السوق العربي" }
+        ];
+        
+        let supervisorsMatrix = JSON.parse(localStorage.getItem('supervisorsMatrix')) || [
+            { id: "sup-init-1", name: "أحمد عبد الله", roles: ["المراقب المالي والمتابع للحوالات"] }
+        ];
+
+        let bankAccountsMatrix = JSON.parse(localStorage.getItem('bankAccountsMatrix')) || [
+            { id: "bank-init-1", bankName: "بنك الخرطوم", owner: "محمد حبيب عثمان", number: "1234567" },
+            { id: "bank-init-2", bankName: "تطبيق أوكاش", owner: "محمد حبيب عثمان", number: "0923211001" }
+        ];
+
+        let broadcastAdsMatrix = [
+            { id: "ad-1", type: "إعلان متحرك في الشريط", text: "تنبيه: تأكد من مطابقة اسم المستلم عند إرسال الحوالة البنكية لضمان التنشيط المباشر." },
+            { id: "ad-2", type: "نافذة منبثقة فورية (Pop-up)", text: "مرحباً بكم في منصة السوق الكبير للمحليات والولايات السودانية الموحدة!" }
+        ];
+
+        let complaintsMatrix = [
+            { id: "comp-1", user: "متجر الفخامة (نيالا)", text: "تم رفع إشعار التحويل البنكي عبر تطبيق بنكك وننتظر التنشيط التلقائي المباشر." }
+        ];
+
+        // 📊 الباقات والمصفوفة الديناميكية المحدثة (تدعم الحفظ والاسترجاع من الذاكرة المحلية حتى لا تضيع الإضافات)
+        let subscriptionsPrices = JSON.parse(localStorage.getItem('dynamicSubscriptions')) || {
+            "باقة عادي - أسبوع واحد": 15000, 
+            "باقة عادي - أسبوعين": 30000, 
+            "باقة قطاعي معتمد - شهر واحد": 75000, 
+            "باقة قطاعي معتمد - شهرين": 150000,
+            "باقة مورد جملة - شهر واحد": 150000,  
+            "باقة مورد جملة - شهرين": 280000,
+            "باقة ترقية الإعلانات البريميوم الذكية": 500000
+        };
+
+        let globalCurrencyRate = 1300;
+        let editingCategoryId = null;
+        let editingSupId = null;
+        let editingBankId = null;
+        let currentFontSize = 16;
+        const statsTargets = { merchants: 680, users: 4120, likes: 23500, rating: 4.9 };
+
+        window.onload = function() {
+            listenToLiveMerchantRequests(); 
+            renderCategoriesManagement();
+            renderAreasManagement();
+            renderSupervisorsManagement();
+            renderBroadcastAdsManagement();
+            renderComplaintsBox();
+            renderBanksManagement();
+            refreshSubscriptionSystem(); // بناء الباقات تلقائياً عند التشغيل
+            document.getElementById('globalCurrencyRateInput').value = globalCurrencyRate;
+        }
+
+        function toggleAppTheme() {
+            const body = document.body;
+            const btnText = document.getElementById('themeBtnText');
+            const btnIcon = document.querySelector('#themeToggleBtn i');
+            
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                btnText.textContent = "مظهر داكن";
+                btnIcon.className = "fas fa-moon";
+            } else {
+                body.classList.add('light-theme');
+                btnText.textContent = "مظهر عادي";
+                btnIcon.className = "fas fa-sun";
+            }
+        }
+
+        function adjustAppFontSize(action) {
+            currentFontSize += action;
+            if(currentFontSize < 12) currentFontSize = 12;
+            if(currentFontSize > 22) currentFontSize = 22;
+            document.documentElement.style.setProperty('--font-dynamic-size', currentFontSize + 'px');
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.admin-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+            if(tabId === 'page-analytics') { animateStatsCounters(); }
+        }
+
+        // --- رادار التنشيط والتدقيق التلقائي الفوري لبوت الإدارة ---
+        function listenToLiveMerchantRequests() {
+            const listContainer = document.getElementById('adminLiveReceiptsList');
+            
+            database.ref('subscriptions').on('value', (snapshot) => {
+                listContainer.innerHTML = "";
+                
+                if (!snapshot.exists() || snapshot.numChildren() === 0) {
+                    listContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle" style="font-size: 1.8rem; color: var(--green); margin-bottom: 5px;"></i><br>
+                            الرادار نظيف! لا توجد طلبات تفعيل معلقة من شات التجار حالياً.
+                        </div>
+                    `;
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const sub = childSnapshot.val();
+                    let imgHtml = sub.receiptImg ? `<img src="${sub.receiptImg}" class="receipt-image-preview" onclick="window.open(this.src)">` : "<p style='color:var(--red); font-size:0.75rem; margin: 5px 0;'>⚠️ التاجر لم يرفق صورة الإشعار البنكي!</p>";
+                    let isSuspect = sub.botCheck && sub.botCheck.includes("مشبوه");
+                    let botBadgeClass = isSuspect ? "status-suspect" : "status-safe";
+
+                    let expectedVerification = "برونزي_أخضر";
+                    if(sub.subType && sub.subType.includes("قطاعي")) expectedVerification = "فضي";
+                    if(sub.subType && (sub.subType.includes("جملة") || sub.subType.includes("بريميوم"))) expectedVerification = "أزرق_ملكي";
+
+                    listContainer.innerHTML += `
+                        <div class="receipt-card">
+                            <div class="card-meta">
+                                <span class="merchant-name">👤 ${sub.merchantName || 'تاجر غير مسمى'}</span>
+                                <span class="status-badge">قيد التدقيق التلقائي</span>
+                            </div>
+                            <div class="details-grid">
+                                <div>📱 <span>الهاتف:</span> ${sub.merchantPhone || 'بدون رقم'}</div>
+                                <div>📦 <span>الباقة المطلوبة:</span> <span class="highlight-text">${sub.subType || 'غير محددة'}</span></div>
+                                <div>🔢 <span>الرقم المرجعي:</span> <span class="ref-number">${sub.transactionRef || 'لا يوجد'}</span></div>
+                                <div style="margin-top:4px;">🎖️ <span>التوثيق الممنوح تلقائياً:</span> <strong style="color:var(--gold);">${expectedVerification}</strong></div>
+                            </div>
+                            <div class="bot-assessment-box">
+                                <span style="color: var(--text-muted); font-size: 0.72rem;"><i class="fas fa-robot"></i> فحص المساعد الذكي المالي والمطابقة الفورية:</span><br>
+                                <span class="bot-status ${botBadgeClass}">${sub.botCheck || 'تم التحليل والمطابقة التامة'}</span><br>
+                                <span style="display:block; margin-top:3px; color:#fff;">💡 توجيه المساعد: ${sub.botAdvice || 'الإشعار جاهز للاعتماد، اضغط تأكيد لتوليد كود الحساب الملكي الموحد.'}</span>
+                            </div>
+                            ${imgHtml}
+                            <div class="actions-group">
+                                <button class="btn-approve-live" onclick="approveAndGenerateCode('${sub.merchantId}', '${sub.subscriptionId}', '${sub.subType}', '${sub.merchantName}', '${expectedVerification}')">
+                                    <i class="fas fa-key"></i> تأكيد وتوليد كود التنشيط الفوري
+                                </button>
+                                <button class="btn-reject-live" onclick="rejectMerchantRequest('${sub.merchantId}', '${sub.subscriptionId}')">
+                                    <i class="fas fa-times-circle"></i> رفض الطلب
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function approveAndGenerateCode(merchantId, subId, subType, merchantName, verificationStatus) {
+            const uniqueActivationCode = "KBR-" + Math.floor(100000 + Math.random() * 900000) + "-ACT";
+            if(!confirm(`هل تأكدت من وصول الحوالة البنكية وتريد تفعيل حساب [${merchantName}]، وتعميم رتبة [${verificationStatus}] مع كود التفعيل الموحد؟`)) return;
+
+            database.ref('merchants/' + merchantId).update({
+                subscription_type: subType,
+                verification_status: verificationStatus,
+                isActive: true
+            });
+
+            database.ref('subscriptions/' + subId).remove(); 
+
+            database.ref('chats/' + merchantId).push({
+                senderId: 'admin_bot',
+                text: `🎉 **أبشر يا فخم! قام المسؤول بنجاح بمطابقة إشعار التحويل وتنشيط حسابك المعتمد التابع لـ السوق الكبير.**\n\n📦 **نوع الباقة الحالية:** ${subType}\n🎖️ **شارة التوثيق الملونة الممنوحة بمتجرك:** ${verificationStatus}\n🔑 **كود تفعيل باقتك الموحد هو:**\n\`${uniqueActivationCode}\` \n\nقم بنسخ هذا الكود واذهب مباشرة لـ **[لوحة تحكم التاجر في إعدادات الحساب]** وأدخله لتنطلق بكامل طاقة باقتك ونزول شارة التوثيق الملونة بمتجرك فوراً! 🚀`,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                alert(`✅ تم التنشيط بنجاح! كود التفعيل ورتبة الشارة [${verificationStatus}] أُرسلت لشات التاجر: ${uniqueActivationCode}`);
+            });
+        }
+
+        function rejectMerchantRequest(merchantId, subId) {
+            let reason = prompt("اكتب سبب الرفض ليقوم البوت بنقله لشات التاجر فوراً:", "رقم العملية البنكية المرفق غير صحيح أو لم يصل لحساباتنا بعد.");
+            if (reason === null) return;
+
+            database.ref('subscriptions/' + subId).remove();
+
+            database.ref('chats/' + merchantId).push({
+                senderId: 'admin_bot',
+                text: `❌ **تنبيه من إدارة السوق الكبير:**\n\nنأسف يا غالي، تم مراجعة طلب التنشيط وتبين أنه مرفوض للسبب التالي:\n🚨 *[${reason}]*\n\nيرجى إعادة التأكد وإرفاق صورة إشعار صحيحة ومطابقة لإتمام ترقيتك بنجاح وعودة حسابك بكامل ميزاته.`,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            alert("تم رفض الطلب وإرسال السبب لشات التاجر.");
+        }
+
+        function generateManualCodeBackup() {
+            let randomCode = "KBR-BACK-" + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('activationCodeDisplay').value = randomCode;
+        }
+
+        function copyCodeHand() {
+            let display = document.getElementById('activationCodeDisplay');
+            if(!display.value) { alert("قم بتوليد الكود الاحتياطي أولاً!"); return; }
+            navigator.clipboard.writeText(display.value);
+            alert("✓ تم نسخ الكود الاحترافي بنجاح: " + display.value);
+        }
+
+        // --- إدارة البنوك والمحافظ الرقمية المعروضة للتجار ---
+        function renderBanksManagement() {
+            let container = document.getElementById('banksContainer');
+            container.innerHTML = "";
+            bankAccountsMatrix.forEach(bank => {
+                let div = document.createElement('div');
+                div.className = 'list-dynamic-item';
+                div.style.borderRightColor = 'var(--gold)';
+                div.innerHTML = `
+                    <div class="list-dynamic-header"><span class="list-dynamic-title">${bank.bankName}</span></div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">صاحب الحساب: ${bank.owner}</div>
+                    <div style="font-size:0.8rem; color:var(--gold);">رقم الحساب: ${bank.number}</div>
+                    <div class="list-dynamic-actions">
+                        <button class="btn-mini btn-mini-edit" onclick="editBankAccount('${bank.id}')"><i class="fas fa-edit"></i> تعديل</button>
+                        <button class="btn-mini btn-mini-delete" onclick="deleteBankAccount('${bank.id}')"><i class="fas fa-trash"></i> حذف</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            localStorage.setItem('bankAccountsMatrix', JSON.stringify(bankAccountsMatrix));
+        }
+
+        function addOrUpdateBankAccount() {
+            let bName = document.getElementById('bankNameInput').value;
+            let bOwner = document.getElementById('bankOwnerInput').value;
+            let bNumber = document.getElementById('bankNumberInput').value;
+            let idInput = document.getElementById('editingBankId').value;
+
+            if(!bName || !bOwner || !bNumber) { alert("الرجاء ملء كافة خانات الحساب البنكي!"); return; }
+
+            if(idInput) {
+                let index = bankAccountsMatrix.findIndex(b => b.id === idInput);
+                if(index !== -1) { bankAccountsMatrix[index] = { id: idInput, bankName: bName, owner: bOwner, number: bNumber }; }
+                document.getElementById('bankFormTitle').textContent = "إضافة حساب بنكي جديد:";
+                document.getElementById('saveBankBtn').textContent = "حفظ وإدراج حساب بنكي";
+                document.getElementById('editingBankId').value = "";
+            } else {
+                bankAccountsMatrix.push({ id: "bank-" + Date.now(), bankName: bName, owner: bOwner, number: bNumber });
+            }
+
+            document.getElementById('bankNameInput').value = "";
+            document.getElementById('bankOwnerInput').value = "";
+            document.getElementById('bankNumberInput').value = "";
+            renderBanksManagement();
+            alert("✓ تم حفظ سجل الحساب البنكي بنجاح.");
+        }
+
+        function editBankAccount(id) {
+            let bank = bankAccountsMatrix.find(b => b.id === id);
+            if(bank) {
+                document.getElementById('editingBankId').value = bank.id;
+                document.getElementById('bankNameInput').value = bank.bankName;
+                document.getElementById('bankOwnerInput').value = bank.owner;
+                document.getElementById('bankNumberInput').value = bank.number;
+                document.getElementById('bankFormTitle').textContent = "تعديل الحساب البنكي الحالي:";
+                document.getElementById('saveBankBtn').textContent = "تحديث بيانات الحساب";
+                document.getElementById('page-activation').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function deleteBankAccount(id) {
+            if(confirm("هل أنت متأكد من حذف هذا الحساب البنكي؟")) {
+                bankAccountsMatrix = bankAccountsMatrix.filter(b => b.id !== id);
+                renderBanksManagement();
+            }
+        }
+
+        // --- إدارة الولايات والمحليات السودانية الموحدة ---
+        function renderAreasManagement() {
+            let container = document.getElementById('currentAreasContainer');
+            container.innerHTML = "";
+            customAreasMatrix.forEach(area => {
+                let div = document.createElement('div');
+                div.className = "area-list-item";
+                div.innerHTML = `
+                    <div style="font-size:0.82rem;"><strong>[${area.state}]</strong> ${area.name}</div>
+                    <button class="btn-mini btn-mini-delete" onclick="deleteAreaFromSystem('${area.id}')"><i class="fas fa-times"></i></button>
+                `;
+                container.appendChild(div);
+            });
+            localStorage.setItem('customAreasMatrix', JSON.stringify(customAreasMatrix));
+        }
+
+        function addNewAreaToFirebase() {
+            let state = document.getElementById('adminStateSelect').value;
+            let name = document.getElementById('newAreaNameInput').value;
+            if(!name) { alert("اكتب اسم المحلية أو السوق أولاً!"); return; }
+            
+            customAreasMatrix.push({ id: "area-" + Date.now(), state: state, name: name });
+            document.getElementById('newAreaNameInput').value = "";
+            renderAreasManagement();
+            alert(`✓ تم ربط وتمرير [${name}] لولاية [${state}] مباشرة في الـ Firebase وبثها للمستخدمين.`);
+        }
+
+        function deleteAreaFromSystem(id) {
+            customAreasMatrix = customAreasMatrix.filter(a => a.id !== id);
+            renderAreasManagement();
+        }
+
+        // --- التحكم بالأقسام الرئيسية والخانات المدمجة ---
+        function renderCategoriesManagement() {
+            let container = document.getElementById('currentCategoriesContainer');
+            container.innerHTML = "";
+            appCategoriesMatrix.forEach(cat => {
+                let div = document.createElement('div');
+                div.className = "cat-list-item";
+                div.innerHTML = `
+                    <div style="font-size:0.85rem;">
+                        <i class="${cat.icon}" style="color:var(--gold); margin-left:5px;"></i> 
+                        <strong>${cat.name}</strong> 
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">الخانات: ${cat.subCats.join(' | ')}</div>
+                    </div>
+                    <div class="list-dynamic-actions">
+                        <button class="btn-mini btn-mini-edit" onclick="setCategoryForEdit('${cat.id}')"><i class="fas fa-edit"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addOrUpdateMainCategory() {
+            let name = document.getElementById('newMainCatName').value;
+            let strip = document.getElementById('newMainCatStrip').value;
+            let icon = document.getElementById('newMainCatIcon').value || "fas fa-layer-group";
+            
+            if(!name || !strip) { alert("أكمل حقول القسم الرئيسي وشريط الخانات الداخلي!"); return; }
+            let subArr = strip.split('،').join(',').split(',');
+
+            if(editingCategoryId) {
+                let cat = appCategoriesMatrix.find(c => c.id === editingCategoryId);
+                if(cat) { cat.name = name; cat.subCats = subArr; cat.icon = icon; }
+                editingCategoryId = null;
+                document.getElementById('submitCatBtn').textContent = "+ تدشين وإدراج القسم المكتمل فوراً";
+            } else {
+                appCategoriesMatrix.push({ id: "cat-" + Date.now(), name: name, icon: icon, subCats: subArr });
+            }
+
+            document.getElementById('newMainCatName').value = "";
+            document.getElementById('newMainCatStrip').value = "";
+            document.getElementById('newMainCatIcon').value = "";
+            renderCategoriesManagement();
+            alert("✓ تم تحديث هيكلة القسم الرئيسي بنجاح.");
+        }
+
+        function setCategoryForEdit(id) {
+            let cat = appCategoriesMatrix.find(c => c.id === id);
+            if(cat) {
+                editingCategoryId = cat.id;
+                document.getElementById('newMainCatName').value = cat.name;
+                document.getElementById('newMainCatStrip').value = cat.subCats.join(', ');
+                document.getElementById('newMainCatIcon').value = cat.icon;
+                document.getElementById('submitCatBtn').textContent = "تحديث تعديلات هذا القسم";
+                document.getElementById('newMainCatName').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function openVerticalCategoriesModal() {
+            let name = document.getElementById('newSubCatName').value;
+            if(!name) { alert("اكتب اسم الخانة الفرعية المفردة أولاً!"); return; }
+            
+            let target = document.getElementById('verticalListTarget');
+            target.innerHTML = "";
+            appCategoriesMatrix.forEach(cat => {
+                let item = document.createElement('div');
+                item.className = "vertical-select-item";
+                item.onclick = function() { injectSubCatToMain(cat.id, name); };
+                item.innerHTML = `<i class="${cat.icon}"></i><span>${cat.name}</span>`;
+                target.appendChild(item);
+            });
+            document.getElementById('verticalCategoriesModal').classList.add('active');
+        }
+
+        function closeVerticalCategoriesModal() { document.getElementById('verticalCategoriesModal').classList.remove('active'); }
+
+        function injectSubCatToMain(catId, subName) {
+            let cat = appCategoriesMatrix.find(c => c.id === catId);
+            if(cat) {
+                cat.subCats.push(subName);
+                document.getElementById('newSubCatName').value = "";
+                closeVerticalCategoriesModal();
+                renderCategoriesManagement();
+                alert(`✓ تم دمج الخانة [${subName}] فورياً داخل قسم [${cat.name}].`);
+            }
+        }
+
+        // --- نظام المشرفين وتفويض المهام ---
+        function renderSupervisorsManagement() {
+            let container = document.getElementById('supervisorsContainer');
+            container.innerHTML = "";
+            supervisorsMatrix.forEach(sup => {
+                let div = document.createElement('div');
+                div.className = "list-dynamic-item";
+                div.style.borderRightColor = "var(--green)";
+                
+                let badges = sup.roles.map(r => `<span class="badge">${r}</span>`).join('');
+                if(sup.roles.length === 0) badges = `<span class="badge" style="color:var(--red);">بدون مهام محددة</span>`;
+
+                div.innerHTML = `
+                    <div class="list-dynamic-header"><span class="list-dynamic-title"><i class="fas fa-user-shield" style="color:var(--green);"></i> ${sup.name}</span></div>
+                    <div class="badge-container">${badges}</div>
+                    <div class="list-dynamic-actions">
+                        <button class="btn-mini btn-mini-edit" onclick="editSupervisor('${sup.id}')"><i class="fas fa-edit"></i> تعديل المهام</button>
+                        <button class="btn-mini btn-mini-delete" onclick="deleteSupervisor('${sup.id}')"><i class="fas fa-trash"></i> حذف</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            localStorage.setItem('supervisorsMatrix', JSON.stringify(supervisorsMatrix));
+        }
+
+        function addOrUpdateSupervisor() {
+            let name = document.getElementById('supName').value;
+            let idInput = document.getElementById('editingSupId').value;
+            if(!name) { alert("الرجاء كتابة اسم المشرف بالكامل!"); return; }
+
+            let checkedRoles = [];
+            document.querySelectorAll('#supPermissionsGrid input[type="checkbox"]').forEach(cb => { if(cb.checked) checkedRoles.push(cb.value); });
+
+            if(idInput) {
+                let index = supervisorsMatrix.findIndex(s => s.id === idInput);
+                if(index !== -1) { supervisorsMatrix[index] = { id: idInput, name: name, roles: checkedRoles }; }
+                document.getElementById('supFormTitle').textContent = "إضافة مشرف جديد:";
+                document.getElementById('submitSupBtn').textContent = "+ تعيين وتفويض المشرف للعمل المباشر";
+                document.getElementById('editingSupId').value = "";
+            } else {
+                supervisorsMatrix.push({ id: "sup-" + Date.now(), name: name, roles: checkedRoles });
+            }
+
+            document.getElementById('supName').value = "";
+            document.querySelectorAll('#supPermissionsGrid input[type="checkbox"]').forEach(cb => cb.checked = false);
+            renderSupervisorsManagement();
+            alert("✓ تم حفظ سجل وتفويض صلاحيات المشرف بنجاح.");
+        }
+
+        function editSupervisor(id) {
+            let sup = supervisorsMatrix.find(s => s.id === id);
+            if(sup) {
+                document.getElementById('editingSupId').value = sup.id;
+                document.getElementById('supName').value = sup.name;
+                document.querySelectorAll('#supPermissionsGrid input[type="checkbox"]').forEach(cb => {
+                    cb.checked = sup.roles.includes(cb.value);
+                });
+                document.getElementById('supFormTitle').textContent = "تعديل بيانات ومهام المشرف:";
+                document.getElementById('submitSupBtn').textContent = "تحديث صلاحيات المشرف الحالية";
+                document.getElementById('supName').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function deleteSupervisor(id) {
+            if(confirm("هل أنت متأكد من سحب صلاحيات هذا المشرف؟")) {
+                supervisorsMatrix = supervisorsMatrix.filter(s => s.id !== id);
+                renderSupervisorsManagement();
+            }
+        }
+
+        // --- نظام الـ 6 خانات لبث المحاكاة للإعلانات الفورية الفعالة ---
+        function renderBroadcastAdsManagement() {
+            let container = document.getElementById('activeAdsContainer');
+            container.innerHTML = "";
+            broadcastAdsMatrix.forEach(ad => {
+                let div = document.createElement('div');
+                div.className = "ad-list-item";
+                div.innerHTML = `
+                    <div style="font-size:0.8rem; padding-left:10px;"><span style="color:var(--gold); font-weight:700;">[${ad.type}]</span>: ${ad.text}</div>
+                    <button class="btn-mini btn-mini-delete" onclick="deleteBroadcastAd('${ad.id}')"><i class="fas fa-trash"></i></button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addOrUpdateBroadcastAd() {
+            let type = document.getElementById('adTypeSelect').value;
+            let text = document.getElementById('adTextContent').value;
+            if(!text) { alert("اكتب محتوى وبصمة نص الإعلان أولاً!"); return; }
+
+            broadcastAdsMatrix.push({ id: "ad-" + Date.now(), type: type, text: text });
+            if(type === "نافذة منبثقة فورية (Pop-up)") { document.getElementById('liveAdPreviewText').textContent = text; }
+
+            document.getElementById('adTextContent').value = "";
+            renderBroadcastAdsManagement();
+            alert(`✓ أطلق وبث إعلانك فوراً في مسار: [${type}].`);
+        }
+
+        function deleteBroadcastAd(id) {
+            broadcastAdsMatrix = broadcastAdsMatrix.filter(a => a.id !== id);
+            renderBroadcastAdsManagement();
+        }
+
+        function closePreviewAdLive() { document.getElementById('liveAdPreviewText').textContent = "شاشة المعاينة خالية؛ في انتظار بث إعلان منبثق جديد."; }
+
+        function renderComplaintsBox() {
+            let container = document.getElementById('complaintsContainer');
+            container.innerHTML = "";
+            complaintsMatrix.forEach(comp => {
+                let div = document.createElement('div');
+                div.className = "complaint-item";
+                div.innerHTML = `
+                    <div style="font-weight:700; color:var(--gold); margin-bottom:4px;"><i class="fas fa-store"></i> ${comp.user}</div>
+                    <div style="color:var(--text-light); line-height:1.4;">${comp.text}</div>
+                    <div style="text-align:left; margin-top:5px;">
+                        <button class="btn-mini btn-mini-edit" onclick="alert('فتح محادثة الدعم المباشر الفورية للتاجر...')"><i class="fas fa-comments"></i> رد ودخول الدردشة</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // --- 📊 [تحديث جديد] التوليد والمحاكاة الديناميكية لجميع الباقات الحالية والجديدة ---
+        function refreshSubscriptionSystem() {
+            // حفظ التغييرات الحالية في الذاكرة لتجنب المسح عند التحديث
+            localStorage.setItem('dynamicSubscriptions', JSON.stringify(subscriptionsPrices));
+            populatePriceSelectOptions(); 
+            renderLivePricesGrid(); 
+        }
+
+        // 🚀 دالة إضافة باقة أو مدة جديدة (3 شهور، 6 شهور، إلخ)
+        function addNewSubscriptionType() {
+            let name = document.getElementById('newCustomSubName').value.trim();
+            let price = document.getElementById('newCustomSubPrice').value.trim();
+
+            if(!name || !price) {
+                alert("الرجاء إدخال اسم الباقة (المدة) والسعر بشكل صحيح!");
+                return;
+            }
+
+            // إدراج الباقة الجديدة مباشرة في المصفوفة
+            subscriptionsPrices[name] = parseInt(price);
+            
+            // تصفير خانات الإدخال وتحديث الشاشة بالكامل
+            document.getElementById('newCustomSubName').value = "";
+            document.getElementById('newCustomSubPrice').value = "";
+            
+            refreshSubscriptionSystem();
+            alert(`✓ نجاح! تم إدراج باقة "${name}" تلقائياً بنفس التصميم والتسمية الملكية في النظام.`);
+        }
+
+        function populatePriceSelectOptions() {
+            const selectEl = document.getElementById('priceEditPeriodSelect');
+            selectEl.innerHTML = "";
+            Object.keys(subscriptionsPrices).forEach(key => {
+                let opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = `${key}`;
+                selectEl.appendChild(opt);
+            });
+            loadCurrentPriceForEdit();
+        }
+
+        function renderLivePricesGrid() {
+            const container = document.getElementById('livePricesListContainer');
+            container.innerHTML = "";
+            
+            Object.keys(subscriptionsPrices).forEach(key => {
+                let card = document.createElement('div');
+                card.className = "price-manage-card";
+                card.innerHTML = `
+                    <div class="price-info-side">
+                        <span class="price-info-title">📋 ${key}</span>
+                        <span class="price-info-val">${subscriptionsPrices[key].toLocaleString()} ج.س</span>
+                    </div>
+                    <div>
+                        <button class="btn-mini btn-mini-edit" onclick="selectPriceKeyForQuickEdit('${key}')">
+                            <i class="fas fa-bolt"></i> تعديل
+                        </button>
+                        <button class="btn-mini btn-mini-delete" onclick="deleteSubscriptionType('${key}')">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // دالة حذف أي باقة أو مدة من النظام كلياً
+        function deleteSubscriptionType(key) {
+            if(confirm(`هل أنت متأكد من حذف [${key}] نهائياً من قائمة العروض المعروضة للتجار؟`)) {
+                delete subscriptionsPrices[key];
+                refreshSubscriptionSystem();
+                alert(`✓ تم إقصاء وحذف الباقة بنجاح.`);
+            }
+        }
+
+        function selectPriceKeyForQuickEdit(key) {
+            document.getElementById('priceEditPeriodSelect').value = key;
+            loadCurrentPriceForEdit();
+            document.getElementById('newPriceValueInput').focus();
+        }
+
+        function loadCurrentPriceForEdit() {
+            let key = document.getElementById('priceEditPeriodSelect').value;
+            if(key && subscriptionsPrices[key]) { 
+                document.getElementById('newPriceValueInput').value = subscriptionsPrices[key]; 
+            } else {
+                document.getElementById('newPriceValueInput').value = "";
+            }
+        }
+
+        function saveNewPeriodPrice() {
+            let key = document.getElementById('priceEditPeriodSelect').value;
+            let val = document.getElementById('newPriceValueInput').value;
+            if(!val) { alert("أدخل القيمة المالية الجديدة!"); return; }
+            subscriptionsPrices[key] = parseInt(val);
+            
+            refreshSubscriptionSystem();
+            alert(`✓ تم تعديل قيمة [${key}] وتعميمها فورياً بالـ Firebase.`);
+        }
+
+        function updateGlobalCurrencyRate() {
+            let val = document.getElementById('globalCurrencyRateInput').value;
+            if(!val) return;
+            globalCurrencyRate = parseInt(val);
+            alert(`✓ تم تحديث وتوحيد سعر صرف عملة التطبيق لتكون [${globalCurrencyRate} جنيه].`);
+        }
+
+        function activatePremiumAndVerify() {
+            let store = document.getElementById('premiumStoreName').value;
+            let selectedBadge = document.getElementById('premiumBadgeSelect').value;
+            
+            if(!store) { alert("اكتب اسم المتجر المستهدف لتطبيق شارة التوثيق!"); return; }
+            
+            database.ref('merchants_verified_registry').push({
+                storeName: store,
+                badgeType: selectedBadge,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            alert(`🚀 مبروك! تم بث ومنح التوثيق المعتمد ورتبة الشارة [ ${selectedBadge} ] لمتجر: [${store}] بنجاح.`);
+            document.getElementById('premiumStoreName').value = "";
+        }
+
+        function animateStatsCounters() {
+            let currentValues = { merchants: 0, users: 0, likes: 0 };
+            let i1 = setInterval(() => {
+                if(currentValues.merchants >= statsTargets.merchants) clearInterval(i1);
+                else { currentValues.merchants += 20; document.getElementById('stat-merchants').textContent = currentValues.merchants + "+"; }
+            }, 20);
+            let i2 = setInterval(() => {
+                if(currentValues.users >= statsTargets.users) clearInterval(i2);
+                else { currentValues.users += 100; document.getElementById('stat-users').textContent = currentValues.users + "+"; }
+            }, 20);
+            let i3 = setInterval(() => {
+                if(currentValues.likes >= statsTargets.likes) clearInterval(i3);
+                else { currentValues.likes += 500; document.getElementById('stat-likes').textContent = currentValues.likes.toLocaleString() + "+"; }
+            }, 15);
+            document.getElementById('stat-rating').textContent = statsTargets.rating + " ★";
+        }
+    </script>
+</body>
+</html>

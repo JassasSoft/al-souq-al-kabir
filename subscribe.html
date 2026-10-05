@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>باقات الاشتراك | السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SDK الخاصة بـ Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <style>
+        :root { 
+            --gold: #ffbd59; 
+            --bg: #0b0b0b; 
+            --card: #161616; 
+            --silver: #c0c0c0; 
+            --blue: #3498db; 
+            --green: #2ecc71;
+            --red: #e74c3c;
+        }
+        
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: var(--bg); 
+            color: #fff; 
+            margin: 0; 
+            padding: 15px; 
+            font-weight: 900;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .header { text-align: center; margin-bottom: 20px; margin-top: 10px; }
+        .header h1 { color: var(--gold); font-size: 2rem; margin-bottom: 8px; text-shadow: 0 0 15px rgba(255, 189, 89, 0.3); }
+        .header p { color: #888; font-size: 0.9rem; font-weight: 400; margin: 0; }
+
+        /* بنر عرض أول 100 تاجر المجاني */
+        .promo-banner {
+            background: linear-gradient(135deg, #1e1b18 0%, #3a2a10 100%);
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            padding: 18px;
+            margin: 0 auto 25px auto;
+            max-width: 500px;
+            box-shadow: 0 0 20px rgba(255, 189, 89, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .promo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .promo-badge {
+            background: var(--gold);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 900;
+        }
+
+        .promo-title {
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .promo-desc {
+            color: #ccc;
+            font-size: 0.85rem;
+            font-weight: 400;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .counter-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .counter-text {
+            font-size: 0.85rem;
+            color: #aaa;
+            font-weight: 400;
+        }
+
+        .counter-number {
+            color: var(--gold);
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        .btn-claim {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(90deg, #ffbd59, #f39c12);
+            color: #000;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: 'Cairo';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(255, 189, 89, 0.3);
+            transition: 0.3s;
+        }
+
+        .btn-claim:active { transform: scale(0.98); }
+
+        /* المحاسب الذكي */
+        .smart-calc-box {
+            background: #111;
+            border: 1px solid var(--gold);
+            border-radius: 20px;
+            padding: 15px;
+            margin: 0 auto 30px auto;
+            max-width: 500px;
+            box-shadow: 0 0 15px rgba(255, 189, 89, 0.1);
+            transition: all 0.3s ease;
+        }
+        .smart-calc-box.highlight {
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(255, 189, 89, 0.3);
+        }
+        .calc-title {
+            font-size: 0.95rem;
+            color: var(--gold);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .calc-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .calc-select {
+            flex: 1;
+            background: #222;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 12px;
+            font-family: 'Cairo';
+            font-weight: 700;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .calc-select:focus {
+            border-color: var(--gold);
+        }
+        .calc-result {
+            background: #000;
+            padding: 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            border: 1px dashed #444;
+        }
+        .total-price {
+            color: var(--gold);
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
+
+        .plans-container { display: flex; flex-direction: column; gap: 25px; max-width: 500px; margin: auto; }
+        
+        .plan-card { 
+            background: var(--card); 
+            border: 2px solid #222; 
+            border-radius: 25px; 
+            padding: 25px; 
+            position: relative; 
+            transition: 0.3s;
+        }
+        .plan-card:active {
+            transform: scale(0.99);
+        }
+
+        .plan-normal { border-color: #333; }
+        .plan-retail { border-color: var(--silver); box-shadow: 0 10px 30px rgba(192, 192, 192, 0.03); }
+        .plan-wholesale { border-color: var(--blue); box-shadow: 0 10px 30px rgba(52, 152, 219, 0.05); }
+
+        .badge { 
+            position: absolute; top: 15px; left: -35px; 
+            background: var(--gold); color: #000; 
+            padding: 5px 40px; transform: rotate(-45deg); 
+            font-size: 0.7rem; font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .plan-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+        .plan-name { font-size: 1.4rem; margin-bottom: 5px; display: block; color: #fff; }
+        .plan-desc { color: #888; font-size: 0.85rem; margin-bottom: 20px; display: block; font-weight: 400; }
+
+        .price-tag { background: #1c1c1c; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #282828; }
+        .price-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .price-val { color: var(--gold); font-weight: 900; }
+
+        .features { list-style: none; padding: 0; margin-bottom: 20px; }
+        .features li { font-size: 0.85rem; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; color: #eee; font-weight: 400; }
+        .features li i { color: var(--green); font-size: 0.85rem; }
+
+        .btn-sub { 
+            width: 100%; padding: 15px; border-radius: 15px; border: none; 
+            font-weight: 900; font-size: 1.1rem; cursor: pointer; 
+            transition: 0.3s; font-family: 'Cairo';
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        
+        .btn-normal { background: #333; color: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn-retail { background: var(--silver); color: #000; box-shadow: 0 5px 15px rgba(192,192,192,0.1); }
+        .btn-wholesale { background: var(--blue); color: #fff; box-shadow: 0 5px 15px rgba(52,152,219,0.2); }
+        
+        .btn-sub:active { transform: scale(0.97); }
+
+        .footer-note { text-align: center; color: #555; font-size: 0.8rem; margin-top: 35px; padding-bottom: 40px; font-weight: 400; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>منصة تجار السوق الكبير 🚀</h1>
+        <p>اختر الباقة المناسبة لنشاطك التجاري وابدأ البيع فوراً</p>
+    </div>
+
+    <!-- بنر العرض المجاني لأول 100 تاجر -->
+    <div class="promo-banner" id="promoBanner">
+        <div class="promo-header">
+            <span class="promo-badge"><i class="fas fa-fire"></i> عرض الإطلاق الخاص</span>
+            <span style="color: var(--gold); font-size: 0.8rem;"><i class="fas fa-gift"></i> مجاناً</span>
+        </div>
+        <div class="promo-title">🔥 تجربة تجارية مجانية لمدة 15 يوماً</div>
+        <div class="promo-desc">
+            انضم الآن إلى أول 100 تاجر في منصة السوق الكبير واستمتع بكافة الميزات والنشر التجاري لمدة 15 يوماً مجاناً دون أي تكلفة!
+        </div>
+        <div class="counter-box">
+            <span class="counter-text">الأماكن المتبقية في العرض:</span>
+            <span class="counter-number" id="slotsLeft">-- مكان</span>
+        </div>
+        <button class="btn-claim" id="claimBtn" onclick="claimFreeTrial()">
+            <i class="fas fa-rocket"></i> تفعيل التجربة المجانية الان (15 يوم)
+        </button>
+    </div>
+
+    <!-- المحاسب الذكي التفاعلي -->
+    <div class="smart-calc-box" id="calcBox">
+        <div class="calc-title">
+            <i class="fas fa-calculator"></i> <span>محاسب السوق الذاتي التفاعلي</span>
+        </div>
+        <div class="calc-row">
+            <select class="calc-select" id="calcPlan" onchange="calculateTotal(true)">
+                <option value="15000">تاجر عادي (أسبوع)</option>
+                <option value="75000" selected>تاجر قطاعي (شهر)</option>
+                <option value="150000">تاجر جملة (شهر)</option>
+            </select>
+            <select class="calc-select" id="calcAddon" onchange="calculateTotal(true)">
+                <option value="0">بدون ميزات إضافية</option>
+                <option value="25000">إضافة إعلان عريض (+25,000)</option>
+                <option value="50000">باقة ترقية العروض (+50,000)</option>
+            </select>
+        </div>
+        <div class="calc-result">
+            <span>التكلفة التقريبية المحسوبة:</span>
+            <span class="total-price" id="calcDisplay">100,000 SDG</span>
+        </div>
+    </div>
+
+    <!-- باقات الاشتراك -->
+    <div class="plans-container">
+        
+        <!-- تاجر عادي -->
+        <div class="plan-card plan-normal">
+            <span class="plan-icon">👤</span>
+            <span class="plan-name">تاجر عادي</span>
+            <span class="plan-desc">بداية ممتازة للتجربة والبيع الفردي المباشر</span>
+            <div class="price-tag">
+                <div class="price-item"><span>أسبوع واحد:</span> <span class="price-val">15,000 ج.س</span></div>
+                <div class="price-item"><span>أسبوعين:</span> <span class="price-val">30,000 ج.س</span></div>
+            </div>
+            <ul class="features">
+                <li><i class="fas fa-check-circle"></i> حتى 3 إعلانات نشطة بالتطبيق</li>
+                <li><i class="fas fa-check-circle"></i> ظهور أساسي قياسي في محرك البحث</li>
+            </ul>
+            <button class="btn-sub btn-normal" onclick="selectAndScroll('15000', '0')">احسب تكلفة الباقة</button>
+        </div>
+
+        <!-- تاجر قطاعي -->
+        <div class="plan-card plan-retail">
+            <div class="badge">الفئة الفضية</div>
+            <span class="plan-icon">🏪</span>
+            <span class="plan-name">تاجر قطاعي</span>
+            <span class="plan-desc">الخيار المثالي للمحلات التجارية والورش والمعارض المحلية</span>
+            <div class="price-tag">
+                <div class="price-item"><span>اشتراك شهري أساسي:</span> <span class="price-val">75,000 ج.س</span></div>
+                <div class="price-item"><span>إضافة إعلان عريض:</span> <span class="price-val">+25,000 ج.س</span></div>
+                <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
+                <div class="price-item" style="font-weight: 900; color: #fff;"><span>العرض الكامل الموصى به:</span> <span>100,000 ج.س</span></div>
+            </div>
+            <ul class="features">
+                <li><i class="fas fa-certificate"></i> توثيق حسابك بالعلامة الفضية المعتمدة</li>
+                <li><i class="fas fa-bolt"></i> إعلانات عريضة مميزة لزيادة المشاهدات</li>
+                <li><i class="fas fa-sync-alt"></i> تحديث دوري تلقائي لمكان الإعلانات</li>
+            </ul>
+            <button class="btn-sub btn-retail" onclick="selectAndScroll('75000', '25000')">احسب المزايا الفضية</button>
+        </div>
+
+        <!-- تاجر جملة -->
+        <div class="plan-card plan-wholesale">
+            <div class="badge" style="background: var(--blue); color: #fff;">الفئة الزرقاء</div>
+            <span class="plan-icon">🏢</span>
+            <span class="plan-name">تاجر جملة (بزنس)</span>
+            <span class="plan-desc">مخصصة للموردين والمصانع والشركات الكبرى</span>
+            <div class="price-tag">
+                <div class="price-item"><span>باقة شهر واحد:</span> <span class="price-val">150,000 ج.س</span></div>
+                <div class="price-item"><span>باقة إعلانات مخصصة:</span> <span class="price-val">50,000 ج.س</span></div>
+                <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
+                <div class="price-item" style="font-weight: 900; color: var(--blue);"><span>باقة شهرين شاملة:</span> <span>300,000 ج.س</span></div>
+            </div>
+            <ul class="features">
+                <li><i class="fas fa-check-double"></i> توثيق الحساب بالعلامة الزرقاء للشركات</li>
+                <li><i class="fas fa-store"></i> متجر إلكتروني مستقل ومتكامل متصل بالتطبيق</li>
+                <li><i class="fas fa-chart-pie"></i> لوحة إحصائيات متقدمة لتحليل حركة المبيعات</li>
+                <li><i class="fas fa-headset"></i> مدير حساب تقني متخصص لمتابعة نشاطك</li>
+            </ul>
+            <button class="btn-sub btn-wholesale" onclick="sendToWhatsapp()">
+                <i class="fab fa-whatsapp"></i> امتلاك حساب تجار الجملة
+            </button>
+        </div>
+
+    </div>
+
+    <p class="footer-note">
+        * جميع الاشتراكات تخضع لمراجعة دقيقة لضمان جودة المحتوى المعروض في السوق الكبير.<br>
+        شكراً لاختيارك منصة المهندس محمد حبيب التقنية.
+    </p>
+
+    <script>
+        // === 1. تهيئة Firebase (ضع بيانات مشروك هنا) ===
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // === 2. مراجعة وعرض العداد التنازلي للأماكن المتبقية من Firebase ===
+        function checkPromoAvailability() {
+            db.collection("settings").doc("promo").get().then((doc) => {
+                let count = 0;
+                if (doc.exists) {
+                    count = doc.data().claimedTradersCount || 0;
+                }
+                const maxTraders = 100;
+                const remaining = Math.max(0, maxTraders - count);
+
+                const slotsElement = document.getElementById("slotsLeft");
+                const claimBtn = document.getElementById("claimBtn");
+
+                if (remaining > 0) {
+                    slotsElement.innerText = `${remaining} مكان فقط`;
+                } else {
+                    slotsElement.innerText = "انتهى العرض المجاني";
+                    slotsElement.style.color = "var(--red)";
+                    claimBtn.disabled = true;
+                    claimBtn.style.background = "#444";
+                    claimBtn.style.color = "#888";
+                    claimBtn.innerHTML = '<i class="fas fa-lock"></i> اكتمل عدد الـ 100 تاجر';
+                }
+            }).catch(err => {
+                document.getElementById("slotsLeft").innerText = "100 مكان";
+            });
+        }
+
+        // === 3. تفعيل التجربة المجانية لمدة 15 يوماً وتسجيلها بـ Firebase ===
+        function claimFreeTrial() {
+            triggerVibe(80);
+            const user = auth.currentUser;
+
+            if (!user) {
+                alert("يرجى تسجيل الدخول أولاً لتفعيل الفترة التجريبية لحسابك.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const confirmTrial = confirm("هل تريد تفعيل اشتراك التجربة المجانية لمدة 15 يوماً لحسابك الآن؟");
+            if (!confirmTrial) return;
+
+            const claimBtn = document.getElementById("claimBtn");
+            claimBtn.disabled = true;
+            claimBtn.innerText = "جاري تفعيل الاشتراك...";
+
+            const now = new Date();
+            const expiryDate = new Date();
+            expiryDate.setDate(now.getDate() + 15); // إضافة 15 يوماً
+
+            // تحديث بيانات التاجر في Firestore
+            db.collection("users").doc(user.uid).set({
+                subscriptionType: "free_trial",
+                subscriptionStatus: "active",
+                trialStartDate: firebase.firestore.Timestamp.fromDate(now),
+                subscriptionEndDate: firebase.firestore.Timestamp.fromDate(expiryDate),
+                isApprovedTrader: true,
+                traderBadge: "trial"
+            }, { merge: true }).then(() => {
+                // تحديث عداد المسجلين
+                db.collection("settings").doc("promo").set({
+                    claimedTradersCount: firebase.firestore.FieldValue.increment(1)
+                }, { merge: true });
+
+                alert("🎉 مبروك! تم تفعيل اشتراكك المجاني بنجاح لمدة 15 يوماً. يمكنك الآن نشر إعلاناتك بفرية عبر لوحة التاجر.");
+                window.location.href = "trader-dashboard.html";
+            }).catch((error) => {
+                alert("حدث خطأ أثناء التفعيل: " + error.message);
+                claimBtn.disabled = false;
+                claimBtn.innerHTML = '<i class="fas fa-rocket"></i> تفعيل التجربة المجانية الان (15 يوم)';
+            });
+        }
+
+        // === 4. الوظائف التفاعلية والمحاسب ===
+        function triggerVibe(duration = 40) {
+            if (window.navigator && window.navigator.vibrate) {
+                window.navigator.vibrate(duration);
+            }
+        }
+
+        function calculateTotal(isManualClick = false) {
+            const planValue = parseInt(document.getElementById('calcPlan').value) || 0;
+            const addonValue = parseInt(document.getElementById('calcAddon').value) || 0;
+            const total = planValue + addonValue;
+            
+            document.getElementById('calcDisplay').innerText = total.toLocaleString('en-US') + " SDG";
+            
+            if (isManualClick) {
+                triggerVibe(30);
+            }
+        }
+
+        function selectAndScroll(planVal, addonVal) {
+            triggerVibe(60);
+            
+            document.getElementById('calcPlan').value = planVal;
+            document.getElementById('calcAddon').value = addonVal;
+            calculateTotal();
+
+            const calcBox = document.getElementById('calcBox');
+            calcBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            calcBox.classList.add('highlight');
+            setTimeout(() => {
+                calcBox.classList.remove('highlight');
+            }, 1000);
+        }
+
+        function sendToWhatsapp() {
+            triggerVibe(80);
+            
+            const currentPlanText = document.getElementById('calcPlan').options[document.getElementById('calcPlan').selectedIndex].text;
+            const currentAddonText = document.getElementById('calcAddon').options[document.getElementById('calcAddon').selectedIndex].text;
+            const currentTotal = document.getElementById('calcDisplay').innerText;
+
+            const phoneNumber = "249923211001";
+            const message = `مرحباً إدارة السوق الكبير 🚀\n\nأود الاستفسار وتأكيد الاشتراك عبر باقة:\n- الفئة المختارة: ${currentPlanText}\n- الإضافات: ${currentAddonText}\n- إجمالي التكلفة التقريبية: ${currentTotal}\n\nيرجى تزويدي بخطوات السداد اللحظي وتفاصيل التفعيل الفوري لحسابي التجاري.`;
+            
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.location.href = whatsappURL;
+        }
+
+        window.onload = function() {
+            calculateTotal();
+            checkPromoAvailability();
+        };
+    </script>
+
+</body>
+</html>

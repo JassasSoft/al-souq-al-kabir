@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>تفاصيل العرض | السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #0d0212;
+            --bg-card: #13041b;
+            --bg-input: #1a0826;
+            --primary-gold: #ffbd59;
+            --text-white: #ffffff;
+            --text-muted: #a59cb0;
+            --success-green: #2ecc71;
+            --accent-purple: #3a1550;
+            --royal-blue: #00c6ff;
+            --danger-red: #e74c3c;
+            --grey-dark: #222222;
+        }
+
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: var(--bg-main); 
+            color: var(--text-white); 
+            margin: 0; 
+            padding-bottom: 120px; /* مساحة مريحة عشان أزرار الـ Fixed تحت */
+            font-weight: 700; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- الواجهة الأولى: ستايل هيدر بار الشبكات --- */
+        .header-bar { 
+            display: none;
+            background: var(--bg-card); padding: 16px; text-align: center; position: relative; border-bottom: 1px solid rgba(255, 189, 89, 0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header-bar .back-btn { position: absolute; right: 20px; top: 22px; color: var(--primary-gold); font-size: 1.3rem; cursor: pointer; }
+        .header-bar h2 { font-size: 1.15rem; margin: 0; color: var(--text-white); font-weight: 900; }
+
+        /* --- الواجهة الثانية: ستايل سلايدر السيارات والعقارات العلوي --- */
+        .header-slider { 
+            display: none; 
+            width: 100%; height: 35vh; min-height: 250px; position: relative; background: #000; 
+        }
+        .header-slider img { width: 100%; height: 100%; object-fit: cover; }
+        .top-icons { position: absolute; top: 20px; width: 100%; padding: 0 20px; box-sizing: border-box; display: flex; justify-content: space-between; z-index: 10; }
+        .circle-icon { background: rgba(0,0,0,0.5); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); color: var(--primary-gold); border: 1px solid rgba(255,189,89,0.3); cursor: pointer; }
+
+        /* الحاوية العامة للمحتوى */
+        .product-container { padding: 15px; }
+        .product-container.slider-mode { margin-top: -30px; background: var(--bg-main); border-radius: 40px 40px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.6); position: relative; z-index: 5; padding-top: 25px; }
+        
+        /* شريط حالة العرض (مستمر / تم البيع) */
+        .ad-status-banner {
+            background: rgba(46, 204, 113, 0.15); border: 1px solid var(--success-green);
+            padding: 12px; border-radius: 12px; text-align: center; font-size: 0.9rem; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .ad-status-banner.sold-out {
+            background: rgba(231, 76, 60, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red); border-color: var(--danger-red);
+        }
+
+        /* كارت معاينة السلعة لقسم الشبكات */
+        .ad-preview-card { display: none; background: var(--bg-card); border-radius: 20px; overflow: hidden; border: 1px solid rgba(255, 189, 89, 0.1); margin-bottom: 15px; }
+        .ad-image { width: 100%; height: 220px; background: #222; object-fit: cover; display: block; }
+        .ad-details { padding: 20px; }
+        
+        /* تفاصيل النص الداخلي للمحتوى الديناميكي */
+        .dynamic-meta { padding: 5px 0; }
+        .ad-price { color: var(--primary-gold); font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; }
+        .ad-title { font-size: 1.4rem; margin: 0 0 10px 0; font-weight: 900; }
+        
+        .loc-badge { background: rgba(255,189,89,0.15); color: var(--primary-gold); padding: 6px 18px; border-radius: 50px; font-size: 0.8rem; font-weight: 900; display: inline-block; margin-bottom: 15px; border: 1px solid var(--primary-gold); }
+        .location-info { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px; }
+
+        /* كارت الأمان المضاف من الفانيل الأول */
+        .safety-alert { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 18px; display: flex; gap: 15px; align-items: center; margin: 20px 0; border-right: 5px solid var(--primary-gold); }
+        .safety-alert i { font-size: 1.5rem; color: var(--primary-gold); }
+        .safety-alert p { margin: 0; font-size: 0.85rem; line-height: 1.6; color: #ccc; }
+
+        /* بطاقة التاجر الموحدة الفخمة */
+        .trader-profile-card { background: var(--bg-card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .trader-meta-left { display: flex; align-items: center; gap: 12px; }
+        .trader-avatar { width: 50px; height: 50px; background: var(--accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-gold); font-size: 1.4rem; border: 1px solid var(--primary-gold); }
+        .trader-name { font-size: 0.95rem; margin: 0; color: #fff; font-weight: 900; }
+        .trader-status { font-size: 0.75rem; color: var(--success-green); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+        .merchant-badge-icon { width: 44px; height: 44px; background: rgba(255, 189, 89, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary-gold); font-size: 1.2rem; border: 1px solid rgba(255,189,89,0.2); }
+
+        /* --- شريط الأزرار السفلي الذكي المدمج والمنظم --- */
+        .action-bar-fixed { position: fixed; bottom: 0; left: 0; right: 0; background: #12051c; padding: 15px; border-top: 1px solid rgba(255,189,89,0.1); z-index: 1000; box-sizing: border-box; box-shadow: 0 -10px 25px rgba(0,0,0,0.5); }
+        .action-layout-stack { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 600px; margin: 0 auto; }
+        
+        .btn-full-width { width: 100%; padding: 14px; border-radius: 14px; border: none; font-family: 'Cairo'; font-weight: 900; font-size: 1.05rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; color: #000; background: linear-gradient(135deg, var(--primary-gold), #e0a343); box-shadow: 0 4px 15px rgba(255,189,89,0.1); }
+        .action-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-split { padding: 14px; border-radius: 12px; border: none; font-family: 'Cairo'; font-weight: 900; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; color: #fff; }
+        .btn-split.wp-style { background: #2ecc71; }
+        .btn-split.call-style { background: #00b0ff; }
+
+        /* قفل اللمس والأزرار عند البيع */
+        .btn-disabled { background: #333 !important; color: #777 !important; cursor: not-allowed !important; box-shadow: none !important; pointer-events: none; }
+
+        /* لوحة التحكم السرية للتاجر */
+        .trader-control-panel { display: none; background: rgba(58, 21, 80, 0.4); border: 1px dashed var(--primary-gold); border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: center; }
+        .control-title { font-size: 0.8rem; color: var(--primary-gold); margin-bottom: 8px; display: block; }
+        .toggle-status-btn { background: var(--danger-red); color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-family: 'Cairo'; font-size: 0.8rem; font-weight: 900; cursor: pointer; }
+
+        /* شاشة الاتصال الداخلي المدمجة بكامل الشاشة */
+        .inapp-call-overlay { position: fixed; inset: 0; background: rgba(13, 2, 18, 0.98); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 20px; text-align: center; }
+        .call-trader-name { font-size: 1.5rem; font-weight: 900; margin: 0; color: #fff; }
+        .call-status-txt { font-size: 1rem; color: var(--primary-gold); margin: 10px 0 0 0; animation: pulseText 1.5s infinite; }
+        @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        .call-avatar-glow { width: 130px; height: 130px; background: var(--bg-card); border: 2px solid var(--primary-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; color: var(--primary-gold); box-shadow: 0 0 30px rgba(255,189,89,0.3); margin: 40px auto; }
+        .btn-end-call { width: 65px; height: 65px; background: var(--danger-red); border: none; border-radius: 50%; color: #fff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(231,76,60,0.4); }
+    </style>
+</head>
+<body>
+
+    <!-- الواجهة A: هيدر بار المخصص للأجهزة والشبكات -->
+    <div class="header-bar" id="networkHeader">
+        <i class="fas fa-arrow-right back-btn" onclick="window.history.back()"></i>
+        <h2 id="networkHeaderTitle">تفاصيل الإعلان</h2>
+    </div>
+
+    <!-- الواجهة B: هيدر السلايدر المخصص للسيارات والعقارات (من الفانيل الأول) -->
+    <div class="header-slider" id="vehicleSlider">
+        <div class="top-icons">
+            <div class="circle-icon" onclick="window.history.back()"><i class="fas fa-arrow-right"></i></div>
+            <div class="circle-icon"><i class="far fa-heart"></i></div>
+        </div>
+        <img src="" id="sliderImage" alt="صورة السلعة">
+    </div>
+
+    <div class="product-container" id="mainContainer">
+        
+        <!-- لوحة تحكم التاجر الذكية لتبديل الحالة -->
+        <div class="trader-control-panel" id="traderControlPanel">
+            <span class="control-title">⚙️ لوحة تحكم التاجر المباشرة بعرضك:</span>
+            <button class="toggle-status-btn" id="toggleStatusBtn" onclick="toggleAdStatusOnServer()">تغيير الحالة إلى (تم البيع 🔴)</button>
+        </div>
+
+        <!-- شريط الحالة الحي المحدث من Firebase -->
+        <div class="ad-status-banner" id="adStatusBanner">
+            <i class="fas fa-check-circle"></i> <span id="adStatusText">العرض مستمر ومتاح للطلب فوراً</span>
+        </div>
+        
+        <!-- كارت العرض المخصص فقط لستايل الشبكات -->
+        <div class="ad-preview-card" id="networkCard">
+            <img src="" id="networkAdImage" class="ad-image" alt="صورة العرض">
+        </div>
+
+        <!-- تفاصيل البيانات الموحدة والديناميكية -->
+        <div class="dynamic-meta">
+            <div class="loc-badge" id="regionBadge"><i class="fas fa-map-marker-alt"></i> جنوب دارفور</div>
+            <div class="ad-price" id="adPrice">0 ج.س</div>
+            <h1 class="ad-title" id="adTitle">تحميل تفاصيل العنوان...</h1>
+            
+            <div class="location-info" id="locationDetails">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>الموقع بالتفصيل</span>
+            </div>
+
+            <!-- نصيحة أمان متكاملة من الفانيل الأول للمستفيد -->
+            <div class="safety-alert">
+                <i class="fas fa-shield-halved"></i>
+                <p><strong>نصيحة السوق الكبير:</strong> لا تحول مبالغ مالية كعربون قبل معاينة السلعة وفحصها في مكان آمن ومضمون.</p>
+            </div>
+
+            <h3 style="color: var(--primary-gold); font-size: 1.1rem; margin: 20px 0 10px 0; font-weight: 900;">وصف السلعة</h3>
+            <p id="adDesc" style="color: var(--text-muted); line-height: 1.8; font-size: 0.95rem; margin: 0;">
+                جاري جلب تفاصيل وصف السلعة من الخادم...
+            </p>
+        </div>
+
+        <!-- كارت ملف التاجر الفخم المشترك -->
+        <div class="trader-profile-card" style="margin-top: 25px;">
+            <div class="trader-meta-left">
+                <div class="trader-avatar"><i class="fas fa-store"></i></div>
+                <div class="trader-info">
+                    <h4 class="trader-name" id="traderName">مجموعة الجساس الهندسية</h4>
+                    <div class="trader-status" id="traderOnlineStatus"><i class="fas fa-circle" style="font-size:0.5rem;"></i> متصل الآن ومستعد للرد</div>
+                </div>
+            </div>
+            <div class="merchant-badge-icon">
+                <i class="fas fa-store-alt"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- شريط الأزرار السفلي المثبت والمحمي برمجياً للواجهتين -->
+    <div class="action-bar-fixed">
+        <div class="action-layout-stack">
+            <button class="btn-full-width" id="askTraderBtn" onclick="askAndGoToChat()">
+                <i class="fas fa-comments"></i> اسأل التاجر داخل التطبيق (شات مباشر)
+            </button>
+            
+            <div class="action-row-split">
+                <button class="btn-split wp-style" id="whatsappTraderBtn" onclick="askAndGoToChat()">
+                    <i class="fab fa-whatsapp"></i> واتساب التاجر
+                </button>
+                <button class="btn-split call-style" id="callTraderBtn" onclick="startInAppVoiceCall()">
+                    <i class="fas fa-phone-alt"></i> اتصال هاتفي
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- شاشة الاتصال الداخلي الرقمي المشفر عبر التطبيق -->
+    <div class="inapp-call-overlay" id="inAppCallScreen">
+        <div>
+            <h3 class="call-trader-name" id="callTargetName">جاري جلب الاسم...</h3>
+            <p class="call-status-txt" id="callStatusLabel">جاري الاتصال الصوتي الآمن عبر السيرفر...</p>
+        </div>
+        <div class="call-avatar-glow">
+            <i class="fas fa-phone-volume"></i>
+        </div>
+        <div style="width: 100%; display: flex; justify-content: center;">
+            <button class="btn-end-call" onclick="endInAppVoiceCall()"><i class="fas fa-phone-slash"></i></button>
+        </div>
+    </div>
+
+    <!-- نغمة الرنين البرمجية الافتراضية للمكالمات -->
+    <audio id="ringtoneAudio" loop src="https://assets.mixkit.co/active_storage/sfx/1344/1344-84.wav"></audio>
+
+    <script>
+        // إعدادات الـ Firebase الموحدة لمشروعك (السوق الكبير)
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            databaseURL: "https://alsouq-alkabeer-2052c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const database = firebase.database();
+
+        // إدارة الهوية والمعرفات الرقمية
+        let currentUserId = localStorage.getItem('user_device_id') || 'user_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('user_device_id', currentUserId);
+
+        // التقاط البارامترات الممررة في الرابط لتحديد ستايل السلعة وبياناتها
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category') || 'networks'; // الافتراضي شبكات إذا لم يحدد
+        const adId = urlParams.get('adId') || 'ad_default_101';
+
+        // المتغيرات الحية للسلعة والتاجر
+        let currentAdStatus = "available";
+        let globalAdTitle = "";
+        let globalTraderId = "";
+        let globalTraderName = "";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            configureInterfaceLayout(category);
+            loadAdAndTraderDataFromServer(adId);
+        });
+
+        // 🛠️ دالة التحكم الذكي بشكل الصفحة بناءً على قسم السلعة الممرر
+        function configureInterfaceLayout(cat) {
+            const netHeader = document.getElementById('networkHeader');
+            const vehSlider = document.getElementById('vehicleSlider');
+            const netCard = document.getElementById('networkCard');
+            const mainContainer = document.getElementById('mainContainer');
+
+            if(cat === 'vehicles' || cat === 'realestate') {
+                // تفعيل ستايل السلايدر المفتوح للعربات والعقارات (الفانيل الأول)
+                vehSlider.style.display = 'block';
+                netHeader.style.display = 'none';
+                netCard.style.display = 'none';
+                mainContainer.classList.add('slider-mode');
+            } else {
+                // تفعيل ستايل الكروت المحددة الفخمة الخاص بالإنترنت والشبكات والمعدات
+                netHeader.style.display = 'block';
+                netCard.style.display = 'block';
+                vehSlider.style.display = 'none';
+                mainContainer.classList.remove('slider-mode');
+            }
+        }
+
+        // جلب البيانات الحية للسلعة والتاجر ديناميكياً من Firebase
+        function loadAdAndTraderDataFromServer(id) {
+            // كود محاكاة لجلب البيانات، ويتحول لجلب حقيقي من الـ Database بمشروعك
+            const mockData = {
+                title: category === 'vehicles' ? "تويوتا لاندكروزر 2012 (أوباما)" : "منظومة إنترنت ستاندرد قمرية متكاملة",
+                price: category === 'vehicles' ? "850,000 ج.س" : "350,000 ج.س",
+                region: category === 'vehicles' ? "جنوب دارفور - رهيد البردي" : "جنوب دارفور - نيالا",
+                specificLoc: category === 'vehicles' ? "حي السلام - المعاينة يومياً" : "مكتب التوزيع الرئيسي",
+                desc: category === 'vehicles' ? "السيارة بحالة الوكالة، مكنة فل، تكييف شغال، صالون نظيف جداً. المعاينة في محلية رهيد البردي جاهزة للتسليم للجادين." : "عرض مميز شامل التركيب والبرمجة الفورية مع تفعيل باقة مجانية. المنظومة جاهزة للتسليم الفوري لشبكات التوزيع.",
+                img: category === 'vehicles' ? "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80" : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='100%' height='100%' fill='%23222'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Cairo' font-size='24' fill='%23ffbd59'>صورة العرض الأصلية</text></svg>",
+                traderId: "trader_jassas_pro",
+                traderName: "مجموعة الجساس الهندسية"
+            };
+
+            // حقن البيانات في الواجهات
+            globalAdTitle = mockData.title;
+            globalTraderId = mockData.traderId;
+            globalTraderName = mockData.traderName;
+
+            document.getElementById('adTitle').innerText = mockData.title;
+            document.getElementById('networkHeaderTitle').innerText = mockData.title;
+            document.getElementById('adPrice').innerText = mockData.price;
+            document.getElementById('regionBadge').innerHTML = `<i class="fas fa-check-circle"></i> ${mockData.region}`;
+            document.getElementById('locationDetails').innerHTML = `<i class="fas fa-map-marker-alt"></i> <span>${mockData.specificLoc}</span>`;
+            document.getElementById('adDesc').innerText = mockData.desc;
+            document.getElementById('traderName').innerText = mockData.traderName;
+            
+            // حقن الصور حسب شكل الهيدر الفعال
+            document.getElementById('sliderImage').src = mockData.img;
+            document.getElementById('networkAdImage').src = mockData.img;
+
+            // فتح لوحة التحكم للتاجر إذا كان هو صاحب الإعلان
+            if(currentUserId === globalTraderId) {
+                document.getElementById('traderControlPanel').style.display = 'block';
+            }
+
+            // الاستماع لحالة الإعلان الحية (مستمر / تم البيع)
+            database.ref(`ads_status/${id}`).on('value', (snapshot) => {
+                if(snapshot.exists()) {
+                    currentAdStatus = snapshot.val().status;
+                    updateAdUIStatus(currentAdStatus);
+                } else {
+                    database.ref(`ads_status/${id}`).set({ status: "available" });
+                }
+            });
+        }
+
+        function updateAdUIStatus(status) {
+            const banner = document.getElementById('adStatusBanner');
+            const statusTxt = document.getElementById('adStatusText');
+            const btnAsk = document.getElementById('askTraderBtn');
+            const btnWp = document.getElementById('whatsappTraderBtn');
+            const btnCall = document.getElementById('callTraderBtn');
+            const btnToggle = document.getElementById('toggleStatusBtn');
+
+            if (status === "sold") {
+                banner.className = "ad-status-banner sold-out";
+                statusTxt.innerText = "هذا العرض تم بيعه بالكامل وإغلاقه 🔴";
+                btnAsk.classList.add('btn-disabled');
+                btnWp.classList.add('btn-disabled');
+                btnCall.classList.add('btn-disabled');
+                if(btnToggle) {
+                    btnToggle.innerText = "إعادة فتح العرض (مستمر 🟢)";
+                    btnToggle.style.background = "var(--success-green)";
+                }
+            } else {
+                banner.className = "ad-status-banner";
+                statusTxt.innerText = "العرض مستمر ومتاح للطلب فوراً 🟢";
+                btnAsk.classList.remove('btn-disabled');
+                btnWp.classList.remove('btn-disabled');
+                btnCall.classList.remove('btn-disabled');
+                if(btnToggle) {
+                    btnToggle.innerText = "تغيير الحالة إلى (تم البيع 🔴)";
+                    btnToggle.style.background = "var(--danger-red)";
+                }
+            }
+        }
+
+        function toggleAdStatusOnServer() {
+            let nextStatus = (currentAdStatus === "available") ? "sold" : "available";
+            database.ref(`ads_status/${adId}`).update({ status: nextStatus });
+        }
+
+        // إرسال السؤال التلقائي والانتقال لصفحة الشات الموحدة في مشروعك
+        function askAndGoToChat() {
+            if(currentAdStatus === "sold") return;
+
+            const sharedChatId = `chat_${currentUserId}_${globalTraderId}`;
+            database.ref(`direct_chats/${sharedChatId}`).push({
+                senderId: currentUserId,
+                senderName: "مستفيد السوق الكبير",
+                text: `مرحباً يا غالي، هل هذا العرض [ ${globalAdTitle} ] ما زال متاحاً ومستمر؟`,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                location.href = `chat.html?chatId=${sharedChatId}&traderId=${globalTraderId}&adId=${adId}`;
+            }).catch(()=>{
+                location.href = `chat.html?chatId=${sharedChatId}&traderId=${globalTraderId}&adId=${adId}`;
+            });
+        }
+
+        // نظام محاكاة الاتصال الصوتي الآمن والمغلق داخل التطبيق
+        function startInAppVoiceCall() {
+            if(currentAdStatus === "sold") return;
+
+            document.getElementById('callTargetName').innerText = globalTraderName;
+            document.getElementById('callStatusLabel').innerText = "جاري الاتصال الصوتي الآمن عبر السيرفر...";
+            document.getElementById('inAppCallScreen').style.display = 'flex';
+            
+            const ringtone = document.getElementById('ringtoneAudio');
+            ringtone.play().catch(()=>{});
+
+            setTimeout(() => {
+                if(document.getElementById('inAppCallScreen').style.display === 'flex') {
+                    document.getElementById('callStatusLabel').innerText = "🟢 متصل الآن (محادثة رقمية مشفرة)";
+                    ringtone.pause();
+                    ringtone.currentTime = 0;
+                }
+            }, 3000);
+        }
+
+        function endInAppVoiceCall() {
+            const ringtone = document.getElementById('ringtoneAudio');
+            ringtone.pause();
+            ringtone.currentTime = 0;
+            document.getElementById('inAppCallScreen').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

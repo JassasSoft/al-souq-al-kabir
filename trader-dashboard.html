@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>السوق الكبير | لوحة التحكم الجغرافية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- SDK الخاصة بـ Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <style>
+        :root { 
+            --gold: #ffbd59; 
+            --bg: #0b0b0b; 
+            --card: #161616; 
+            --green: #2ecc71; 
+            --danger: #ff5959; 
+            --blue: #3498db;
+        }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #fff; margin: 0; padding-bottom: 30px; font-weight: 700; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        
+        /* الهيدر المطور */
+        .header { position: sticky; top: 0; z-index: 1000; background: linear-gradient(to bottom, #161616, #0b0b0b); padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #333; }
+        .brand-title { text-align: center; flex: 1; }
+        .brand-name { font-weight: 900; color: var(--gold); font-size: 1.3rem; display: block; }
+        .brand-slogan { font-size: 0.7rem; color: #ccc; font-weight: 400; display: block; margin-top: 2px; }
+        .settings-icon { color: var(--gold); font-size: 1.4rem; cursor: pointer; padding: 5px; }
+
+        .container { padding: 15px; max-width: 600px; margin: auto; }
+
+        /* شريط حالة الاشتراك والـ 15 يوم تجريبي */
+        .sub-status-bar {
+            background: rgba(255, 189, 89, 0.1);
+            border: 1px solid var(--gold);
+            border-radius: 16px;
+            padding: 12px 15px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+        .sub-status-bar.expired {
+            background: rgba(255, 89, 89, 0.1);
+            border-color: var(--danger);
+        }
+        .sub-btn {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-family: 'Cairo';
+            font-weight: 900;
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* اللوحة الجغرافية */
+        .geo-panel { background: var(--card); border: 1px solid #333; border-radius: 24px; padding: 20px; margin-top: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .geo-title { color: var(--gold); font-weight: 900; font-size: 1.1rem; margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        .geo-select-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+        .geo-label { font-size: 0.85rem; color: #aaa; display: block; margin-bottom: 5px; }
+        .geo-select { width: 100%; background: #222; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 12px; font-family: 'Cairo'; font-weight: 700; font-size: 0.95rem; outline: none; transition: 0.3s; color-scheme: dark; box-sizing: border-box; }
+        .geo-select:focus { border-color: var(--gold); }
+
+        /* التبويبات */
+        .tabs { display: flex; background: #1a1a1a; padding: 5px; border-radius: 18px; margin: 25px 0; border: 1px solid #333; }
+        .tab { flex: 1; padding: 12px; border: none; border-radius: 14px; background: transparent; color: #888; font-weight: 900; cursor: pointer; font-size: 0.85rem; font-family: 'Cairo'; }
+        .tab.active { background: var(--gold); color: #000; }
+
+        /* الإحصائيات الجغرافية */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 22px; text-align: center; border-bottom: 3px solid transparent; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .stat-card h2 { margin: 8px 0 0; font-size: 1.8rem; font-weight: 900; }
+        .stat-card small { font-size: 0.8rem; color: #aaa; display: block; margin-top: 4px; }
+
+        /* الشاشات التفاعلية للتبويبات */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .item-card-mini {
+            background: #1c1c1c;
+            border: 1px solid #282828;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* نافذة الإعدادات */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 2000; backdrop-filter: blur(8px); }
+        .modal-body { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 85%; background: #1a1a1a; padding: 25px; border-radius: 28px; border: 1px solid var(--gold); }
+        .menu-item { display: flex; align-items: center; gap: 15px; padding: 18px; color: #fff; text-decoration: none; border-bottom: 1px solid #222; font-size: 1rem; }
+
+        .btn-save { width: 100%; background: var(--gold); color: #000; border: none; padding: 18px; border-radius: 20px; font-weight: 900; font-size: 1.1rem; margin-top: 25px; box-shadow: 0 4px 15px rgba(255,189,89,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Cairo'; }
+    </style>
+</head>
+<body onload="startApp()">
+
+    <div id="settingsBox" class="modal">
+        <div class="modal-body">
+            <h3 style="color:var(--gold); margin-top:0; text-align:center;">إعدادات الحساب</h3>
+            <a href="profile.html" class="menu-item"><i class="fas fa-user-edit" style="color:var(--gold);"></i> تعديل البروفايل</a>
+            <a href="subscribe.html" class="menu-item"><i class="fas fa-crown" style="color:var(--gold);"></i> باقات الاشتراك والأفضلية</a>
+            <a href="#" class="menu-item" style="color:var(--danger); border:none;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+            <button onclick="toggleMenu()" style="width:100%; margin-top:15px; background:none; border:none; color:#777; font-weight:900; font-family:'Cairo'; cursor: pointer;">إغلاق</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <i class="fas fa-cog settings-icon" onclick="toggleMenu()"></i>
+        <div class="brand-title">
+            <span class="brand-name">السوق الكبير</span>
+            <span class="brand-slogan">سوقك بأمان.. تسوق من أي مكان</span>
+        </div>
+        <a href="profile.html" style="color:var(--gold); text-decoration:none; font-size:0.9rem; font-weight: 900;">ملفي <i class="fas fa-chevron-left"></i></a>
+    </div>
+
+    <div class="container">
+        
+        <h3 id="msg" style="text-align: center; margin-top: 10px; margin-bottom: 10px; color: var(--gold); font-size: 1.1rem; font-weight: 900;"></h3>
+
+        <!-- شريط حالة الاشتراك والتجربة المجانية 15 يوم -->
+        <div class="sub-status-bar" id="subStatusBar">
+            <div>
+                <i class="fas fa-clock" style="color: var(--gold); margin-left: 5px;"></i>
+                <span id="subStatusText">جاري فحص حالة الاشتراك...</span>
+            </div>
+            <a href="subscribe.html" class="sub-btn">الاشتراكات</a>
+        </div>
+
+        <div class="geo-panel">
+            <div class="geo-title">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>النطاق الجغرافي والفلترة الذكية</span>
+            </div>
+            
+            <div class="geo-select-group">
+                <div>
+                    <label class="geo-label">اختر الولاية المستهدفة:</label>
+                    <select class="geo-select" id="stateSelector" onchange="filterRegionChanged()">
+                        <optgroup label="ولايات دارفور">
+                            <option value="جنوب دارفور" selected>جنوب دارفور</option>
+                            <option value="غرب دارفور">غرب دارفور</option>
+                            <option value="شمال دارفور">شمال دارفور</option>
+                            <option value="شرق دارفور">شرق دارفور</option>
+                            <option value="وسط دارفور">وسط دارفور</option>
+                        </optgroup>
+                        <optgroup label="ولايات كردفان">
+                            <option value="شمال كردفان">شمال كردفان</option>
+                            <option value="جنوب كردفان">جنوب كردفان</option>
+                            <option value="غرب كردفان">غرب كردفان</option>
+                        </optgroup>
+                        <optgroup label="إقليم النيل الأزرق">
+                            <option value="النيل الأزرق">النيل الأزرق</option>
+                        </optgroup>
+                        <optgroup label="باقي الولايات">
+                            <option value="الخرطوم">الخرطوم</option>
+                            <option value="البحر الأحمر">البحر الأحمر</option>
+                            <option value="الجزيرة">الجزيرة</option>
+                            <option value="نهر النيل">نهر النيل</option>
+                            <option value="الشمالية">الشمالية</option>
+                            <option value="النيل الأبيض">النيل الأبيض</option>
+                            <option value="سنار">سنار</option>
+                            <option value="كسلا">كسلا</option>
+                            <option value="القضارف">القضارف</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="geo-label">اختر المنطقة / المدينة المحلية للفلترة:</label>
+                    <select class="geo-select" id="citySelector" onchange="triggerFilterVisuals()">
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button onclick="switchTab('stats')" id="tab-stats" class="tab active">الإحصائيات الجغرافية</button>
+            <button onclick="switchTab('ads')" id="tab-ads" class="tab">منتجات المنطقة</button>
+            <button onclick="switchTab('id')" id="tab-id" class="tab">تجار المنطقة</button>
+        </div>
+
+        <!-- تبويب الإحصائيات -->
+        <div id="view-stats" class="tab-content active">
+            <div class="stat-grid">
+                <div class="stat-card" style="border-color:var(--gold);">
+                    <i class="fas fa-users" style="color:var(--gold); font-size: 1.5rem;"></i>
+                    <h2 class="num" id="stat-traders" data-val="142">0</h2>
+                    <small>التجار النشطين بالمنطقة</small>
+                </div>
+                <div class="stat-card" style="border-color:#3498db;">
+                    <i class="fas fa-shopping-bag" style="color:#3498db; font-size: 1.5rem;"></i>
+                    <h2 class="num" id="stat-products" data-val="584">0</h2>
+                    <small>المنتجات المعروضة حالياً</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويب منتجات المنطقة -->
+        <div id="view-ads" class="tab-content">
+            <div id="productsList">
+                <div class="item-card-mini">
+                    <span>📱 آيفون 13 برو ماكس (نيالا)</span>
+                    <span style="color:var(--gold);">450,000 ج.س</span>
+                </div>
+                <div class="item-card-mini">
+                    <span>🌾 محاصيل سمسم ممتاز (نيالا)</span>
+                    <span style="color:var(--gold);">120,000 ج.س</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويب تجار المنطقة -->
+        <div id="view-id" class="tab-content">
+            <div id="tradersList">
+                <div class="item-card-mini">
+                    <span>🏪 معرض البركة للكهربائيات</span>
+                    <span style="color:var(--green); font-size:0.8rem;">تاجر فضي معتمد</span>
+                </div>
+                <div class="item-card-mini">
+                    <span>🏢 شركة دارفور لاستيراد المحاصيل</span>
+                    <span style="color:var(--blue); font-size:0.8rem;">تاجر جملة معتمد</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-save" onclick="vibrateEffect()"><i class="fas fa-sync-alt"></i> اعتماد النطاق الجغرافي وحفظ الفلترة</button>
+    </div>
+
+    <script>
+        // === 1. تهيئة Firebase ===
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // قاعدة البيانات الجغرافية
+        const regionsData = {
+            "جنوب دارفور": { traders: 284, products: 1240, cities: ["نيالا", "كاس", "برام", "رهيد البردي", "تلس", "عد الفرسان"] },
+            "غرب دارفور": { traders: 95, products: 412, cities: ["الجنينة", "فوربرنقا", "كلبس", "هبيلا"] },
+            "شمال دارفور": { traders: 160, products: 730, cities: ["الفاشر", "كتم", "كبكابية", "مليط"] },
+            "شرق دارفور": { traders: 88, products: 390, cities: ["الضعين", "عسلاية", "بحر العرب"] },
+            "وسط دارفور": { traders: 74, products: 310, cities: ["زالنجي", "قارسيلا", "نيرتتي"] },
+            "شمال كردفان": { traders: 130, products: 620, cities: ["الأبيض", "أم روابة", "بارا"] },
+            "جنوب كردفان": { traders: 65, products: 280, cities: ["كادوقلي", "الدلنج", "أبو جبيهة"] },
+            "غرب كردفان": { traders: 78, products: 340, cities: ["الفوله", "النهود", "بابنوسة"] },
+            "النيل الأزرق": { traders: 55, products: 210, cities: ["الدمازين", "الروصيرص", "باو"] },
+            "الخرطوم": { traders: 450, products: 2900, cities: ["الخرطوم", "أم درمان", "بحري"] },
+            "البحر الأحمر": { traders: 210, products: 1150, cities: ["بورتسودان", "سواكن", "طوكر"] },
+            "الجزيرة": { traders: 195, products: 980, cities: ["ود مدني", "المناقل", "الحصاحيصا"] },
+            "نهر النيل": { traders: 140, products: 670, cities: ["عطبرة", "الدامر", "شندي"] },
+            "الشمالية": { traders: 85, products: 410, cities: ["دنقلا", "مروي", "وادي حلفا"] },
+            "النيل الأبيض": { traders: 110, products: 530, cities: ["ربك", "كextended", "الدويم"] },
+            "سنار": { traders: 90, products: 460, cities: ["سنار", "سنجة", "الدندر"] },
+            "كسلا": { traders: 105, products: 510, cities: ["كسلا", "حلفا الجديدة"] },
+            "القضارف": { traders: 125, products: 690, cities: ["القضارف", "الفاو"] }
+        };
+
+        // === 2. التحقق من حالة اشتراك التاجر من Firebase ===
+        function checkUserSubscription() {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    db.collection("users").doc(user.uid).get().then((doc) => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            const subText = document.getElementById("subStatusText");
+                            const subBar = document.getElementById("subStatusBar");
+
+                            if (data.subscriptionType === "free_trial" && data.subscriptionEndDate) {
+                                const endDate = data.subscriptionEndDate.toDate();
+                                const now = new Date();
+                                const diffTime = endDate - now;
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                                if (diffDays > 0) {
+                                    subText.innerText = `التجربة المجانية نشطة (باقي ${diffDays} يوماً)`;
+                                } else {
+                                    subText.innerText = "انتهت فترة التجربة المجانية (15 يوماً)";
+                                    subBar.classList.add("expired");
+                                }
+                            } else if (data.subscriptionStatus === "active") {
+                                subText.innerText = `اشتراك تجاري نشط (${data.subscriptionType || 'معتمد'})`;
+                            } else {
+                                subText.innerText = "حساب عادي - اشترك لتتمكن من النشر التلقائي";
+                            }
+                        }
+                    });
+                } else {
+                    document.getElementById("subStatusText").innerText = "زائر - سجل الدخول لتفعيل ميزات التجار";
+                }
+            });
+        }
+
+        function toggleMenu() {
+            const m = document.getElementById('settingsBox');
+            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+            if(m.style.display === 'block' && window.navigator.vibrate) window.navigator.vibrate(30);
+        }
+
+        function switchTab(t) {
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.getElementById('tab-' + t).classList.add('active');
+            document.getElementById('view-' + t).classList.add('active');
+
+            if(t === 'stats') runNumbers();
+        }
+
+        function filterRegionChanged() {
+            const selectedState = document.getElementById('stateSelector').value;
+            const citySelector = document.getElementById('citySelector');
+            
+            citySelector.innerHTML = "";
+            if(regionsData[selectedState]) {
+                regionsData[selectedState].cities.forEach(city => {
+                    let opt = document.createElement('option');
+                    opt.value = city;
+                    opt.innerText = city;
+                    citySelector.appendChild(opt);
+                });
+
+                document.getElementById('stat-traders').setAttribute('data-val', regionsData[selectedState].traders);
+                document.getElementById('stat-products').setAttribute('data-val', regionsData[selectedState].products);
+                runNumbers();
+            }
+        }
+
+        function triggerFilterVisuals() {
+            if(window.navigator.vibrate) window.navigator.vibrate(15);
+            runNumbers();
+        }
+
+        function runNumbers() {
+            document.querySelectorAll('.num').forEach(n => {
+                const target = +n.getAttribute('data-val');
+                let now = 0;
+                const step = target / 20;
+                const timer = setInterval(() => {
+                    now += step;
+                    if(now >= target) { n.innerText = target; clearInterval(timer); }
+                    else { n.innerText = Math.ceil(now); }
+                }, 30);
+            });
+        }
+
+        function vibrateEffect() {
+            if(window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
+            
+            const activeState = document.getElementById('stateSelector').value;
+            const activeCity = document.getElementById('citySelector').value;
+            localStorage.setItem('filteredState', activeState);
+            localStorage.setItem('filteredCity', activeCity);
+
+            alert("تم اعتماد النطاق الجغرافي وربط فلترة المستفيدين والتجار لـ (" + activeState + " - " + activeCity + ") بنجاح! ✅");
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = "login.html";
+            });
+        }
+
+        function startApp() {
+            const h = new Date().getHours();
+            document.getElementById('msg').innerText = h < 12 ? 'صباح النجاح والتميز يا مهندس محمد' : 'مساء الفخامة والإنجاز يا مهندس محمد';
+            
+            filterRegionChanged();
+            checkUserSubscription();
+        }
+    </script>
+</body>
+</html>

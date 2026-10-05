@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>السوق الكبير | الستارلينك وملحقاته</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --gold: #ffbd59; --dark: #000; --header-h: 135px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--dark); color: #fff; height: 100vh; overflow: hidden; }
+
+        /* 👑 الهيدر المطور والمطابق تماماً للصورة */
+        .fixed-top { position: fixed; top: 0; width: 100%; z-index: 5000; background: var(--dark); border-bottom: 2px solid var(--gold); }
+        .nav-main { height: 75px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; }
+        
+        /* شريط التمرير الانسيابي */
+        .brand-strip { height: 60px; background: #080808; display: flex; align-items: center; overflow-x: auto; scroll-behavior: smooth; border-top: 1px solid #1a1a1a; padding: 0 10px; }
+        .brand-strip::-webkit-scrollbar { display: none; }
+        
+        /* 🏷️ أزرار الخانات الذكية (Chips) */
+        .chip { padding: 8px 22px; margin: 0 6px; border-radius: 50px; font-size: 0.8rem; color: #fff; white-space: nowrap; cursor: pointer; font-weight: 700; border: 2px solid transparent; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .chip[data-cat="الكل"] { background: #333; }
+        .chip[data-cat="الجيل 2"] { background: #c62828; }
+        .chip[data-cat="الجيل 3"] { background: #1565c0; }
+        .chip[data-cat="ميني"] { background: #2e7d32; }
+        .chip[data-cat="ملحقات"] { background: #ef6c00; }
+        .chip.active { border-color: var(--gold); transform: scale(1.05); box-shadow: 0 0 12px rgba(255, 189, 89, 0.4); }
+
+        /* 📑 القائمة الجانبية الموحدة (معدلة لتفتح من جهة الشمال / اليسار) */
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 8999; display: none; }
+        .sidebar-overlay.active { display: block; }
+        
+        .sidebar { position: fixed; top: 0; left: -290px; width: 290px; height: 100%; background: #080808; z-index: 9000; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-right: 2px solid var(--gold); display: flex; flex-direction: column; }
+        .sidebar.active { transform: translateX(290px); }
+        
+        .sidebar-header { background: var(--gold); color: #000; padding: 15px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; height: 55px; shrink: 0; }
+        .close-btn { font-size: 1.4rem; cursor: pointer; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+
+        /* كارت البروفايل الفاخر */
+        .user-profile-box { background: linear-gradient(135deg, #111 0%, #1a1a1a 100%); padding: 15px; border-bottom: 2px solid rgba(255, 189, 89, 0.2); display: flex; align-items: center; gap: 12px; shrink: 0; cursor: pointer; }
+        .avatar-wrapper { position: relative; }
+        .user-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; background: #222; color: var(--gold); font-size: 1.4rem; }
+        .status-dot { width: 12px; height: 12px; background: #25d366; border-radius: 50%; border: 2px solid #111; position: absolute; bottom: 2px; left: 2px; }
+        .user-info { display: flex; flex-direction: column; gap: 2px; }
+        .user-name { font-weight: 900; font-size: 0.95rem; color: #fff; }
+        .user-role { font-size: 0.75rem; color: var(--gold); font-weight: 700; background: rgba(255, 189, 89, 0.1); padding: 1px 8px; border-radius: 50px; width: fit-content; border: 1px solid rgba(255, 189, 89, 0.2); }
+
+        .sidebar-content { padding: 15px; display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; padding-bottom: 20px; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px; background: #111; color: #eee; text-decoration: none; font-weight: 700; font-size: 0.9rem; border: 1px solid #1a1a1a; cursor: pointer; }
+        .nav-link i { width: 20px; text-align: center; font-size: 1.1rem; color: var(--gold); }
+        .nav-link.active-item { background: rgba(255, 189, 89, 0.15); border-color: var(--gold); color: var(--gold); }
+        
+        .menu-section-title { font-size: 0.75rem; color: #666; font-weight: 900; margin-top: 8px; margin-bottom: 2px; padding-right: 5px; text-transform: uppercase; }
+        .logout-lnk { background: rgba(211, 47, 47, 0.05); border: 1px solid rgba(211, 47, 47, 0.15); color: #ff5252; margin-top: auto; }
+        .logout-lnk i { color: #ff5252 !important; }
+
+        /* 💎 عروض البريميو */
+        main { margin-top: var(--header-h); height: calc(100vh - var(--header-h)); overflow-y: auto; padding-bottom: 80px; }
+        .premium-container { margin: 15px; height: 150px; border: 2px solid var(--gold); border-radius: 20px; background: #0d0d0d; position: relative; overflow: hidden; }
+        .ad-slide { position: absolute; inset: 0; padding: 20px; display: flex; align-items: center; gap: 15px; opacity: 0; transition: 0.6s; transform: translateY(10px); }
+        .ad-slide.active { opacity: 1; transform: translateY(0); }
+        .premium-label { position: absolute; top: 10px; left: 10px; background: var(--gold); color: #000; font-size: 0.6rem; font-weight: 900; padding: 3px 8px; border-radius: 4px; z-index: 5; }
+        .ad-progress { position: absolute; bottom: 0; right: 0; height: 4px; background: var(--gold); width: 0%; transition: width 4s linear; }
+
+        /* 🛍️ شبكة المنتجات */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px 20px; }
+        .card { background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 25px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .price { color: var(--gold); font-weight: 900; font-size: 1.1rem; margin: 5px 0; }
+        .order-btn { background: #25d366; color: #000; padding: 10px; border-radius: 12px; font-weight: 900; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.8rem; margin-top: 8px; }
+
+        /* 🤖 البوت */
+        .bot-trigger { position: fixed; bottom: 25px; left: 20px; width: 70px; height: 70px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid #000; z-index: 6000; box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer; }
+        .chat-popup { position: fixed; bottom: 105px; left: 20px; width: 320px; background: #0d0d0d; border: 2px solid var(--gold); border-radius: 20px; display: none; flex-direction: column; z-index: 6001; overflow: hidden; animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .chat-head { background: var(--gold); color: #000; padding: 15px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
+        .chat-msg-area { height: 250px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 15px; border-radius: 15px; font-size: 0.85rem; max-width: 85%; }
+        .msg.bot { background: #1a1a1a; color: #fff; align-self: flex-start; border-right: 3px solid var(--gold); }
+        .msg.user { background: var(--gold); color: #000; align-self: flex-end; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- القائمة الجانبية (تم تعديل الهيكل ليتناسب مع الظهور من الشمال) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebarContainer">
+        <div class="sidebar-header">
+            <span>السوق الكبير</span>
+            <div class="close-btn" onclick="closeSidebar()"><i class="fas fa-times"></i></div>
+        </div>
+        <div class="user-profile-box" onclick="window.location.href='profile.html'">
+            <div class="avatar-wrapper">
+                <div class="user-avatar"><i class="fas fa-user-tie"></i></div>
+                <div class="status-dot"></div>
+            </div>
+            <div class="user-info">
+                <span class="user-name">المطور محمد حبيب</span>
+                <span class="user-role">تاجر معتمد</span>
+            </div>
+        </div>
+        <div class="sidebar-content">
+            <div class="nav-link" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i> تحديث الصفحة</div>
+            <div id="dynamic-menu-area"></div>
+            <div class="menu-section-title">روابط سريعة</div>
+            <div class="nav-link" onclick="window.location.href='trader-dashboard.html'"><i class="fas fa-user-cog"></i> لوحة تحكم التجار</div>
+            <div class="nav-link logout-lnk" onclick="window.location.href='login.html'"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</div>
+        </div>
+    </div>
+
+    <!-- 🌟 الهيدر المعدل والمطابق للصورة 1000109401.jpg -->
+    <header class="fixed-top">
+        <div class="nav-main">
+            <!-- زر الرجوع إلى الرئيسية أصبح في أقصى اليمين -->
+            <i class="fas fa-arrow-right" style="color:var(--gold); font-size:1.4rem; cursor:pointer;" onclick="window.location.href='index.html'"></i>
+            
+            <!-- عنوان القسم المتناسق في المنتصف -->
+            <h1 style="color:var(--fff); font-weight:900; font-size: 1.15rem;">الستارلينك وملحقاته | <span id="catTitle" style="color: var(--gold);">الكل</span></h1>
+            
+            <!-- زر فتح السايدبار أصبح في أقصى اليسار والشمال -->
+            <i class="fas fa-bars" style="color:var(--gold); font-size:1.4rem; cursor:pointer;" onclick="openSidebar()"></i>
+        </div>
+        <div class="brand-strip" id="brandStrip"></div>
+    </header>
+
+    <main>
+        <div class="premium-container" id="adContainer"></div>
+        <div class="grid" id="mainGrid"></div>
+    </main>
+
+    <!-- المساعد الذكي -->
+    <div class="bot-trigger" onclick="toggleChat()"><i class="fas fa-user-tie" style="font-size:2.2rem; color:#000;"></i></div>
+    <div class="chat-popup" id="chatWin">
+        <div class="chat-head">
+            <span><i class="fas fa-user-shield"></i> المهندس جاسم</span>
+            <i class="fas fa-chevron-down" onclick="toggleChat()" style="cursor:pointer;"></i>
+        </div>
+        <div class="chat-msg-area" id="chatBody">
+            <div class="msg bot">مرحباً بك يا هندسة! أنا المساعد الذكي لنظام السوق الكبير. كيف يمكنني خدمتك في عروض ستارلينك اليوم؟</div>
+        </div>
+        <div style="padding:10px; background:#080808; display:flex; gap:8px;">
+            <input type="text" id="chatInput" style="flex:1; background:#111; border:1px solid #333; color:#fff; padding:10px; border-radius:10px; outline:none;" placeholder="اكتب سؤالك...">
+            <button onclick="sendMsg()" style="background:var(--gold); border:none; width:40px; border-radius:10px; color:#000; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        localStorage.setItem('current_market_page', 'starlink');
+        let currentCat = localStorage.getItem('starlink_last_cat') || "الكل";
+        let adIndex = 0;
+
+        const storeData = {
+            "الجيل 2": { 
+                ads: [{n:"Starlink V2 Standard", p:"1,600,000", d:"الأكثر طلباً واستقراراً في السودان", i:"📡"}],
+                items:[{n:"V2 Standard Kit", p:"1,600,000", i:"📡"}, {n:"V2 Refurbished", p:"1,350,000", i:"♻️"}]
+            },
+            "الجيل 3": { 
+                ads: [{n:"Starlink V3 Ultra", p:"2,350,000", d:"سرعة تدفق فائقة مع راوتر Wi-Fi 6 المطور", i:"🚀"}],
+                items:[{n:"V3 Standard Kit", p:"2,350,000", i:"🚀"}, {n:"V3 Case Premium Kit", p:"2,500,000", i:"📦"}]
+            },
+            "ميني": { 
+                ads: [{n:"Starlink Mini", p:"1,850,000", d:"حجم مدمج، خفيف الوزن وعالي كفاءة الطاقة", i:"📶"}],
+                items:[{n:"Starlink Mini Kit", p:"1,850,000", i:"📶"}, {n:"Mini Portable Battery", p:"85,000", i:"🔋"}]
+            },
+            "ملحقات": { 
+                ads: [{n:"Original Ethernet Adapter", p:"110,000", d:"منفذ إيثرنت لتوصيل شبكات الميكروتيك مباشرة", i:"🔌"}],
+                items:[{n:"Ethernet Adapter", p:"110,000", i:"🔌"}, {n:"Starlink Cable 30m", p:"95,000", i:"🧵"}]
+            }
+        };
+
+        const categories = ["الكل", "الجيل 2", "الجيل 3", "ميني", "ملحقات"];
+
+        function openSidebar() { 
+            document.getElementById('sidebarContainer').classList.add('active'); 
+            document.getElementById('sidebarOverlay').classList.add('active');
+        }
+        
+        function closeSidebar() { 
+            document.getElementById('sidebarContainer').classList.remove('active'); 
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+        
+        function toggleChat() { 
+            const win = document.getElementById('chatWin');
+            win.style.display = win.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function updatePage(cat) {
+            currentCat = cat;
+            localStorage.setItem('starlink_last_cat', cat);
+            document.getElementById('catTitle').innerText = cat;
+            renderChips();
+            renderItems();
+            startPremiumAds();
+            buildDynamicSidebarMenu();
+
+            setTimeout(() => {
+                const activeChip = document.querySelector(`.chip[data-cat="${cat}"]`);
+                if (activeChip) {
+                    activeChip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }, 100);
+        }
+
+        function renderChips() {
+            document.getElementById('brandStrip').innerHTML = categories.map(c => 
+                `<div class="chip ${currentCat === c ? 'active' : ''}" data-cat="${c}" onclick="updatePage('${c}')">${c}</div>`
+            ).join('');
+        }
+
+        function renderItems() {
+            let items = [];
+            if(currentCat === 'الكل') {
+                Object.values(storeData).forEach(d => items = [...items, ...d.items]);
+            } else {
+                items = storeData[currentCat]?.items || [];
+            }
+            document.getElementById('mainGrid').innerHTML = items.map(item => `
+                <div class="card">
+                    <span style="font-size:3.5rem; display:block; margin:10px 0;">${item.i}</span>
+                    <h4 style="font-size:0.85rem; font-weight:700;">${item.n}</h4>
+                    <div class="price">${item.p} SDG</div>
+                    <a href="https://wa.me/249xxxxxxx" class="order-btn"><i class="fab fa-whatsapp"></i> اطلب الآن</a>
+                </div>
+            `).join('');
+        }
+
+        function startPremiumAds() {
+            clearInterval(window.adTimer);
+            let ads = [];
+            if(currentCat === 'الكل') {
+                Object.values(storeData).forEach(d => ads = [...ads, ...d.ads]);
+            } else {
+                ads = storeData[currentCat]?.ads || [];
+            }
+
+            const container = document.getElementById('adContainer');
+            if(ads.length === 0) { container.style.display = 'none'; return; }
+            container.style.display = 'block';
+
+            const run = () => {
+                const ad = ads[adIndex % ads.length];
+                container.innerHTML = `
+                    <div class="ad-slide active">
+                        <span class="premium-label"><i class="fas fa-crown"></i> بريميو</span>
+                        <div style="font-size:3rem;">${ad.i || '💎'}</div>
+                        <div style="flex:1">
+                            <h3 style="color:var(--gold); font-size:1.1rem; font-weight:900;">${ad.n}</h3>
+                            <p style="font-size:0.75rem; color:#aaa;">${ad.d}</p>
+                            <div class="price" style="font-size:1.25rem;">${ad.p} <small>SDG</small></div>
+                        </div>
+                        <div class="ad-progress" id="pBar"></div>
+                    </div>`;
+                setTimeout(() => { if(document.getElementById('pBar')) document.getElementById('pBar').style.width = '100%'; }, 50);
+                adIndex++;
+            };
+            run();
+            window.adTimer = setInterval(run, 4000);
+        }
+
+        function buildDynamicSidebarMenu() {
+            const dynamicArea = document.getElementById('dynamic-menu-area');
+            let htmlContent = `<div class="menu-section-title">تصفح الستارلينك وملحقاته</div>`;
+            
+            categories.forEach(cat => {
+                let displayLabel = `منظومات ${cat}`;
+                let iconClass = "fas fa-satellite-dish";
+                let isActive = currentCat === cat ? "active-item" : "";
+                
+                if (cat === 'الكل') { displayLabel = 'عرض كل الأجهزة والملحقات'; iconClass = "fas fa-border-all"; }
+                else if (cat === 'الجيل 2') iconClass = "fas fa-satellite-dish";
+                else if (cat === 'الجيل 3') iconClass = "fas fa-wifi";
+                else if (cat === 'ميني') iconClass = "fas fa-microchip";
+                else if (cat === 'ملحقات') { displayLabel = 'الملحقات والكوابل الأصلية'; iconClass = "fas fa-tools"; }
+                
+                htmlContent += `
+                    <div class="nav-link ${isActive}" onclick="updatePage('${cat}'); closeSidebar();">
+                        <i class="${iconClass}"></i> ${displayLabel}
+                    </div>`;
+            });
+            dynamicArea.innerHTML = htmlContent;
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('chatInput');
+            if(!input.value) return;
+            const body = document.getElementById('chatBody');
+            body.innerHTML += `<div class="msg user">${input.value}</div>`;
+            const userText = input.value;
+            input.value = '';
+            
+            setTimeout(() => {
+                let reply = "جاري مراجعة استفسارك حول منظومات الستارلينك المتاحة بالسوق الكبير، وسيتواصل معك المهندس جاسم فوراً.";
+                if(userText.includes("سعر") || userText.includes("بكم")) reply = "أسعار منظومات الستارلينك وملحقاتها في السوق الكبير محدثة ولحظية، يمكنك معاينة السعر الحالي في كرت الصنف بالأسفل والطلب عبر الواتساب مباشرة.";
+                body.innerHTML += `<div class="msg bot">${reply}</div>`;
+                body.scrollTop = body.scrollHeight;
+            }, 800);
+        }
+
+        buildDynamicSidebarMenu();
+        updatePage(currentCat);
+    </script><script>
+    // 🔓 دالة فتح القائمة الجانبية
+    function openSidebarDrawer() {
+        // بيفحص الكلاسات المشهورة عندك في التطبيق ليضمن التشغيل الفوري
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            
+            // 🧠 حركة ذكية: إجبار السايدبار داخل الـ iframe إنه يعيد قراءة الخانات أول ما يفتح
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    // 🔒 دالة إغلاق القائمة الجانبية
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+</script><script>
+    // 🔓 دالة فتح وإغلاق القائمة الجانبية (القديمة المعتمدة)
+    function openSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+
+    // 🔒 محرك حقن وتوحيد الشريط السفلي الاحترافي في صفحة القسم تلقائياً
+    function injectUniversalBottomNavbar() {
+        // 1. إضافة التنسيقات الفخمة للشريط السفلي لضمان ثباته وأناقته
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .parent-bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(12px); border-top: 1px solid #1a1a1a; height: 68px; display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 999; }
+            .parent-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: #555; gap: 4px; cursor: pointer; flex: 1; height: 100%; position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+            .parent-nav-item i { font-size: 1.15rem; }
+            .parent-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Cairo', sans-serif; }
+            .parent-nav-item.active-nav { color: #ffbd59; }
+            .parent-nav-item.active-nav::after { content: ''; position: absolute; top: 2px; width: 12px; height: 3px; background: #ffbd59; border-radius: 10px; box-shadow: 0 0 8px #ffbd59; }
+            /* إعطاء مساحة أسفل محتوى الصفحة الأساسي حتى لا يختفي تحت الشريط السفلي */
+            body { padding-bottom: 75px !important; }
+        `;
+        document.head.appendChild(style);
+
+        // 2. بناء هيكل الشريط السفلي بالربط الذكي
+        const navbar = document.createElement('nav');
+        navbar.className = 'parent-bottom-navbar';
+        navbar.innerHTML = `
+            <div class="parent-nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="parent-nav-item active-nav" onclick="openSidebarDrawer()"><i class="fas fa-th-large"></i><span>الأقسام</span></div>
+            <div class="parent-nav-item" onclick="window.location.href='smart-search.html'"><i class="fas fa-search"></i><span>بحث ذكي</span></div>
+            <div class="parent-nav-item" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i><span>تحديث</span></div>
+        `;
+        
+        document.body.appendChild(navbar);
+    }
+
+    // تشغيل المحرك فور تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', injectUniversalBottomNavbar);
+</script><!-- المحرك النهائي الشامل: سرعة خارقة + ربط تلقائي للشريط والسيرفيس بالسايدبار -->
+<script>
+    // 🧠 مصفوفة الربط الموحدة للأقسام الـ 12 في "السوق الكبير" لضمان سرعة الانتقال
+    const globalAppSections = {
+        'mobiles.html': { id: 'mobiles', name: 'الهواتف والملحقات' },
+        'computers.html': { id: 'computers', name: 'الحواسيب والطابعات' },
+        'starlink.html': { id: 'starlink', name: 'الستارلينك وملحقاته' },
+        'electricity.html': { id: 'electricity', name: 'الأجهزة الكهربائية' },
+        'clothes.html': { id: 'clothes', name: 'الملبوسات والأحذية' },
+        'furniture.html': { id: 'furniture', name: 'الأثاث والأواني' },
+        'building.html': { id: 'building', name: 'أدوات البناء' },
+        'realestate.html': { id: 'realestate', name: 'العقارات والأراضي' },
+        'vehicles.html': { id: 'vehicles', name: 'السيارات والمركبات' },
+        'motors.html': { id: 'motors', name: 'المواتر والمحركات' },
+        'crops.html': { id: 'crops', name: 'الحبوب والمحاصيل' },
+        'livestock.html': { id: 'livestock', name: 'المواشي والأعلاف' }
+    };
+
+    // 🔓 دالة فتح وإغلاق القائمة الجانبية المستقرة وسريعة الاستجابة
+    function openSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            // تأمين التحديث الفوري والذكي لبيانات السايدبار وإجباره على قراءة التابات العلوية
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+
+    // 📲 دالة التنقل الفوري فائق السرعة لمنع التهنيج في المبايل
+    function fastNavigate(targetUrl) {
+        // حفظ اسم الصفحة الحالية في الذاكرة لتسهيل العودة وربط البيانات
+        const fileName = targetUrl.split('/').pop().split('?')[0];
+        if(globalAppSections[fileName]) {
+            localStorage.setItem('current_market_page', globalAppSections[fileName].id);
+        }
+        window.location.href = targetUrl;
+    }
+
+    // 🔒 محرك حقن وبناء الشريط السفلي الاحترافي ذو الاستجابة الفورية
+    function injectUniversalBottomNavbar() {
+        // قراءة اسم الملف الحالي تلقائياً لمعرفة القسم المفتوح
+        const currentFileName = window.location.pathname.split('/').pop() || 'building.html';
+        
+        // حفظ الفئة الحالية في الكاش عشان السايدبار يقرأها أوتوماتيك لو الرابط اتغير
+        if(globalAppSections[currentFileName]) {
+            localStorage.setItem('current_market_page', globalAppSections[currentFileName].id);
+        }
+
+        // 1. حقن التنسيقات الفخمة والثابتة (الأسود الملكي مع الذهب الأصلي)
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .parent-bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(15px); border-top: 1px solid #1a1a1a; height: 68px; display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 999; }
+            .parent-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: #555; gap: 4px; cursor: pointer; flex: 1; height: 100%; position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; transition: transform 0.1s; }
+            .parent-nav-item i { font-size: 1.15rem; }
+            .parent-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Cairo', sans-serif; }
+            .parent-nav-item.active-nav { color: #ffbd59; }
+            .parent-nav-item.active-nav::after { content: ''; position: absolute; top: 2px; width: 12px; height: 3px; background: #ffbd59; border-radius: 10px; box-shadow: 0 0 8px #ffbd59; }
+            .parent-nav-item:active { transform: scale(0.92); color: #ffbd59; }
+            body { padding-bottom: 78px !important; }
+        `;
+        document.head.appendChild(style);
+
+        // 2. بناء الهيكل وربطه بالدوال السريعة fastNavigate
+        const navbar = document.createElement('nav');
+        navbar.className = 'parent-bottom-navbar';
+        navbar.innerHTML = `
+            <div class="parent-nav-item" onclick="fastNavigate('index.html')"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="parent-nav-item active-nav" onclick="openSidebarDrawer()"><i class="fas fa-th-large"></i><span>الأقسام</span></div>
+            <div class="parent-nav-item" onclick="fastNavigate('smart-search.html')"><i class="fas fa-search"></i><span>بحث ذكي</span></div>
+            <div class="parent-nav-item" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i><span>تحديث</span></div>
+        `;
+        
+        document.body.appendChild(navbar);
+    }
+
+    // تشغيل المحرك فوراً بسرعة المتصفح وبدون أي انتظار لشاشات التحميل
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectUniversalBottomNavbar);
+    } else {
+        injectUniversalBottomNavbar();
+    }
+</script>
+</body>
+</html>

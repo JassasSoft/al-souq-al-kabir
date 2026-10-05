@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>السوق الكبير | الحبوب والمحاصيل</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --gold: #fcc963; --dark: #000; --card: #111; --green: #25d366; --header-h: 135px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--dark); color: #fff; height: 100vh; overflow: hidden; }
+
+        /* الهيدر والقواعد البصرية الثابتة */
+        .fixed-top { position: fixed; top: 0; width: 100%; z-index: 1000; background: var(--dark); border-bottom: 2px solid var(--gold); height: var(--header-h); display: flex; flex-direction: column; }
+        .nav-bar { height: 75px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; width: 100%; }
+        .brand-text h1 { color: #fff; font-size: 1.1rem; font-weight: 900; text-align: center; }
+        
+        /* شريط الخانات العلوي السريع */
+        .brand-track { height: 60px; background: #0a0a0a; display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; padding: 0 10px; gap: 10px; width: 100%; }
+        .brand-track::-webkit-scrollbar { display: none; }
+        .chip { padding: 8px 20px; border-radius: 12px; font-size: 0.8rem; color: #fff; white-space: nowrap; transition: transform 0.1s ease, background 0.15s ease; cursor: pointer; font-weight: 700; border: 2px solid transparent; opacity: 0.8; }
+        
+        /* نظام التلوين الذكي الموحد للأقسام والخانات والقائمة */
+        .chip[data-cat="الكل"], .drawer-item[data-cat="الكل"] { background: #424242; }
+        .chip[data-cat="حبوب_قطاعي"], .drawer-item[data-cat="حبوب_قطاعي"] { background: #4a148c; }
+        .chip[data-cat="حبوب_جملة"], .drawer-item[data-cat="حبوب_جملة"] { background: #1b5e20; }
+        .chip[data-cat="محصول_قطاعي"], .drawer-item[data-cat="محصول_قطاعي"] { background: #01579b; }
+        .chip[data-cat="محصول_جملة"], .drawer-item[data-cat="محصول_جملة"] { background: #b71c1c; }
+        .chip[data-cat="بذور_تقاوي"], .drawer-item[data-cat="بذور_تقاوي"] { background: #e65100; }
+        .chip[data-cat="جملة_خضار"], .drawer-item[data-cat="جملة_خضار"] { background: #004d40; }
+        .chip[data-cat="جملة_فواكه"], .drawer-item[data-cat="جملة_فواكه"] { background: #827717; }
+        .chip[data-cat="أدوات"], .drawer-item[data-cat="أدوات"] { background: #3e2723; }
+        .chip[data-cat="بورصة"], .drawer-item[data-cat="بورصة"] { background: #212121; border-color: var(--gold); color: var(--gold); }
+        
+        .chip.active { background: var(--gold) !important; color: #000; opacity: 1; transform: scale(1.03); border-color: #fff; box-shadow: 0 0 10px var(--gold); }
+        .drawer-item.active-system { opacity: 1 !important; transform: scale(1.01); border: 2px solid #fff !important; box-shadow: 0 0 10px var(--gold); }
+
+        /* الأوفرلاي الاحترافي خلف القائمة */
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); z-index: 10000; display: none; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+
+        /* 🔽 القائمة الجانبية بالمقاس المتناسق والمظبوط تماماً جهة الشمال زي الصورة 🔽 */
+        .drawer { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 10001; border-right: 2px solid var(--gold); display: flex; flex-direction: column; box-shadow: 10px 0 30px rgba(0, 0, 0, 0.9); transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .drawer.open { left: 0; }
+        
+        /* كرت الهوية الترحيبي الفخم في رأس القائمة (محمد حبيب) */
+        .drawer-brand-profile { padding: 25px 20px; background: linear-gradient(135deg, #111 0%, #000 100%); border-bottom: 1px solid rgba(252, 201, 99, 0.2); display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .drawer-brand-profile .user-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: var(--gold); font-size: 1.4rem; }
+        .drawer-brand-profile h2 { font-size: 1.05rem; font-weight: 900; color: #fff; }
+        .drawer-brand-profile p { font-size: 0.7rem; color: var(--gold); font-weight: 700; }
+        .drawer-brand-profile .close-icon { position: absolute; top: 20px; right: 20px; color: #888; font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
+        .drawer-brand-profile .close-icon:hover { color: #fff; }
+
+        /* قائمة طولية منسقة ومنظمة */
+        .drawer-menu-items { flex: 1; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; padding: 15px 12px; }
+        .drawer-menu-items::-webkit-scrollbar { width: 3px; }
+        .drawer-menu-items::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+        
+        /* عناصر طولية رشيقة واحترافية للتحويل بين الأنظمة */
+        .drawer-item { display: flex; align-items: center; justify-content: space-between; color: #fff; text-decoration: none; padding: 11px 14px; font-weight: 700; transition: all 0.15s ease; border-radius: 10px; font-size: 0.8rem; opacity: 0.9; border: 1px solid rgba(255,255,255,0.02); width: 100%; }
+        .drawer-item i { font-size: 0.9rem; width: 22px; text-align: center; color: #fff; }
+        .drawer-item span { flex: 1; margin-right: 10px; text-align: right; }
+        .drawer-item:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.05); }
+
+        .drawer-footer-credits { padding: 15px; border-top: 1px solid #1c1c1c; background: #050505; text-align: center; font-size: 0.65rem; color: #555; font-weight: bold; }
+
+        main { margin-top: var(--header-h); height: calc(100vh - var(--header-h) - 65px); overflow-y: auto; padding-bottom: 20px; scroll-behavior: smooth; }
+        
+        /* بنر بريميو الملكي */
+        .ad-container { margin: 15px; height: 110px; border: 1px solid var(--gold); border-radius: 15px; background: linear-gradient(45deg, #0f0f0f, #1a1a1a); display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; text-align: center; padding: 10px; }
+        .ad-label { position: absolute; top: 8px; right: 10px; font-size: 0.6rem; color: var(--gold); font-weight: 900; border: 1px solid var(--gold); padding: 2px 5px; border-radius: 4px; }
+        .progress-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--gold); width: 0%; transition: width 3950ms linear; }
+
+        /* شبكة المنتجات */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px; }
+        .product-card { background: var(--card); border: 1px solid #1a1a1a; border-radius: 18px; padding: 15px; text-align: center; transition: transform 0.1s ease; display: flex; flex-direction: column; justify-content: space-between; }
+        .product-card:active { transform: scale(0.96); }
+        .prod-price { color: var(--gold); font-weight: 900; margin: 8px 0; font-size: 0.95rem; background: #000; padding: 8px; border-radius: 12px; border: 1px solid #222; }
+        .buy-btn { background: var(--green); color: #000; padding: 10px; border-radius: 12px; font-weight: 900; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.75rem; border: none; width: 100%; cursor: pointer; }
+
+        /* البوت العائم والمحادثة */
+        .bot-btn { position: fixed; bottom: 85px; left: 20px; width: 60px; height: 60px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 9000; cursor: pointer; border: 3px solid #000; box-shadow: 0 0 15px rgba(252, 201, 99, 0.3); animation: floatSystem 3s infinite ease-in-out; }
+        @keyframes floatSystem { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        
+        .chat-win { position: fixed; bottom: 155px; left: 20px; width: 300px; height: 380px; background: #0d0d0d; border: 2px solid var(--gold); border-radius: 20px; display: none; flex-direction: column; z-index: 9001; overflow: hidden; }
+        .chat-header { background: var(--gold); color: #000; padding: 12px; font-weight: 900; display: flex; justify-content: space-between; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #050505; }
+        .msg { padding: 10px; border-radius: 12px; font-size: 0.85rem; max-width: 85%; line-height: 1.4; }
+        .msg.bot { background: #1a1a1a; border-right: 4px solid var(--gold); align-self: flex-start; color: #fff; }
+        .msg.user { background: var(--gold); color: #000; font-weight: 700; align-self: flex-end; }
+        .chat-footer { padding: 10px; background: #050505; display: flex; gap: 8px; border-top: 1px solid #222; }
+        .chat-input { flex: 1; background: #151515; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 10px; outline: none; font-family: 'Cairo'; }
+
+        /* شريط التنقل السفلي الموحد والثابت تماماً */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: #080808; border-top: 1px solid #1c1c1c; display: flex; justify-content: space-around; align-items: center; z-index: 10002; padding: 0 10px; }
+        .nav-item { color: #666; text-align: center; text-decoration: none; font-size: 0.72rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-weight: bold; width: 20%; cursor: pointer; }
+        .nav-item i { font-size: 1.25rem; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item.exit-btn { color: #ff3b30; }
+    </style>
+</head>
+<body>
+
+    <div class="drawer-overlay" id="overlay" onclick="toggleMenu()"></div>
+    
+    <div class="drawer" id="drawer">
+        <div class="drawer-brand-profile">
+            <i class="fas fa-arrow-left close-icon" onclick="toggleMenu()"></i>
+            <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+            <h2>المهندس محمد حبيب</h2>
+            <p>مطور ومؤسسة Jassas Soft Pro</p>
+        </div>
+
+        <div class="drawer-menu-items">
+            <a href="#" class="drawer-item" data-cat="الكل" id="menu-الكل" onclick="navigateSmart('الكل')"><span>نظام الكل المفتوح</span><i class="fas fa-border-all"></i></a>
+            <a href="#" class="drawer-item" data-cat="حبوب_قطاعي" id="menu-حبوب_قطاعي" onclick="navigateSmart('حبوب_قطاعي')"><span>حبوب قطاعي</span><i class="fas fa-mortar-pestle"></i></a>
+            <a href="#" class="drawer-item" data-cat="حبوب_جملة" id="menu-حبوب_جملة" onclick="navigateSmart('حبوب_جملة')"><span>حبوب جملة</span><i class="fas fa-boxes"></i></a>
+            <a href="#" class="drawer-item" data-cat="محصول_قطاعي" id="menu-محصول_قطاعي" onclick="navigateSmart('محصول_قطاعي')"><span>محصول قطاعي</span><i class="fas fa-apple-alt"></i></a>
+            <a href="#" class="drawer-item" data-cat="محصول_جملة" id="menu-محصول_جملة" onclick="navigateSmart('محصول_جملة')"><span>محصول جملة</span><i class="fas fa-truck-loading"></i></a>
+            <a href="#" class="drawer-item" data-cat="بذور_تقاوي" id="menu-بذور_تقاوي" onclick="navigateSmart('بذور_تقاوي')"><span>بذور وتقاوي معتمدة</span><i class="fas fa-seedling"></i></a>
+            <a href="#" class="drawer-item" data-cat="جملة_خضار" id="menu-جملة_خضار" onclick="navigateSmart('جملة_خضار')"><span>جملة الخضار</span><i class="fas fa-carrot"></i></a>
+            <a href="#" class="drawer-item" data-cat="جملة_فواكه" id="menu-جملة_فواكه" onclick="navigateSmart('جملة_فواكه')"><span>جملة الفواكه</span><i class="fas fa-lemon"></i></a>
+            <a href="#" class="drawer-item" data-cat="أدوات" id="menu-أدوات" onclick="navigateSmart('أدوات')"><span>أدوات وحاصدات</span><i class="fas fa-tractor"></i></a>
+            <a href="#" class="drawer-item" data-cat="بورصة" id="menu-بورصة" onclick="navigateSmart('بورصة')"><span>أسعار البورصة</span><i class="fas fa-chart-line"></i></a>
+        </div>
+
+        <div class="drawer-footer-credits">
+            Powered by Jassas Soft Pro &copy; 2026
+        </div>
+    </div>
+
+    <header class="fixed-top">
+        <div class="nav-bar">
+            <a href="javascript:history.back()" style="color:var(--gold); font-size:1.4rem;"><i class="fas fa-arrow-right"></i></a>
+            <div class="brand-text"><h1>الحبوب والمحاصيل</h1></div>
+            <i class="fas fa-bars" onclick="toggleMenu()" style="color:var(--gold); font-size:1.5rem; cursor:pointer;"></i>
+        </div>
+        <div class="brand-track" id="catNav"></div>
+    </header>
+
+    <main>
+        <div id="bannerArea"></div>
+        <div class="grid" id="productGrid"></div>
+    </main>
+
+    <div class="bot-btn" onclick="toggleChat()"><i class="fas fa-user-tie" style="font-size:1.6rem; color:#000;"></i></div>
+    <div class="chat-win" id="chatWin">
+        <div class="chat-header">
+            <span>🤵 مستشار السوق الكبير</span>
+            <i class="fas fa-times" onclick="toggleChat()" style="cursor:pointer;"></i>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="msg bot">مرحباً بك يا هندسة محمد حبيب! أنا مستشارك الذكي في منصة السوق الكبير، كيف يمكنني مساعدتك في فحص عروض الحبوب والمحاصيل المتاحة اليوم؟</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chatInput" class="chat-input" placeholder="اكتب سؤالك هنا...">
+            <button onclick="sendMessage()" style="background:var(--gold); border:none; width:45px; border-radius:10px; color:#000; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="window.location.href='index.html'"><i class="fas fa-home"></i>الرئيسية</div>
+        <div class="nav-item"><i class="fas fa-envelope"></i>الرسائل</div>
+        <div class="nav-item"><i class="fas fa-user"></i>حسابي</div>
+        <div class="nav-item exit-btn"><i class="fas fa-power-off"></i>خروج</div>
+    </nav>
+
+    <script>
+        const categories = [
+            { id: "الكل", n: "الكل" },
+            { id: "حبوب_قطاعي", n: "حبوب قطاعي" },
+            { id: "حبوب_جملة", n: "حبوب جملة" },
+            { id: "محصول_قطاعي", n: "محصول قطاعي" },
+            { id: "محصول_جملة", n: "محصول جملة" },
+            { id: "بذور_تقاوي", n: "بذور وتقاوي" },
+            { id: "جملة_خضار", n: "جملة الخضار" },
+            { id: "جملة_فواكه", n: "جملة الفواكه" },
+            { id: "أدوات", n: "أدوات وحاصدات" },
+            { id: "بورصة", n: "أسعار البورصة" }
+        ];
+        
+        const premiumAds = {
+            "الكل": [
+                {t: "مستودعات السوق الكبير للحبوب 🌾", d: "نقدم أجود أنواع الذرة والدخن والسمسم بأسعار تنافسية جداً لكبار التجار والموردين."},
+                {t: "موسم المانجو السودانية الطازجة 🥭", d: "بدأ التوريد المباشر بالجملة! مانجو كيت وتيمور فاخرة من مزارعنا بأسعار حصرية."},
+                {t: "تقاوي محسنة ومعتمدة 🌱", d: "احصل على بذور زهرة الشمس والقطن المحسنة لزيادة إنتاجية فدانك بنسبة 40%."}
+            ],
+            "حبوب_قطاعي": [{t: "عروض الأسر السعيدة 🍲", d: "اشترِ ملوة عدس + ملوة كبكبيه واحصل على كيلو زيت مجاناً عبر تجار السوق الكبير!"}],
+            "جملة_خضار": [{t: "وكالة الخضار المركزي 🍅", d: "توريد شاحنات بصل وبطاطس بأسعار الجملة المباشرة لكافة ولايات ومناطق السودان."}],
+            "بورصة": [{t: "تنبيهات أسعار البورصة 📊", d: "تحديث لحظي لأسعار السمسم والصمغ العربي في أسواق المحاصيل الكبرى."}],
+            "أدوات": [{t: "حاصدات ومعدات زراعية 🚜", d: "توفر تراكتورات ومعدات حصاد حديثة للإيجار والبيع بضمان معتمد."}]
+        };
+
+        const products = [
+            {n:"ذرة فتريتة فاخرة", p:"3,500", c:"حبوب_قطاعي", l:"سوق نيالا"}, 
+            {n:"سمسم أبيض صادر", p:"98,000", c:"حبوب_جملة", l:"زريبة بورصة القضارف"},
+            {n:"مانجو تيمور (كرتونة)", p:"15,000", c:"جملة_فواكه", l:"مزارع غرب دارفور"}, 
+            {n:"بصل أحمر (شوال)", p:"42,000", c:"جملة_خضار", l:"سوق خضار نيالا"},
+            {n:"تقاوي طماطم هجين ممتازة", p:"14,500", c:"بذور_تقاوي", l:"محل التقدم الزراعي"}, 
+            {n:"حاصدة يدوية حديثة", p:"85,000", c:"أدوات", l:"المنطقة الصناعية"}
+        ];
+
+        let activeTab = "الكل";
+
+        function render() {
+            document.getElementById('catNav').innerHTML = categories.map(t => 
+                `<div class="chip ${activeTab === t.id ? 'active' : ''}" data-cat="${t.id}" id="chip-${t.id}" onclick="setCat('${t.id}')">${t.n}</div>`
+            ).join('');
+
+            const grid = document.getElementById('productGrid');
+            const filtered = activeTab === "الكل" ? products : products.filter(p => p.c === activeTab);
+            
+            grid.innerHTML = filtered.length ? filtered.map(p => {
+                let iconClass = 'seedling';
+                if(p.c.includes('فواكه')) iconClass = 'apple-alt';
+                else if(p.c.includes('خضار')) iconClass = 'carrot';
+                else if(p.c === 'أدوات') iconClass = 'tractor';
+                else if(p.c.includes('جملة')) iconClass = 'boxes';
+                
+                return `
+                <div class="product-card">
+                    <i class="fas fa-${iconClass}" style="font-size:1.5rem; color:var(--gold); margin-bottom:10px;"></i>
+                    <h4 style="font-size:0.8rem; height:40px; color:#fff;">${p.n}</h4>
+                    <div style="font-size:0.65rem; color:#888; margin-bottom:5px;"><i class="fas fa-map-marker-alt"></i> ${p.l}</div>
+                    <div class="prod-price">${p.p} ج.س</div>
+                    <button class="buy-btn" onclick="window.location.href='https://wa.me/249923211001'"><i class="fab fa-whatsapp"></i> اطلب الآن</button>
+                </div>`;
+            }).join('') : `<div style="grid-column:1/3; text-align:center; padding:50px; color:#555;">قريباً.. تتوفر عروض ومحاصيل هنا</div>`;
+
+            // مزامنة التحديد الفوري للألوان والتبويبات النشطة داخل القائمة الطولية الجانبية
+            document.querySelectorAll('.drawer-item').forEach(item => item.classList.remove('active-system'));
+            const activeMenuItem = document.getElementById(`menu-${activeTab}`);
+            if (activeMenuItem) {
+                activeMenuItem.classList.add('active-system');
+            }
+        }
+
+        function navigateSmart(catName) {
+            setCat(catName);
+            toggleMenu();
+            setTimeout(() => {
+                const targetChip = document.getElementById(`chip-${catName}`);
+                if (targetChip) {
+                    targetChip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            }, 50); 
+        }
+
+        let adTimer;
+        let adIndex = 0;
+        function rotateAds(cat = 'الكل') {
+            clearInterval(adTimer);
+            const banner = document.getElementById('bannerArea');
+            let pool = premiumAds[cat] || premiumAds["الكل"];
+            
+            const runAd = () => {
+                if (adIndex >= pool.length) adIndex = 0;
+                const currentAd = pool[adIndex];
+                banner.innerHTML = `
+                    <div class="ad-container">
+                        <span class="ad-label">👑 بريميو الملكي</span>
+                        <div style="color:var(--gold); font-weight:900; font-size:1rem;">${currentAd.t}</div>
+                        <div style="font-size:0.75rem; color:#ccc; margin-top:5px;">${currentAd.d}</div>
+                        <div class="progress-bar" id="pb"></div>
+                    </div>`;
+                
+                setTimeout(() => { if(document.getElementById('pb')) document.getElementById('pb').style.width = "100%"; }, 20);
+                adIndex = (adIndex + 1) % pool.length;
+            };
+
+            runAd();
+            if(cat === 'الكل') adTimer = setInterval(runAd, 4000);
+        }
+
+        function setCat(c) { activeTab = c; adIndex = 0; render(); rotateAds(c); }
+        
+        function toggleMenu() { 
+            const dr = document.getElementById('drawer');
+            const ov = document.getElementById('overlay');
+            if(dr.classList.contains('open')) {
+                dr.classList.remove('open');
+                ov.style.display = 'none';
+            } else {
+                dr.classList.add('open');
+                ov.style.display = 'block';
+            }
+        }
+        
+        function toggleChat() { const cw = document.getElementById('chatWin'); cw.style.display = (cw.style.display === 'flex') ? 'none' : 'flex'; }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const body = document.getElementById('chatBody');
+            if(!input.value.trim()) return;
+
+            let val = input.value;
+            body.innerHTML += `<div class="msg user">${val}</div>`;
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            setTimeout(() => {
+                let r = "أبشر يا هندسة، جاري فحص الوكالات النشطة في السوق الكبير لتوفير استفسارك فوراً...";
+                if(val.includes("سعر") || val.includes("بورصة")) r = "الأسعار اليوم متغيرة ولحظية، يمكنك متابعة خانة 'أسعار البورصة' في الشريط العلوي لتتبع حركة السوق مباشرة.";
+                if(val.includes("جملة")) r = "مرحباً بك، يتوفر لدينا شحن وتوريد كميات (شاحنات وشوالات) بأسعار بورصة المحاصيل اليومية.";
+                body.innerHTML += `<div class="msg bot">${r}</div>`;
+                body.scrollTop = body.scrollHeight;
+            }, 500);
+        }
+
+        window.onload = function() { render(); rotateAds(); };
+    </script><script>
+    // 🔓 دالة فتح القائمة الجانبية
+    function openSidebarDrawer() {
+        // بيفحص الكلاسات المشهورة عندك في التطبيق ليضمن التشغيل الفوري
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            
+            // 🧠 حركة ذكية: إجبار السايدبار داخل الـ iframe إنه يعيد قراءة الخانات أول ما يفتح
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    // 🔒 دالة إغلاق القائمة الجانبية
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+</script><script>
+    // 🔓 دالة فتح وإغلاق القائمة الجانبية (القديمة المعتمدة)
+    function openSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+
+    // 🔒 محرك حقن وتوحيد الشريط السفلي الاحترافي في صفحة القسم تلقائياً
+    function injectUniversalBottomNavbar() {
+        // 1. إضافة التنسيقات الفخمة للشريط السفلي لضمان ثباته وأناقته
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .parent-bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(12px); border-top: 1px solid #1a1a1a; height: 68px; display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 999; }
+            .parent-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: #555; gap: 4px; cursor: pointer; flex: 1; height: 100%; position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+            .parent-nav-item i { font-size: 1.15rem; }
+            .parent-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Cairo', sans-serif; }
+            .parent-nav-item.active-nav { color: #ffbd59; }
+            .parent-nav-item.active-nav::after { content: ''; position: absolute; top: 2px; width: 12px; height: 3px; background: #ffbd59; border-radius: 10px; box-shadow: 0 0 8px #ffbd59; }
+            /* إعطاء مساحة أسفل محتوى الصفحة الأساسي حتى لا يختفي تحت الشريط السفلي */
+            body { padding-bottom: 75px !important; }
+        `;
+        document.head.appendChild(style);
+
+        // 2. بناء هيكل الشريط السفلي بالربط الذكي
+        const navbar = document.createElement('nav');
+        navbar.className = 'parent-bottom-navbar';
+        navbar.innerHTML = `
+            <div class="parent-nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="parent-nav-item active-nav" onclick="openSidebarDrawer()"><i class="fas fa-th-large"></i><span>الأقسام</span></div>
+            <div class="parent-nav-item" onclick="window.location.href='smart-search.html'"><i class="fas fa-search"></i><span>بحث ذكي</span></div>
+            <div class="parent-nav-item" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i><span>تحديث</span></div>
+        `;
+        
+        document.body.appendChild(navbar);
+    }
+
+    // تشغيل المحرك فور تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', injectUniversalBottomNavbar);
+</script><!-- المحرك النهائي الشامل: سرعة خارقة + ربط تلقائي للشريط والسيرفيس بالسايدبار -->
+<script>
+    // 🧠 مصفوفة الربط الموحدة للأقسام الـ 12 في "السوق الكبير" لضمان سرعة الانتقال
+    const globalAppSections = {
+        'mobiles.html': { id: 'mobiles', name: 'الهواتف والملحقات' },
+        'computers.html': { id: 'computers', name: 'الحواسيب والطابعات' },
+        'starlink.html': { id: 'starlink', name: 'الستارلينك وملحقاته' },
+        'electricity.html': { id: 'electricity', name: 'الأجهزة الكهربائية' },
+        'clothes.html': { id: 'clothes', name: 'الملبوسات والأحذية' },
+        'furniture.html': { id: 'furniture', name: 'الأثاث والأواني' },
+        'building.html': { id: 'building', name: 'أدوات البناء' },
+        'realestate.html': { id: 'realestate', name: 'العقارات والأراضي' },
+        'vehicles.html': { id: 'vehicles', name: 'السيارات والمركبات' },
+        'motors.html': { id: 'motors', name: 'المواتر والمحركات' },
+        'crops.html': { id: 'crops', name: 'الحبوب والمحاصيل' },
+        'livestock.html': { id: 'livestock', name: 'المواشي والأعلاف' }
+    };
+
+    // 🔓 دالة فتح وإغلاق القائمة الجانبية المستقرة وسريعة الاستجابة
+    function openSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            // تأمين التحديث الفوري والذكي لبيانات السايدبار وإجباره على قراءة التابات العلوية
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+
+    // 📲 دالة التنقل الفوري فائق السرعة لمنع التهنيج في المبايل
+    function fastNavigate(targetUrl) {
+        // حفظ اسم الصفحة الحالية في الذاكرة لتسهيل العودة وربط البيانات
+        const fileName = targetUrl.split('/').pop().split('?')[0];
+        if(globalAppSections[fileName]) {
+            localStorage.setItem('current_market_page', globalAppSections[fileName].id);
+        }
+        window.location.href = targetUrl;
+    }
+
+    // 🔒 محرك حقن وبناء الشريط السفلي الاحترافي ذو الاستجابة الفورية
+    function injectUniversalBottomNavbar() {
+        // قراءة اسم الملف الحالي تلقائياً لمعرفة القسم المفتوح
+        const currentFileName = window.location.pathname.split('/').pop() || 'building.html';
+        
+        // حفظ الفئة الحالية في الكاش عشان السايدبار يقرأها أوتوماتيك لو الرابط اتغير
+        if(globalAppSections[currentFileName]) {
+            localStorage.setItem('current_market_page', globalAppSections[currentFileName].id);
+        }
+
+        // 1. حقن التنسيقات الفخمة والثابتة (الأسود الملكي مع الذهب الأصلي)
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .parent-bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(15px); border-top: 1px solid #1a1a1a; height: 68px; display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 999; }
+            .parent-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: #555; gap: 4px; cursor: pointer; flex: 1; height: 100%; position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; transition: transform 0.1s; }
+            .parent-nav-item i { font-size: 1.15rem; }
+            .parent-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Cairo', sans-serif; }
+            .parent-nav-item.active-nav { color: #ffbd59; }
+            .parent-nav-item.active-nav::after { content: ''; position: absolute; top: 2px; width: 12px; height: 3px; background: #ffbd59; border-radius: 10px; box-shadow: 0 0 8px #ffbd59; }
+            .parent-nav-item:active { transform: scale(0.92); color: #ffbd59; }
+            body { padding-bottom: 78px !important; }
+        `;
+        document.head.appendChild(style);
+
+        // 2. بناء الهيكل وربطه بالدوال السريعة fastNavigate
+        const navbar = document.createElement('nav');
+        navbar.className = 'parent-bottom-navbar';
+        navbar.innerHTML = `
+            <div class="parent-nav-item" onclick="fastNavigate('index.html')"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="parent-nav-item active-nav" onclick="openSidebarDrawer()"><i class="fas fa-th-large"></i><span>الأقسام</span></div>
+            <div class="parent-nav-item" onclick="fastNavigate('smart-search.html')"><i class="fas fa-search"></i><span>بحث ذكي</span></div>
+            <div class="parent-nav-item" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i><span>تحديث</span></div>
+        `;
+        
+        document.body.appendChild(navbar);
+    }
+
+    // تشغيل المحرك فوراً بسرعة المتصفح وبدون أي انتظار لشاشات التحميل
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectUniversalBottomNavbar);
+    } else {
+        injectUniversalBottomNavbar();
+    }
+</script>
+</body>
+</html>

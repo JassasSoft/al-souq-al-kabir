@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>السوق الكبير | الشاشة الرئيسية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --gold: #ffbd59; 
+            --bg: #0d0212; 
+            --card: #161616; 
+            --glow: rgba(255, 189, 89, 0.15); 
+            --sidebar-bg: #12051b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #fff; overflow-x: hidden; padding-bottom: 30px; }
+        
+        /* الهيدر الاحترافي */
+        .master-header { width: 100%; background: #000; padding: 10px 15px; display: flex; flex-direction: column; align-items: center; gap: 6px; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 100; }
+        .header-top { width: 100%; display: flex; align-items: center; justify-content: space-between; }
+        .master-header img { width: 120px; height: auto; }
+        .header-btn { background: none; border: none; color: var(--gold); font-size: 1.4rem; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; }
+        .header-btn:active { transform: scale(0.85); }
+
+        /* شريط الجغرافيا النشطة */
+        .geo-indicator { font-size: 0.75rem; color: var(--gold); font-weight: 700; background: rgba(255, 189, 89, 0.08); padding: 3px 14px; border-radius: 50px; border: 1px solid rgba(255, 189, 89, 0.2); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+        /* شريط الإعلانات الفوري */
+        .ticker-container { background: #111; height: 35px; overflow: hidden; position: relative; border-bottom: 1px solid #222; cursor: pointer; }
+        .ticker-text { display: flex; white-space: nowrap; position: absolute; animation: move-ltr 35s linear infinite; }
+        .ticker-text span { padding: 0 40px; color: var(--gold); font-weight: bold; line-height: 35px; font-size: 0.85rem; }
+        @keyframes move-ltr { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        /* عناوين الأقسام */
+        .sec-header { padding: 18px 15px 10px; color: var(--gold); font-weight: 900; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between; }
+        .sec-header a { color: #fff; font-size: 0.8rem; font-weight: normal; text-decoration: none; border-bottom: 1px dashed var(--gold); }
+
+        /* السلايدر البريميوم */
+        .premium-slider { display: flex; overflow-x: auto; gap: 15px; padding: 0 15px 15px; scrollbar-width: none; }
+        .premium-slider::-webkit-scrollbar { display: none; }
+        .p-card { min-width: 85%; height: 150px; border-radius: 18px; border: 1px solid var(--gold); position: relative; overflow: hidden; background: #000; cursor: pointer; flex-shrink: 0; }
+        .p-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0.55; }
+        .p-card .p-info { position: absolute; bottom: 0; width: 100%; padding: 12px 15px; background: linear-gradient(transparent, #000); font-weight: 700; color: #fff; }
+
+        /* شبكة الأقسام السريعة */
+        .grid-matrix { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 5px 12px 30px; }
+        .cat-box { background: var(--card); border-radius: 15px; padding: 14px 3px; display: flex; flex-direction: column; align-items: center; border: 1px solid rgba(255,189,89,0.1); text-decoration: none; transition: transform 0.1s ease; }
+        .cat-box.turbo-clicked { transform: scale(0.9) !important; background: #222 !important; border-color: var(--gold); }
+        .cat-icon-circle { width: 52px; height: 52px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 8px; border: 1.5px solid var(--gold); box-shadow: 0 4px 15px rgba(255, 189, 89, 0.2); }
+        .cat-label { font-size: 0.72rem; font-weight: 800; color: #fff; text-align: center; line-height: 1.3; }
+
+        /* التدرجات */
+        .grad-mobiles { background: linear-gradient(145deg, #1e1b4b, #000); color: #60a5fa !important; }
+        .grad-computers { background: linear-gradient(145deg, #062f4f, #000); color: #38bdf8 !important; }
+        .grad-starlink { background: linear-gradient(145deg, #2e1065, #000); color: #c084fc !important; }
+        .grad-electronics { background: linear-gradient(145deg, #14532d, #000); color: #4ade80 !important; }
+        .grad-fashion { background: linear-gradient(145deg, #701a75, #000); color: #f472b6 !important; }
+        .grad-furniture { background: linear-gradient(145deg, #7c2d12, #000); color: #fb923c !important; }
+        .grad-building { background: linear-gradient(145deg, #451a03, #000); color: #f59e0b !important; }
+        .grad-realestate { background: linear-gradient(145deg, #115e59, #000); color: #2dd4bf !important; }
+        .grad-cars { background: linear-gradient(145deg, #1f2937, #000); color: #e5e7eb !important; }
+        .grad-motors { background: linear-gradient(145deg, #991b1b, #000); color: #f87171 !important; }
+        .grad-crops { background: linear-gradient(145deg, #064e3b, #000); color: #34d399 !important; }
+        .grad-livestock { background: linear-gradient(145deg, #3f2b12, #000); color: #fbbf24 !important; }
+
+        /* القائمة الجانبية المتقدمة والذكية */
+        .sidebar-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 9999; transition: right 0.3s ease; display: flex; justify-content: flex-start; }
+        .sidebar-overlay.active { right: 0; }
+        
+        .sidebar-panel { width: 80%; max-width: 310px; height: 100%; background: var(--sidebar-bg); border-left: 2px solid var(--gold); display: flex; flex-direction: column; padding: 20px 15px; box-shadow: -5px 0 25px rgba(0,0,0,0.8); overflow-y: auto; }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,189,89,0.2); padding-bottom: 15px; margin-bottom: 15px; }
+        .sidebar-title { color: var(--gold); font-size: 1.1rem; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+        .close-sidebar-btn { background: rgba(255,189,89,0.1); border: 1px solid var(--gold); color: var(--gold); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* كارت بيانات المستخدم داخل القائمة الجانبية */
+        .user-card-side { background: rgba(255,189,89,0.05); border: 1px solid rgba(255,189,89,0.2); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; background: var(--gold); color: #000; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; border: 2px solid #fff; }
+        .user-info h4 { font-size: 0.9rem; color: #fff; margin-bottom: 2px; }
+        .user-info p { font-size: 0.75rem; color: var(--gold); }
+
+        /* روابط القائمة الجانبية */
+        .side-menu-list { display: flex; flex-direction: column; gap: 8px; }
+        .side-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #160a22; border-radius: 10px; color: #fff; text-decoration: none; font-size: 0.88rem; font-weight: 700; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .side-item i { width: 22px; text-align: center; color: var(--gold); font-size: 1rem; }
+        .side-item:active { background: rgba(255, 189, 89, 0.15); border-color: var(--gold); }
+        .side-item.highlight { background: linear-gradient(90deg, rgba(255,189,89,0.2), #160a22); border-color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <header class="master-header">
+        <div class="header-top">
+            <button class="header-btn" id="openSidebarBtn"><i class="fas fa-bars"></i></button>
+            <img src="long.png" alt="السوق الكبير">
+            <button class="header-btn" onclick="location.href='profile.html'" title="الملف الشخصي"><i class="fas fa-user-circle"></i></button>
+        </div>
+        <div class="geo-indicator" onclick="openLocationPicker()">
+            <i class="fas fa-map-marker-alt"></i> <span id="currentGeoLabel">جاري التحديد...</span>
+        </div>
+    </header>
+
+    <div class="ticker-container" onclick="fastNavigate('ads-center.html')">
+        <div class="ticker-text" id="ticker-box">
+            <span>جاري تحميل التحديثات والإعلانات الفورية...</span>
+        </div>
+    </div>
+
+    <div class="sec-header">
+        <span><i class="fas fa-gem"></i> إعلانات البريميوم</span>
+        <a href="ads-center.html">عرض الكل</a>
+    </div>
+    <div class="premium-slider">
+        <div class="p-card" onclick="fastNavigate('ads-center.html')"><img src="long.png" alt="تجار"><div class="p-info">تجار موثوقون</div></div>
+        <div class="p-card" onclick="fastNavigate('ads-center.html')"><img src="long.png" alt="عروض"><div class="p-info">عروض حصرية وخصومات</div></div>
+    </div>
+
+    <div class="sec-header"><span><i class="fas fa-th-large"></i> أقسام السوق</span></div>
+    
+    <div class="grid-matrix">
+        <a href="category-mobiles.html?cat=1" class="cat-box data-turbo"><div class="cat-icon-circle grad-mobiles"><i class="fas fa-mobile-alt"></i></div><span class="cat-label">الهواتف والملحقات</span></a>
+        <a href="computers.html?cat=2" class="cat-box data-turbo"><div class="cat-icon-circle grad-computers"><i class="fas fa-desktop"></i></div><span class="cat-label">الحواسيب والطابعات</span></a>
+        <a href="category-starlink.html?cat=3" class="cat-box data-turbo"><div class="cat-icon-circle grad-starlink"><i class="fas fa-satellite-dish"></i></div><span class="cat-label">ستارلينك وملحقاته</span></a>
+        
+        <a href="electronics.html?cat=4" class="cat-box data-turbo"><div class="cat-icon-circle grad-electronics"><i class="fas fa-plug"></i></div><span class="cat-label">الأجهزة الإلكترونية والكهربائية</span></a>
+        <a href="fashion_mall.html?cat=5" class="cat-box data-turbo"><div class="cat-icon-circle grad-fashion"><i class="fas fa-shirt"></i></div><span class="cat-label">الملبوسات والأحذية</span></a>
+        <a href="furniture.html?cat=6" class="cat-box data-turbo"><div class="cat-icon-circle grad-furniture"><i class="fas fa-couch"></i></div><span class="cat-label">الأثاث والأواني</span></a>
+        
+        <a href="building_materials.html?cat=7" class="cat-box data-turbo"><div class="cat-icon-circle grad-building"><i class="fas fa-tools"></i></div><span class="cat-label">أدوات البناء والكهرباء</span></a>
+        <a href="realestate.html?cat=9" class="cat-box data-turbo"><div class="cat-icon-circle grad-realestate"><i class="fas fa-home"></i></div><span class="cat-label">العقارات والأراضي</span></a>
+        <a href="category-cars.html?cat=10" class="cat-box data-turbo"><div class="cat-icon-circle grad-cars"><i class="fas fa-car"></i></div><span class="cat-label">العرَبات والاسبيرات</span></a>
+        
+        <a href="motors.html?cat=11" class="cat-box data-turbo"><div class="cat-icon-circle grad-motors"><i class="fas fa-motorcycle"></i></div><span class="cat-label">المواتر والملحقات</span></a>
+        <a href="grains_and_crops.html?cat=12" class="cat-box data-turbo"><div class="cat-icon-circle grad-crops"><i class="fas fa-seedling"></i></div><span class="cat-label">الحبوب والمحاصيل</span></a>
+        <a href="livestock_and_feed.html?cat=13" class="cat-box data-turbo"><div class="cat-icon-circle grad-livestock"><i class="fas fa-cow"></i></div><span class="cat-label">المواشي والأعلاف</span></a>
+    </div>
+
+    <!-- القائمة الجانبية المدمجة والذكية بنفس الصفحة -->
+    <div class="sidebar-overlay" id="sidebarOverlay">
+        <div class="sidebar-panel">
+            <div class="sidebar-header">
+                <div class="sidebar-title"><i class="fas fa-sliders-h"></i> مركز الخدمات</div>
+                <div class="close-sidebar-btn" id="closeSidebarBtn"><i class="fas fa-times"></i></div>
+            </div>
+
+            <!-- معلومات المستخدم -->
+            <div class="user-card-side" onclick="fastNavigate('profile.html')">
+                <div class="user-avatar"><i class="fas fa-user"></i></div>
+                <div class="user-info">
+                    <h4>المطور محمد حبيب</h4>
+                    <p><i class="fas fa-check-circle"></i> تاجر معتمد • نيالا</p>
+                </div>
+            </div>
+
+            <!-- خيارات التحكم والتنقل السريع -->
+            <div class="side-menu-list">
+                <a href="add-ad.html" class="side-item highlight">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>إضافة إعلان جديد</span>
+                </a>
+                <a href="chat-list.html" class="side-item">
+                    <i class="fas fa-comments"></i>
+                    <span>المحادثات المباشرة</span>
+                </a>
+                <a href="my-ads.html" class="side-item">
+                    <i class="fas fa-list-alt"></i>
+                    <span>إعلاناتي المعروضة</span>
+                </a>
+                <a href="verify-receipt.html" class="side-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>الفحص الجنائي للإشعارات</span>
+                </a>
+                <a href="plans.html" class="side-item">
+                    <i class="fas fa-crown"></i>
+                    <span>خطط الباقات والاشتراكات</span>
+                </a>
+                <a href="profile.html" class="side-item">
+                    <i class="fas fa-user-cog"></i>
+                    <span>إعدادات الحساب والبروفايل</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e",
+            measurementId: "G-WTC5HE9BB1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // قراءة النطاق الجغرافي النشط
+        function loadActiveGeo() {
+            const savedState = localStorage.getItem('filteredState') || "جنوب دارفور";
+            const savedCity = localStorage.getItem('filteredCity') || "نيالا";
+            document.getElementById('currentGeoLabel').innerText = `${savedCity} - ${savedState}`;
+        }
+        loadActiveGeo();
+
+        // جلب التحديثات والشريط الإخباري
+        onSnapshot(collection(db, "ads"), (snapshot) => {
+            let text = "";
+            snapshot.forEach((doc) => { if(doc.data().type === "إعلان متحرك في الشريط") text = doc.data().text; });
+            document.getElementById('ticker-box').innerHTML = `<span>${text || "مرحباً بكم في تطبيق السوق الكبير 🇸🇩"}</span>`;
+        });
+
+        window.fastNavigate = function(url) { window.location.href = url; };
+
+        // التحكم بالقائمة الجانبية
+        const sidebar = document.getElementById('sidebarOverlay');
+        document.getElementById('openSidebarBtn').addEventListener('click', () => sidebar.classList.add('active'));
+        document.getElementById('closeSidebarBtn').addEventListener('click', () => sidebar.classList.remove('active'));
+        sidebar.addEventListener('click', (e) => { if(e.target === sidebar) sidebar.classList.remove('active'); });
+
+        // زر التفاعل مع الأقسام
+        document.querySelectorAll('.data-turbo').forEach(elem => {
+            elem.addEventListener('touchstart', function(e) {
+                this.classList.add('turbo-clicked');
+                let destination = this.getAttribute('href');
+                const savedState = localStorage.getItem('filteredState') || "جنوب دارفور";
+                const savedCity = localStorage.getItem('filteredCity') || "نيالا";
+                destination += `&state=${encodeURIComponent(savedState)}&city=${encodeURIComponent(savedCity)}`;
+                setTimeout(() => { window.location.href = destination; }, 40);
+                e.preventDefault();
+            }, {passive: false});
+        });
+    </script>
+</body>
+</html>

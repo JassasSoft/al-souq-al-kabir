@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>تفاصيل الإعلان - السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #0d0212;
+            --bg-card: #13041b;
+            --bg-input: #1a0826;
+            --primary-gold: #ffbd59;
+            --text-white: #ffffff;
+            --text-muted: #a59cb0;
+            --success-green: #2ecc71;
+            --accent-purple: #3a1550;
+            --royal-blue: #00c6ff;
+            --danger-red: #e74c3c;
+        }
+
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: var(--bg-main); 
+            color: var(--text-white); 
+            margin: 0; 
+            padding-bottom: 30px;
+            font-weight: 700; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .header-bar { 
+            background: var(--bg-card); padding: 16px; text-align: center; position: relative; border-bottom: 1px solid rgba(255, 189, 89, 0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .header-bar .back-btn { position: absolute; right: 20px; top: 22px; color: var(--primary-gold); font-size: 1.3rem; cursor: pointer; }
+        .header-bar h2 { font-size: 1.15rem; margin: 0; color: var(--text-white); font-weight: 900; }
+
+        .product-container { padding: 15px; }
+        
+        /* حالة الإعلان الذكية (مستمر / تم البيع) */
+        .ad-status-banner {
+            background: rgba(46, 204, 113, 0.15); border: 1px solid var(--success-green);
+            padding: 10px; border-radius: 12px; text-align: center; font-size: 0.9rem; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .ad-status-banner.sold-out {
+            background: rgba(231, 76, 60, 0.15); border: 1px solid var(--danger-red); color: var(--danger-red);
+        }
+
+        /* كارت الإعلان المطابق للتصميم الحالي */
+        .ad-preview-card { background: var(--bg-card); border-radius: 20px; overflow: hidden; border: 1px solid rgba(255, 189, 89, 0.1); margin-bottom: 15px; }
+        .ad-image { width: 100%; height: 220px; background: #222; object-fit: cover; display: block; }
+        .ad-details { padding: 20px; }
+        .ad-price { color: var(--primary-gold); font-size: 1.4rem; font-weight: 900; margin-bottom: 10px; }
+        .ad-title { font-size: 1.2rem; margin: 0 0 10px 0; font-weight: 900; }
+        .ad-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin: 0; }
+
+        /* كارت بيانات التاجر */
+        .trader-profile-card { background: var(--bg-card); border-radius: 18px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .trader-meta-left { display: flex; align-items: center; gap: 12px; }
+        .trader-avatar { width: 50px; height: 50px; background: var(--accent-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-gold); font-size: 1.4rem; border: 1px solid var(--primary-gold); }
+        .trader-info { }
+        .trader-name { font-size: 0.95rem; margin: 0; color: #fff; font-weight: 900; }
+        .trader-status { font-size: 0.75rem; color: var(--success-green); display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+        .merchant-badge-icon { width: 44px; height: 44px; background: rgba(255, 189, 89, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary-gold); font-size: 1.2rem; border: 1px solid rgba(255,189,89,0.2); }
+
+        /* توزيع الأزرار المطابق تماماً للصورة المعطاة */
+        .action-layout-stack { display: flex; flex-direction: column; gap: 12px; }
+        .btn-full-width { width: 100%; padding: 15px; border-radius: 14px; border: none; font-family: 'Cairo'; font-weight: 900; font-size: 1.05rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; color: #000; background: linear-gradient(135deg, var(--primary-gold), #e0a343); box-shadow: 0 4px 15px rgba(255,189,89,0.1); }
+        
+        .action-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-split { padding: 14px; border-radius: 12px; border: none; font-family: 'Cairo'; font-weight: 900; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; color: #fff; }
+        .btn-split.wp-style { background: #2ecc71; }
+        .btn-split.call-style { background: #00b0ff; }
+
+        /* الأزرار الرمادية في حالة تم البيع لقفل اللمس */
+        .btn-disabled { background: #333 !important; color: #777 !important; cursor: not-allowed !important; box-shadow: none !important; pointer-events: none; }
+
+        /* لوحة التحكم الخاصة بالتاجر صاحب الإعلان لإدارة الحالة */
+        .trader-control-panel { background: rgba(58, 21, 80, 0.4); border: 1px dashed var(--primary-gold); border-radius: 15px; padding: 12px; margin-bottom: 15px; text-align: center; }
+        .control-title { font-size: 0.8rem; color: var(--primary-gold); margin-bottom: 8px; display: block; }
+        .toggle-status-btn { background: var(--danger-red); color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-family: 'Cairo'; font-size: 0.8rem; font-weight: 900; cursor: pointer; }
+
+        /* واجهة مودال الاتصال الصوتي الداخلي (In-App Call Screen) */
+        .inapp-call-overlay { position: fixed; inset: 0; background: rgba(13, 2, 18, 0.98); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 20px; text-align: center; }
+        .call-trader-name { font-size: 1.5rem; font-weight: 900; margin: 0; color: #fff; }
+        .call-status-txt { font-size: 1rem; color: var(--primary-gold); margin: 10px 0 0 0; animation: pulseText 1.5s infinite; }
+        @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+        .call-avatar-glow { width: 130px; height: 130px; background: var(--bg-card); border: 2px solid var(--primary-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; color: var(--primary-gold); box-shadow: 0 0 30px rgba(255,189,89,0.3); margin: 40px auto; }
+        .call-actions-row { width: 100%; display: flex; justify-content: center; }
+        .btn-end-call { width: 65px; height: 65px; background: var(--danger-red); border: none; border-radius: 50%; color: #fff; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(231,76,60,0.4); }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <i class="fas fa-arrow-right back-btn" onclick="window.history.back()"></i>
+        <h2>تفاصيل الإعلان - السوق الكبير</h2>
+    </div>
+
+    <div class="product-container">
+        
+        <!-- لوحة تحكم تظهر فقط إذا كان المستخدم المسجل هو نفسه صاحب الإعلان لتبديل الحالة -->
+        <div class="trader-control-panel" id="traderControlPanel" style="display: none;">
+            <span class="control-title">⚙️ لوحة تحكم التجر المباشرة بعرضك:</span>
+            <button class="toggle-status-btn" id="toggleStatusBtn" onclick="toggleAdStatusOnServer()">تغيير الحالة إلى (تم البيع 🔴)</button>
+        </div>
+
+        <!-- شريط حالة الإعلان الذكي المحدث تلقائياً -->
+        <div class="ad-status-banner" id="adStatusBanner">
+            <i class="fas fa-check-circle"></i> <span id="adStatusText">العرض مستمر ومتاح للطلب فوراً</span>
+        </div>
+        
+        <!-- كارت معاينة الإعلان المتوافق مع الصورة تماماً -->
+        <div class="ad-preview-card">
+            <!-- الصورة تحمل نص افتراضي إذا لم تتوفر صورة السيرفر -->
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'><rect width='100%' height='100%' fill='%23222'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Cairo' font-size='24' fill='%23666'>صورة العرض الأصلية</text></svg>" id="adImage" class="ad-image" alt="صورة العرض">
+            <div class="ad-details">
+                <div class="ad-price" id="adPrice">350,000 ج.س</div>
+                <h3 class="ad-title" id="adTitle">منظومة إنترنت ستاندرد قمرية متكاملة</h3>
+                <p class="ad-desc" id="adDesc">عرض مميز شامل التركيب والبرمجة الفورية مع تفعيل باقة مجانية. المنظومة جاهزة للتسليم الفوري لشبكات التوزيع.</p>
+            </div>
+        </div>
+
+        <!-- كارت بيانات التاجر المتوافق مع التصميم تماماً -->
+        <div class="trader-profile-card">
+            <div class="trader-meta-left">
+                <div class="trader-avatar"><i class="fas fa-store"></i></div>
+                <div class="trader-info">
+                    <h4 class="trader-name" id="traderName">مجموعة الجساس الهندسية</h4>
+                    <div class="trader-status" id="traderOnlineStatus"><i class="fas fa-circle" style="font-size:0.5rem;"></i> متصل الآن ومستعد للرد</div>
+                </div>
+            </div>
+            <div class="merchant-badge-icon">
+                <i class="fas fa-store-alt"></i>
+            </div>
+        </div>
+
+        <!-- توزيع الأزرار المطابق تماماً للصورة المعطاة 1000112799.jpg -->
+        <div class="action-layout-stack">
+            <button class="btn-full-width" id="askTraderBtn" onclick="askAndGoToChat()">
+                <i class="fas fa-comments"></i> اسأل التاجر داخل التطبيق (شات مباشر)
+            </button>
+            
+            <div class="action-row-split">
+                <!-- تم تحويل أزرار الواتساب والاتصال لتعمل برمجياً داخل التطبيق بالكامل -->
+                <button class="btn-split wp-style" id="whatsappTraderBtn" onclick="askAndGoToChat()">
+                    <i class="fab fa-whatsapp"></i> واتساب التاجر
+                </button>
+                <button class="btn-split call-style" id="callTraderBtn" onclick="startInAppVoiceCall()">
+                    <i class="fas fa-phone-alt"></i> اتصال هاتفي
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- شاشة الاتصال الداخلي الرقمي المغلق (In-App Call Overlay) -->
+    <div class="inapp-call-overlay" id="inAppCallScreen">
+        <div>
+            <h3 class="call-trader-name" id="callTargetName">مجموعة الجساس الهندسية</h3>
+            <p class="call-status-txt" id="callStatusLabel">جاري الاتصال الصوتي الآمن عبر التطبيق...</p>
+        </div>
+        
+        <div class="call-avatar-glow">
+            <i class="fas fa-phone-volume"></i>
+        </div>
+        
+        <div class="call-actions-row">
+            <button class="btn-end-call" onclick="endInAppVoiceCall()"><i class="fas fa-phone-slash"></i></button>
+        </div>
+    </div>
+
+    <!-- كود الصوت الافتراضي للرنين الداخلي بدون ملفات خارجية -->
+    <audio id="ringtoneAudio" loop src="https://assets.mixkit.co/active_storage/sfx/1344/1344-84.wav"></audio>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            databaseURL: "https://alsouq-alkabeer-2052c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e",
+            measurementId: "G-WTC5HE9BB1"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const database = firebase.database();
+
+        // معرف المستخدم الحالي (المستفيد أو الزائر المتصفح)
+        let currentUserId = localStorage.getItem('user_device_id') || 'user_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('user_device_id', currentUserId);
+
+        // بيانات الإعلان الحالي المفتوح (مربوطة ديناميكياً)
+        let adId = "ad_554"; 
+        let adTitleText = "منظومة إنترنت ستاندرد قمرية متكاملة";
+        let targetTraderId = "trader_jassas"; // معرف التاجر صاحب الإعلان
+        let targetTraderName = "مجموعة الجساس الهندسية";
+
+        let currentAdStatus = "available"; // الحالة الافتراضية
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // 1. فحص إذا كان المتصفح الحالي هو صاحب الإعلان لفتح لوحة التحكم
+            if(currentUserId === targetTraderId) {
+                document.getElementById('traderControlPanel').style.display = 'block';
+            }
+
+            // 2. الاستماع لتغير حالة الإعلان الحية مباشرة من السيرفر (مستمر أو تم البيع)
+            database.ref(`ads_status/${adId}`).on('value', (snapshot) => {
+                if(snapshot.exists()) {
+                    currentAdStatus = snapshot.val().status;
+                    updateAdUIStatus(currentAdStatus);
+                } else {
+                    // تأسيس الحالة في السيرفر لأول مرة لو كانت غير موجودة
+                    database.ref(`ads_status/${adId}`).set({ status: "available" });
+                }
+            });
+        });
+
+        // تحديث الواجهة والتعامل مع الأزرار بناء على حالة العرض
+        function updateAdUIStatus(status) {
+            const banner = document.getElementById('adStatusBanner');
+            const statusTxt = document.getElementById('adStatusText');
+            const btnAsk = document.getElementById('askTraderBtn');
+            const btnWp = document.getElementById('whatsappTraderBtn');
+            const btnCall = document.getElementById('callTraderBtn');
+            const btnToggle = document.getElementById('toggleStatusBtn');
+
+            if (status === "sold") {
+                banner.className = "ad-status-banner sold-out";
+                statusTxt.innerText = "هذا العرض تم بيعه بالكامل وإغلاقه 🔴";
+                
+                // قفل وتعطيل الأزرار لمنع الإزعاج والمكالمات
+                btnAsk.classList.add('btn-disabled');
+                btnWp.classList.add('btn-disabled');
+                btnCall.classList.add('btn-disabled');
+                
+                if(btnToggle) {
+                    btnToggle.innerText = "إعادة فتح العرض (مستمر 🟢)";
+                    btnToggle.style.background = "var(--success-green)";
+                }
+            } else {
+                banner.className = "ad-status-banner";
+                statusTxt.innerText = "العرض مستمر ومتاح للطلب فوراً 🟢";
+                
+                // تفعيل الأزرار للعمل بشكل طبيعي
+                btnAsk.classList.remove('btn-disabled');
+                btnWp.classList.remove('btn-disabled');
+                btnCall.classList.remove('btn-disabled');
+                
+                if(btnToggle) {
+                    btnToggle.innerText = "تغيير الحالة إلى (تم البيع 🔴)";
+                    btnToggle.style.background = "var(--danger-red)";
+                }
+            }
+        }
+
+        // دالة التاجر لتبديل حالة الإعلان على السيرفر
+        function toggleAdStatusOnServer() {
+            let nextStatus = (currentAdStatus === "available") ? "sold" : "available";
+            database.ref(`ads_status/${adId}`).update({ status: nextStatus });
+        }
+
+        // إرسال السؤال آلياً والتوجيه الفوري لصفحة الشات الرئيسية للتاجر والمستفيد
+        function askAndGoToChat() {
+            if(currentAdStatus === "sold") return;
+
+            // توليد معرف مسار شات موحد ومشترك بين هذا المستفيد وهذا التاجر
+            const sharedChatId = `chat_${currentUserId}_${targetTraderId}`;
+            const targetChatRef = database.ref(`direct_chats/${sharedChatId}`);
+
+            // دفع الرسالة تلقائياً للسيرفر ليراها التاجر في قائمته
+            targetChatRef.push({
+                senderId: currentUserId,
+                senderName: "مستفيد السوق الكبير",
+                text: `مرحباً يا غالي، هل هذا العرض [ ${adTitleText} ] ما زال متاحاً ومستمر؟`,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                // التوجيه الفوري لصفحة الشات الموحدة في مشروعك وتمرير المعطيات عبر الرابط
+                location.href = `chat.html?chatId=${sharedChatId}&traderId=${targetTraderId}&adId=${adId}`;
+            }).catch(()=>{
+                // التوجيه حتى في حالة عدم توفر شبكة لضمان عمل الصفحة
+                location.href = `chat.html?chatId=${sharedChatId}&traderId=${targetTraderId}&adId=${adId}`;
+            });
+        }
+
+        // نظام الاتصال الصوتي الداخلي الرقمي (In-App Voice Call Logic)
+        function startInAppVoiceCall() {
+            if(currentAdStatus === "sold") return;
+
+            document.getElementById('callTargetName').innerText = targetTraderName;
+            document.getElementById('callStatusLabel').innerText = "جاري الاتصال الصوتي الآمن عبر السيرفر...";
+            document.getElementById('inAppCallScreen').style.display = 'flex';
+            
+            // تشغيل جرس الرنين الداخلي الذكي للمستخدم لتأكيد الاتصال داخل التطبيق
+            const ringtone = document.getElementById('ringtoneAudio');
+            ringtone.play().catch(()=>{});
+
+            // محاكاة تحول الاتصال الرقمي لـ "متصل" بعد ثانيتين برمجياً
+            setTimeout(() => {
+                if(document.getElementById('inAppCallScreen').style.display === 'flex') {
+                    document.getElementById('callStatusLabel').innerText = "🟢 متصل الآن (محادثة رقمية مشفرة)";
+                    ringtone.pause();
+                    ringtone.currentTime = 0;
+                }
+            }, 3000);
+        }
+
+        function endInAppVoiceCall() {
+            const ringtone = document.getElementById('ringtoneAudio');
+            ringtone.pause();
+            ringtone.currentTime = 0;
+            document.getElementById('inAppCallScreen').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
