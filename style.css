@@ -1,0 +1,229 @@
+/* ==========================================
+    المتغيرات الذكية المتجاوبة
+   ========================================== */
+
+:root {
+    /* المتغيرات الأساسية */
+    --grid-columns: 2; /* سيتم تعديلها تلقائياً */
+    --icon-size: 50px; /* سيتم تعديلها تلقائياً */
+    --card-padding: 14px 10px; /* سيتم تعديلها تلقائياً */
+    --font-size-base: 0.9rem; /* سيتم تعديلها تلقائياً */
+    --touch-target-size: 44px;
+    --container-padding: 15px;
+    --gap-size: 12px;
+    
+    /* الألوان */
+    --gold: #ffbd59;
+    --gold-dim: rgba(255, 189, 89, 0.15);
+    --bg: #0d0212;
+    --card: #161616;
+    --sidebar-bg: rgba(18, 5, 27, 0.95);
+}
+
+/* ==========================================
+   📱 Media Queries الذكية
+   ========================================== */
+
+/* الموبايل الصغير (أقل من 640px) */
+@media (max-width: 639px) {
+    :root {
+        --grid-columns: 2;
+        --icon-size: 45px;
+        --card-padding: 12px 8px;
+        --font-size-base: 0.85rem;
+    }
+    
+    .master-header img {
+        width: 90px;
+    }
+    
+    .grid-matrix {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 5px 10px 30px;
+    }
+    
+    .cat-label {
+        font-size: 0.65rem;
+    }
+}
+
+/* الموبايل الكبير (640px - 767px) */
+@media (min-width: 640px) and (max-width: 767px) {
+    :root {
+        --grid-columns: 3;
+        --icon-size: 50px;
+        --card-padding: 14px 10px;
+    }
+}
+
+/* التابلت (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    :root {
+        --grid-columns: 3;
+        --icon-size: 55px;
+        --card-padding: 16px 12px;
+        --font-size-base: 0.9rem;
+    }
+    
+    .grid-matrix {
+        gap: 15px;
+        padding: 10px 20px 30px;
+    }
+    
+    .master-header img {
+        width: 120px;
+    }
+}
+
+/* الديسكتوب الصغير (1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+    :root {
+        --grid-columns: 4;
+        --icon-size: 60px;
+        --card-padding: 18px 14px;
+    }
+    
+    .grid-matrix {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+    }
+}
+
+/* الديسكتوب الكبير (1280px فأكثر) */
+@media (min-width: 1280px) {
+    :root {
+        --grid-columns: 4;
+        --icon-size: 65px;
+        --card-padding: 20px 15px;
+        --font-size-base: 1rem;
+    }
+    
+    .grid-matrix {
+        max-width: 1400px;
+        margin: 0 auto;
+        gap: 20px;
+    }
+}
+
+/* ==========================================
+   🎯 كلاسات الأجهزة (تطبق تلقائياً)
+   */
+
+/* أجهزة اللمس (موبايل/تابلت) */
+.touch-device .cat-box {
+    min-height: var(--touch-target-size);
+    touch-action: manipulation;
+}
+
+.touch-device .header-btn,
+.touch-device .side-item {
+    min-height: var(--touch-target-size);
+}
+
+/* أجهزة الماوس (ديسكتوب) */
+.mouse-device .cat-box {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mouse-device .cat-box:hover {
+    transform: translateY(-5px);
+    border-color: var(--gold);
+    box-shadow: 0 8px 25px rgba(255, 189, 89, 0.2);
+}
+
+.mouse-device .side-item:hover {
+    background: rgba(255, 189, 89, 0.1);
+    border-color: var(--gold);
+    transform: translateX(-5px);
+}
+
+/* ==========================================
+   📐 تحسينات خاصة بكل جهاز
+   ========================================== */
+
+/* الآيفون */
+.device-iphone .master-header {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+/* الأندرويد */
+.device-android .ticker-container {
+    height: 38px; /* أعلى قليلاً للأندرويد */
+}
+
+/* التابلت */
+.device-tablet .premium-slider .p-card {
+    min-width: 45%; /* عرض أكبر للتابلت */
+    height: 180px;
+}
+
+/* الديسكتوب */
+.device-desktop .sidebar-panel {
+    width: 350px; /* أوسع للديسكتوب */
+}
+
+/* ==========================================
+   🌐 دعم الشاشات الأفقية (Landscape)
+   ========================================== */
+
+@media (orientation: landscape) and (max-height: 500px) {
+    .grid-matrix {
+        grid-template-columns: repeat(6, 1fr); /* 6 أعمدة في الوضع الأفقي */
+    }
+    
+    .cat-box {
+        padding: 10px 5px;
+    }
+    
+    .cat-icon-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .cat-label {
+        font-size: 0.6rem;
+    }
+}
+
+/* ==========================================
+   🖥️ شاشات Full HD و 4K
+   ========================================== */
+
+@media (min-width: 1920px) {
+    body {
+        font-size: 1.1rem;
+    }
+    
+    .grid-matrix {
+        max-width: 1600px;
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* ==========================================
+   📱 تحسينات الشاشات الصغيرة جداً
+   ========================================== */
+
+@media (max-width: 360px) {
+    .grid-matrix {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .cat-icon-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    
+    .cat-label {
+        font-size: 0.6rem;
+    }
+    
+    .master-header img {
+        width: 80px;
+    }
+}
