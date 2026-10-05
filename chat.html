@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>غرفة التحكم والدعم والمساعد الذكي - السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #0d0212;
+            --bg-card: #13041b;
+            --bg-input: #1a0826;
+            --primary-gold: #ffbd59;
+            --text-white: #ffffff;
+            --text-muted: #a59cb0;
+            --success-green: #2ecc71;
+            --accent-purple: #3a1550;
+            --danger-red: #e74c3c;
+            --silver: #c0c0c0;
+            --royal-blue: #00c6ff;
+        }
+
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: var(--bg-main); 
+            color: var(--text-white); 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            overflow: hidden; 
+            font-weight: 700; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .chat-header { 
+            background: var(--bg-card); padding: 16px; text-align: center; position: relative; border-bottom: 1px solid rgba(255, 189, 89, 0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10;
+        }
+        .chat-header .back-arrow { position: absolute; right: 20px; top: 22px; color: var(--primary-gold); font-size: 1.3rem; cursor: pointer; }
+        .chat-header h2 { font-size: 1.15rem; margin: 0; color: var(--text-white); font-weight: 900; }
+        
+        .navigation-tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 5px; gap: 4px; z-index: 9; }
+        .tab-item { flex: 1; text-align: center; padding: 10px 2px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .tab-item i { font-size: 1rem; }
+        .tab-item.active { background: var(--accent-purple); color: var(--primary-gold); font-weight: 900; border: 1px solid rgba(255, 189, 89, 0.15); }
+
+        .view-content-panel { flex: 1; display: none; overflow-y: auto; padding: 15px; padding-bottom: 140px; }
+        .view-content-panel.active-panel { display: flex; flex-direction: column; }
+
+        /* --- الدردشة الحية --- */
+        .chat-messages-area { gap: 14px; }
+        .bubble { max-width: 85%; padding: 12px 16px; border-radius: 20px; font-size: 0.9rem; line-height: 1.6; position: relative; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .bubble.incoming { background: var(--bg-card); align-self: flex-start; border-bottom-right-radius: 4px; color: var(--text-white); border: 1px solid rgba(255,189,89,0.08); }
+        .bubble.outgoing { background: linear-gradient(135deg, var(--primary-gold), #e0a343); color: #000; align-self: flex-end; border-bottom-left-radius: 4px; font-weight: 700; box-shadow: 0 4px 12px rgba(255,189,89,0.15); }
+        .bubble .time-stamp { display: block; font-size: 0.65rem; margin-top: 6px; text-align: left; opacity: 0.6; }
+        
+        .activation-code-style {
+            display: block;
+            background: #222;
+            color: var(--primary-gold);
+            padding: 12px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.25rem;
+            font-weight: 900;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px dashed var(--primary-gold);
+            cursor: pointer;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            transition: background 0.2s;
+        }
+        .activation-code-style:active { background: #333; }
+
+        .chat-input-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 15px 15px 25px 15px; background: linear-gradient(to top, var(--bg-main) 80%, transparent); display: flex; gap: 10px; align-items: center; z-index: 8; }
+        .input-container-wrapper { flex: 1; background: var(--bg-card); border: 1px solid rgba(255,189,89,0.15); border-radius: 25px; display: flex; align-items: center; padding: 2px 15px; height: 48px; }
+        .real-chat-input { flex: 1; background: transparent; border: none; padding: 10px 5px; color: #fff; outline: none; font-size: 0.95rem; font-family: 'Cairo'; }
+        .submit-send-btn { width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary-gold), #e0a343); border: none; border-radius: 50%; color: #000; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+
+        /* --- الاستمارات والقوائم --- */
+        .merchant-card-panel { background: var(--bg-card); border: 1px solid rgba(255, 189, 89, 0.1); border-radius: 18px; padding: 20px; margin-bottom: 15px; }
+        .merchant-card-panel h3 { margin-top: 0; color: var(--primary-gold); font-size: 1.1rem; display: flex; align-items: center; gap: 8px; font-weight: 900; }
+        .merchant-card-panel p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin: 5px 0 15px 0; }
+        
+        .form-group-custom { margin-bottom: 15px; }
+        .form-group-custom label { display: block; font-size: 0.85rem; margin-bottom: 8px; color: var(--text-white); }
+        .form-group-custom input[type="text"], .form-group-custom select { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-family: 'Cairo'; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+        
+        .file-upload-wrapper { border: 2px dashed rgba(255, 189, 89, 0.3); border-radius: 12px; padding: 20px; text-align: center; background: var(--bg-input); cursor: pointer; position: relative; }
+        .file-upload-wrapper i { font-size: 1.8rem; color: var(--primary-gold); margin-bottom: 8px; }
+        .file-upload-wrapper span { display: block; font-size: 0.8rem; color: var(--text-muted); }
+        .file-upload-wrapper input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+
+        .action-submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary-gold), #e0a343); border: none; border-radius: 12px; color: #000; font-family: 'Cairo'; font-weight: 900; font-size: 1rem; cursor: pointer; }
+
+        /* لوحة فحص الآدمن */
+        .receipt-item { background: var(--bg-input); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,189,89,0.15); }
+        .receipt-preview-img { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 8px; border: 1px dashed var(--primary-gold); display: block; cursor: pointer; }
+
+        .quick-support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .support-card-btn { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 18px 10px; text-align: center; color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .support-card-btn.wp-color i { color: var(--success-green); }
+        .support-card-btn.call-color i { color: var(--primary-gold); }
+
+        .system-notice-bubble { align-self: center; background: rgba(255, 189, 89, 0.06); border: 1px dashed rgba(255, 189, 89, 0.25); padding: 10px 16px; border-radius: 12px; font-size: 0.8rem; color: var(--primary-gold); text-align: center; max-width: 90%; margin: 5px 0; }
+        .badge-status { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 900; display: inline-block; margin-top: 5px; }
+        .badge-pending { background: #d35400; color: #fff; }
+        .badge-verified { background: var(--success-green); color: #000; }
+        .badge-fake { background: var(--danger-red); color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-header">
+        <i class="fas fa-arrow-right back-arrow" onclick="window.history.back()"></i>
+        <h2>مساعد الدعم والتحكم الذكي - السوق الكبير</h2>
+    </div>
+
+    <div class="navigation-tabs">
+        <div class="tab-item active" onclick="switchPanel('chatPanel', this)">
+            <i class="fas fa-comments"></i>
+            <span>الدردشة الحية</span>
+        </div>
+        <div class="tab-item" onclick="switchPanel('merchantPanel', this)">
+            <i class="fas fa-store-alt"></i>
+            <span>تفعيل كتاجر</span>
+        </div>
+        <div class="tab-item" onclick="switchPanel('supportPanel', this)">
+            <i class="fas fa-headset"></i>
+            <span>الدعم السريع</span>
+        </div>
+        <div class="tab-item" id="adminTabBtn" onclick="verifyAdminAccess(this)">
+            <i class="fas fa-user-shield"></i>
+            <span>فحص الآدمن</span>
+        </div>
+    </div>
+
+    <!-- 1. قسم الدردشة الحية مع المساعد الذكي -->
+    <div id="chatPanel" class="view-content-panel active-panel chat-messages-area"></div>
+
+    <!-- 2. قسم تفعيل اشتراك تاجر المطور بالكامل -->
+    <div id="merchantPanel" class="view-content-panel">
+        <div class="merchant-card-panel">
+            <h3><i class="fas fa-file-invoice-dollar"></i> استمارة التنشيط والتوثيق المزدوج</h3>
+            <p>سيقوم نظام المساعد الذكي بضغط ومعاينة مستند الدفع تلقائياً لسرعة مراجعة وحفظ البيانات الفورية.</p>
+            
+            <div class="form-group-custom">
+                <label>الباقة ونوع التوثيق المختار</label>
+                <select id="subscriptionType">
+                    <optgroup label="👤 حساب تاجر عادي">
+                        <option value="تاجر عادي (بدون توثيق) - أسبوع واحد">تاجر عادي (بدون توثيق) - أسبوع واحد [15,000 ج.س]</option>
+                        <option value="تاجر عادي (بدون توثيق) - أسبوعين">تاجر عادي (بدون توثيق) - أسبوعين [25,000 ج.س]</option>
+                        <option value="تاجر عادي (موثق) - أسبوع واحد">تاجر عادي (موثق 🟢) - أسبوع واحد [30,000 ج.س]</option>
+                        <option value="تاجر عادي (موثق) - أسبوعين">تاجر عادي (موثق 🟢) - أسبوعين [50,000 ج.س]</option>
+                    </optgroup>
+                    <optgroup label="🏪 حساب تاجر قطاعي (فضي)">
+                        <option value="تاجر قطاعي (بدون توثيق) - شهر واحد">تاجر قطاعي (بدون توثيق) - شهر واحد [60,000 ج.س]</option>
+                        <option value="تاجر قطاعي (بدون توثيق) - شهرين">تاجر قطاعي (بدون توثيق) - شهرين [110,000 ج.س]</option>
+                        <option value="تاجر قطاعي (موثق فضي) - شهر واحد">تاجر قطاعي (موثق فضي ⚪) - شهر واحد [75,000 ج.س]</option>
+                        <option value="تاجر قطاعي (موثق فضي) - شهرين">تاجر قطاعي (موثق فضي ⚪) - شهرين [130,000 ج.س]</option>
+                    </optgroup>
+                    <optgroup label="🏢 حساب جملة ومؤسسات (فئة متكاملة)">
+                        <option value="تاجر جملة (بدون توثيق) - شهر واحد">تاجر جملة (بدون توثيق) - شهر واحد [120,000 ج.س]</option>
+                        <option value="تاجر جملة (بدون توثيق) - شهرين">تاجر جملة (بدون توثيق) - شهرين [220,000 ج.س]</option>
+                        <option value="تاجر جملة (موثق فئة متكاملة) - شهر واحد">تاجر جملة (موثق فئة متكاملة 🔵) - شهر واحد [150,000 ج.س]</option>
+                        <option value="تاجر جملة (موثق فئة متكاملة) - شهرين">تاجر جملة (موثق فئة متكاملة 🔵) - شهرين [280,000 ج.س]</option>
+                    </optgroup>
+                    <optgroup label="🚀 إعلانات مستقلة">
+                        <option value="باقة إعلانات بريميوم ذكية مستقلة">إعلان بريميوم ذكي متصدر [50,000 ج.س]</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="form-group-custom">
+                <label>الاسم الكامل للتاجر</label>
+                <input type="text" id="merchantFullName" placeholder="أدخل اسمك الثلاثي لتوثيق الحساب">
+            </div>
+
+            <div class="form-group-custom">
+                <label>رقم هاتف الحساب المسجل بالتطبيق</label>
+                <input type="text" id="merchantPhoneNum" placeholder="مثال: 0912345678">
+            </div>
+
+            <div class="form-group-custom">
+                <label>رقم العملية البنكية المرجعي (المستند)</label>
+                <input type="text" id="transactionRefNumber" placeholder="أدخل رقم إشعار بنكك هنا...">
+            </div>
+            
+            <div class="form-group-custom">
+                <label>صورة إشعار التحويل</label>
+                <div class="file-upload-wrapper" onclick="document.getElementById('receiptFileInput').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span id="uploadStatusText">اضغط هنا لإرفاق صورة الإشعار الأصلية</span>
+                    <input type="file" id="receiptFileInput" accept="image/*" onchange="compressAndPrepareFile(this)">
+                </div>
+            </div>
+            
+            <button class="action-submit-btn" onclick="submitReceiptToFirebase()">
+                <i class="fas fa-check-circle"></i> إرسال البيانات للمسؤول والمساعد الذكي
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. قسم الدعم السريع -->
+    <div id="supportPanel" class="view-content-panel">
+        <div class="merchant-card-panel" style="text-align: center; padding: 25px 15px;">
+            <i class="fas fa-shield-alt" style="font-size: 2.5rem; color: var(--primary-gold); margin-bottom: 10px;"></i>
+            <h3>الاتصال والتحقق السريع المباشر</h3>
+            <p>لأي استفسارات تجارية طارئة، تواصل مع فريق إدارة السوق الكبير.</p>
+        </div>
+        <div class="quick-support-grid">
+            <div class="support-card-btn wp-color" onclick="openWhatsApp()">
+                <i class="fab fa-whatsapp"></i>
+                <span>واتساب الإدارة</span>
+            </div>
+            <div class="support-card-btn call-color" onclick="document.getElementById('callModal').style.display='flex'">
+                <i class="fas fa-phone-alt"></i>
+                <span>اتصال هاتفي مباشر</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. قسم فحص الآدمن -->
+    <div id="adminPanelApproval" class="view-content-panel">
+        <div style="border-bottom: 2px solid var(--primary-gold); padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 style="color: var(--primary-gold); margin:0;"><i class="fas fa-user-shield"></i> لوحة الفحص والتدقيق الفوري</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:4px 0 0 0;">هنا تظهر الإشعارات المضغوطة المرفوعة فوراً من التجار.</p>
+        </div>
+        <div id="adminReceiptsList">جاري تحميل طلبات الفحص الحالية...</div>
+    </div>
+
+    <!-- مودال الاتصال -->
+    <div id="callModal" style="display:none; position:fixed; inset:0; background:rgba(13, 2, 18, 0.95); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:var(--bg-card); padding:30px; border-radius:25px; text-align:center; border:1px solid var(--primary-gold); width:100%; max-width:300px;">
+            <i class="fas fa-phone-volume" style="font-size:3rem; color:var(--primary-gold); margin-bottom:15px;"></i>
+            <h3 style="color:#fff; margin:0; font-weight: 900;">الاتصال الهاتفي بالإدارة</h3>
+            <p style="color:var(--primary-gold); font-size:1.4rem; margin:15px 0; letter-spacing: 1px;">0923211001</p>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <a href="tel:0923211001" style="flex:1; background:linear-gradient(135deg, var(--primary-gold), #e0a343); padding:14px; border-radius:12px; color:#000; text-decoration:none; font-weight:900; font-size: 0.95rem; display: block; text-align: center;">اتصال</a>
+                <button onclick="document.getElementById('callModal').style.display='none'" style="flex:1; background:#251233; border:1px solid rgba(255,255,255,0.1); padding:14px; border-radius:12px; color:#fff; font-weight:900; font-size:0.95rem; cursor:pointer; font-family:'Cairo';">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- شريط الإدخال السفلي للدردشة -->
+    <div class="chat-input-bar" id="footerChatBar">
+        <div class="input-container-wrapper">
+            <input type="text" id="userInputMessage" class="real-chat-input" placeholder="اكتب رسالتك هنا للمساعد الذكي...">
+        </div>
+        <button class="submit-send-btn" onclick="processUserMessageSend()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            databaseURL: "https://alsouq-alkabeer-2052c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e",
+            measurementId: "G-WTC5HE9BB1"
+        };
+        
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const database = firebase.database();
+
+        let currentUserId = localStorage.getItem('user_device_id') || 'user_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('user_device_id', currentUserId);
+
+        const chatRef = database.ref('chats/' + currentUserId);
+        let messagesBox = document.getElementById('chatPanel');
+        let compressedImageBase64 = ""; 
+
+        chatRef.on('child_added', (snapshot) => {
+            const data = snapshot.val();
+            const direction = (data.senderId === currentUserId) ? 'out' : 'in';
+            createBubble(data.text, direction, data.timestamp, data.isSystemNotice);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const planName = localStorage.getItem('chosen_plan_name');
+            const planPrice = localStorage.getItem('chosen_plan_price');
+            
+            if (planName && planPrice) {
+                const selectElement = document.getElementById('subscriptionType');
+                for (let option of selectElement.options) {
+                    if (option.value.includes(planName) || planName.includes(option.value)) {
+                        option.selected = true;
+                        break;
+                    }
+                }
+                
+                setTimeout(() => {
+                    createBotBubble(`🤖 **المساعد الذكي لـ السوق الكبير:**\n\nمرحب بيك يا هندسة! أبشر، قريت بياناتك وشايفك حددت باقة **[${planName}]** بقيمة **${parseInt(planPrice).toLocaleString()} ج.س**.\n\nمن فضلك اتوجه لتبويب **"تفعيل كتاجر"** فوق عشان تلقى البيانات مجهزة ليك، وارفع صورة إشعار بنكك لتنشيط الحساب الفوري! ✨`);
+                }, 800);
+            } else {
+                setTimeout(() => {
+                    createBotBubble("🤖 **المساعد الذكي لـ السوق الكبير:**\n\nمرحب بيك يا غالي في مركز التحكم الموحد! أنا هنا عشان أساعدك في تفعيل اشتراكك التجاري، توثيق حسابك، أو الرد على استفساراتك الفنية فوراً. كيف أقدر أخدمك الليلة؟");
+                }, 500);
+            }
+        });
+
+        function verifyAdminAccess(tabElement) {
+            let pass = prompt("الرجاء إدخال كلمة سر الآدمن لفتح لوحة فحص الإشعارات:");
+            if (pass === "123") {
+                switchPanel('adminPanelApproval', tabElement);
+                loadSubscriptionsForAdmin(); 
+            } else {
+                alert("كلمة المرور خاطئة!");
+                switchPanel('chatPanel', document.querySelectorAll('.tab-item')[0]);
+            }
+        }
+
+        function switchPanel(panelId, tabElement) {
+            document.querySelectorAll('.view-content-panel').forEach(panel => panel.classList.remove('active-panel'));
+            document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(panelId).classList.add('active-panel');
+            if(tabElement) tabElement.classList.add('active');
+            
+            document.getElementById('footerChatBar').style.display = (panelId === 'chatPanel') ? 'flex' : 'none';
+        }
+
+        function copyActivationCode(codeText) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert("📋 تم نسخ كود التفعيل بنجاح! توجه لإعدادات التطبيق لتنشيط حسابك.");
+                }).catch(() => {
+                    fallbackCopyText(codeText);
+                });
+            } else {
+                fallbackCopyText(codeText);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed"; 
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert("📋 تم نسخ كود التفعيل بنجاح!");
+            } catch (err) {
+                alert("يرجى تحديد الكود ونسخه يدوياً.");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function createBubble(text, direction, timestamp, isNotice = false) {
+            let element = document.createElement('div');
+            if (isNotice) {
+                element.className = 'system-notice-bubble';
+                element.innerHTML = text;
+            } else {
+                element.className = `bubble ${direction === 'in' ? 'incoming' : 'outgoing'}`;
+                let timeString = "الآن";
+                if(timestamp) {
+                    let d = new Date(timestamp);
+                    timeString = d.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+                }
+                element.innerHTML = text + `<span class="time-stamp">${timeString}</span>`;
+            }
+            messagesBox.appendChild(element);
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        }
+
+        function createBotBubble(text) {
+            let element = document.createElement('div');
+            element.className = 'bubble incoming';
+            let d = new Date();
+            let timeString = d.toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'});
+            element.innerHTML = text + `<span class="time-stamp">${timeString}</span>`;
+            messagesBox.appendChild(element);
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        }
+
+        function processUserMessageSend() {
+            let inp = document.getElementById('userInputMessage');
+            let messageText = inp.value.trim();
+            if(messageText !== "") {
+                chatRef.push({ senderId: currentUserId, text: messageText, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                triggerSmartAssistant(messageText);
+                inp.value = "";
+            }
+        }
+
+        function triggerSmartAssistant(userText) {
+            let textLower = userText.toLowerCase();
+            let botReply = "";
+            
+            if (textLower.includes("سعر") || textLower.includes("بكم") || textLower.includes("اشتراك") || textLower.includes("باقة")) {
+                botReply = "🤖 **مساعد السوق الكبير:**\nأبشر يا فخم، عندنا فئات اشتراكات رئيسية مرنة:\n\n1️⃣ **باقات التاجر العادي:** تبدأ من 15,000 ج.س وتصل لـ 50,000 ج.س للموثق الأخضر 🟢.\n2️⃣ **باقات التاجر القطاعي:** تبدأ من 60,000 ج.س وتصل لـ 130,000 ج.س مع التوثيق الفضي ⚪.\n3️⃣ **باقات الجملة والمؤسسات:** تبدأ من 120,000 ج.س وتصل لـ 280,000 ج.س مع التوثيق فئة متكاملة 🔵.\n\nتقدر تختار باقتك وتملأ إشعار التحويل المالي من خانة **'تفعيل كتاجر'** في التبويبات بالأعلى!";
+            } else if (textLower.includes("توثيق") || textLower.includes("الشارة") || textLower.includes("العلامة")) {
+                botReply = "🤖 **مساعد السوق الكبير:**\nالتوثيق يمنح حسابك موثوقية كاملة للزبائن ويضاعف مبيعاتك! 🚀\n\n- الحساب العادي يأخذ توثيق أخضر 🟢\n- الحساب القطاعي يأخذ توثيق فضي ⚪\n- حساب الجملة يأخذ توثيق فئة متكاملة 🔵\n\nبمجرد دفع قيمة الباقة وتفعيلها عبر إرفاق الإشعار، هتنزل الشارة تلقائياً بجانب اسم متجرك.";
+            } else if (textLower.includes("تاخر") || textLower.includes("ما اتفعل") || textLower.includes("الادمن")) {
+                botReply = "🤖 **مساعد السوق الكبير:**\nولا تشيل هم يا هندسة! مراجعة الإشعارات بتتم بسرعة فائقة. إذا كنت رفعت المستند فعلاً، فالآدمن شغال يفحص فيه حالياً وهيصلك كود التفعيل هنا في الشات فوراً. لو مستعجل شديد تقدر تضغط على تبويب **'الدعم السريع'** وتتصل مباشرة بالإدارة!";
+            }
+            
+            if (botReply !== "") {
+                setTimeout(() => { 
+                    chatRef.push({ senderId: "admin_bot", text: botReply, timestamp: firebase.database.ServerValue.TIMESTAMP }); 
+                }, 1000);
+            }
+        }
+
+        function compressAndPrepareFile(input) {
+            if(input.files && input.files[0]) {
+                let file = input.files[0];
+                document.getElementById('uploadStatusText').innerText = "⏳ جاري ضغط ومعالجة الصورة لرفع سريع...";
+                
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let img = new Image();
+                    img.onload = function() {
+                        let canvas = document.createElement('canvas');
+                        let maxWidth = 700;
+                        let scale = maxWidth / img.width;
+                        canvas.width = maxWidth;
+                        canvas.height = img.height * scale;
+                        
+                        let ctx2d = canvas.getContext('2d');
+                        ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        compressedImageBase64 = canvas.toDataURL('image/jpeg', 0.4);
+                        
+                        document.getElementById('uploadStatusText').innerText = `📁 تم الضغط وجاهز للرفع الفوري!`;
+                        document.getElementById('uploadStatusText').style.color = 'var(--success-green)';
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function submitReceiptToFirebase() {
+            let type = document.getElementById('subscriptionType').value;
+            let fullName = document.getElementById('merchantFullName').value.trim();
+            let phone = document.getElementById('merchantPhoneNum').value.trim();
+            let refNum = document.getElementById('transactionRefNumber').value.trim();
+            let submitBtn = document.querySelector('.action-submit-btn');
+            
+            if(!fullName || !phone || !refNum) {
+                alert("الرجاء ملء جميع الخانات الأساسية للتفعيل!");
+                return;
+            }
+
+            const originalBtnHTML = submitBtn.innerHTML;
+            submitBtn.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)"; 
+            submitBtn.style.color = "#ffffff";
+            submitBtn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> طيران إلى السيرفر... 🚀";
+            submitBtn.disabled = true;
+
+            let botAssessment = "يبدو حقيقياً ومطابقاً";
+            let botRecommendation = "جاهز للتفعيل الفوري";
+            if (refNum.length < 5 || /^(.)\1+$/.test(refNum) || isNaN(refNum)) { 
+                botAssessment = "مشبوه جداً / رقم عملية غير منطقي ⚠️"; 
+                botRecommendation = "يرجى مراجعته يدوياً وبدقة صارمة وعدم توليد كود تلقائي";
+            }
+
+            const newSubRef = database.ref('subscriptions').push();
+
+            newSubRef.set({
+                subscriptionId: newSubRef.key,
+                merchantId: currentUserId,
+                merchantName: fullName,
+                merchantPhone: phone,
+                transactionRef: refNum,
+                subType: type,
+                receiptImg: compressedImageBase64, 
+                status: "pending",
+                botCheck: botAssessment,
+                botAdvice: botRecommendation,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                chatRef.push({
+                    senderId: "admin_bot",
+                    text: `🤖 **مساعد الفحص الذكي:**\n\nتم استلام ورفع تفاصيل إشعارك بنجاح:\n• **التاجر:** ${fullName}\n• **الباقة ونوع التوثيق:** ${type}\n• **رقم المرجع المرفق:** ${refNum}\n\n⚙️ جاري المطابقة النهائية من الإدارة لتوليد كود التفعيل والتوثيق الخاص بمتجرك وتثبيته!`,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                localStorage.removeItem('chosen_plan_name');
+                localStorage.removeItem('chosen_plan_price');
+
+                resetSubmitButton(submitBtn, originalBtnHTML);
+                switchPanel('chatPanel', document.querySelectorAll('.tab-item')[0]);
+                
+                document.getElementById('transactionRefNumber').value = "";
+                document.getElementById('merchantFullName').value = "";
+                document.getElementById('merchantPhoneNum').value = "";
+                document.getElementById('receiptFileInput').value = "";
+                document.getElementById('uploadStatusText').innerText = "اضغط هنا لإرفاق صورة الإشعار الأصلية";
+                compressedImageBase64 = "";
+            }).catch((error) => {
+                alert("حدث خطأ أثناء الرفع، يرجى التحقق من الشبكة وإعادة المحاولة.");
+                resetSubmitButton(submitBtn, originalBtnHTML);
+            });
+        }
+
+        function resetSubmitButton(btn, originalHTML) {
+            btn.style.background = "linear-gradient(135deg, var(--primary-gold), #e0a343)";
+            btn.style.color = "#000"; btn.innerHTML = originalHTML; btn.disabled = false;
+        }
+
+        function loadSubscriptionsForAdmin() {
+            const adminListContainer = document.getElementById('adminReceiptsList');
+            database.ref('subscriptions').on('value', (snapshot) => {
+                adminListContainer.innerHTML = "";
+                if (!snapshot.exists()) {
+                    adminListContainer.innerHTML = "<p style='font-size:0.85rem; color:var(--text-muted); text-align:center;'>لا توجد طلبات معلقة حالياً في السيرفر.</p>";
+                    return;
+                }
+                snapshot.forEach((childSnapshot) => {
+                    const sub = childSnapshot.val();
+                    let imgHtml = sub.receiptImg ? `<img src="${sub.receiptImg}" class="receipt-preview-img" title="اضغط لمشاهدة الحجم الكامل" onclick="window.open(this.src)">` : "<p style='color:var(--danger-red); font-size:0.8rem;'>⚠️ لا توجد صورة مرفقة!</p>";
+                    let badgeClass = (sub.botCheck.includes("مشبوه")) ? "badge-fake" : "badge-verified";
+
+                    adminListContainer.innerHTML += `
+                        <div class="receipt-item">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <strong style="color:var(--primary-gold); font-size:0.95rem;">👤 ${sub.merchantName}</strong>
+                                <span class="badge-status badge-pending">إشعار معلق</span>
+                            </div>
+                            <div style="font-size:0.85rem; margin-top:6px; color:#fff; line-height:1.5;">
+                                📞 الهاتف: ${sub.merchantPhone}<br>
+                                📦 الباقة المطلوبة: <span style="color:var(--primary-gold);">${sub.subType}</span><br>
+                                🔢 رقم المرجع: <span style="color:var(--success-green); font-weight:900;">${sub.transactionRef}</span>
+                            </div>
+                            
+                            <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:8px; margin-top:8px; border-left:3px solid var(--primary-gold);">
+                                <span style="font-size:0.75rem; color:var(--text-muted);">🤖 تقييم البوت الآلي للفحص:</span><br>
+                                <span class="badge-status ${badgeClass}">${sub.botCheck}</span><br>
+                                <span style="font-size:0.75rem; color:#fff;">💡 التوجيه: ${sub.botAdvice}</span>
+                            </div>
+
+                            ${imgHtml}
+                            
+                            <div style="margin-top:12px; display:flex; gap:8px;">
+                                <button onclick="approveSubscription('${sub.merchantId}', '${sub.subscriptionId}', '${sub.subType}')" style="flex:1; background:var(--success-green); color:#000; border:none; padding:8px; border-radius:6px; font-size:0.8rem; font-weight:900; cursor:pointer;">✅ حقيقي وتفعيل الآن</button>
+                                <button onclick="rejectSubscription('${sub.merchantId}', '${sub.subscriptionId}')" style="flex:1; background:var(--danger-red); color:#fff; border:none; padding:8px; border-radius:6px; font-size:0.8rem; font-weight:900; cursor:pointer;">❌ إشعار مضروب ومرفوض</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function approveSubscription(merchantId, subId, subType) {
+            const randomCode = "KBR-" + Math.floor(1000 + Math.random() * 9000) + "-ACT";
+
+            database.ref('subscriptions/' + subId).remove(); 
+            database.ref('chats/' + merchantId).push({
+                senderId: 'admin',
+                text: `🎉 **تهانينا! قام المسؤول بتأكيد إشعار الدفع الخاص بك بنجاح.**\n\n📦 **نوع الباقة المنشطة:** ${subType}\n🔑 **كود تفعيل حسابك كتاجر هو (اضغط للنسخ الفوري):**\n<div class="activation-code-style" onclick="copyActivationCode('${randomCode}')">${randomCode}</div>\n\nقم بالضغط على الكود لنسخه ثم تفعيله في إعدادات التطبيق لفتح ميزات البيع والشارة الموثقة الفورية في **السوق الكبير**!`,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            alert("تم التفعيل وتوليد كود التفعيل وإرساله تلقائياً للتاجر: " + randomCode);
+        }
+
+        function rejectSubscription(merchantId, subId) {
+            database.ref('subscriptions/' + subId).remove();
+            database.ref('chats/' + merchantId).push({
+                senderId: 'admin',
+                text: `❌ **تنبيه من إدارة السوق الكبير:**\nنأسف، بعد فحص رقم العملية البنكية المرفق تبين أنه غير صحيح أو لم يصل لحساباتنا الحالية. يرجى إعادة التأكد وإرسال إشعار صحيح وصورة واضحة لطلب التنشيط.`,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+            alert("تم رفض الطلب وإرسال التنبيه للتاجر.");
+        }
+
+        function openWhatsApp() { window.open('https://wa.me/249923211001', '_blank'); }
+    </script>
+</body>
+</html>

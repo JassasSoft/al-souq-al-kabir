@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الحواسيب والطابعات - السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --gold: #fcc963; 
+            --gold-glow: rgba(252, 201, 99, 0.6);
+            --dark: #000; 
+            --card: #121212; 
+            --gray: #1a1a1a; 
+            --btn-green: #25d366;
+            --btn-green-hover: #20ba5a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--dark); color: #fff; height: 100vh; overflow: hidden; padding-bottom: 75px; }
+
+        /* الهيدر المتوافق الفخم */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 0 15px; height: 75px; background: #050505; border-bottom: 2px solid var(--gold); position: fixed; top: 0; width: 100%; z-index: 5000; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+        .header i { color: var(--gold); font-size: 1.5rem; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; }
+        .header span { font-weight: 900; color: var(--gold); font-size: 1.15rem; flex: 1; text-align: center; margin-right: -10px; }
+        .header a { text-decoration: none; display: flex; align-items: center; }
+
+        /* القائمة الجانبية (Sidebar) المتكاملة */
+        .sidebar { position: fixed; top: 0; left: -295px; width: 295px; height: 100%; background: #080808; z-index: 9000; transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1); border-right: 2px solid var(--gold); box-shadow: 10px 0 30px rgba(0,0,0,0.9); display: flex; flex-direction: column; }
+        .sidebar.active { left: 0; }
+        .sidebar-header { background: var(--gold); color: #000; padding: 20px 15px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header h2 { font-size: 1.15rem; font-weight: 900; }
+        .sidebar-close { font-size: 1.3rem; cursor: pointer; color: #000; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+
+        /* بروفايل المستخدم بالسايدبار */
+        .sidebar-user-section { padding: 18px 15px; background: #111; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 12px; }
+        .sidebar-avatar-container { position: relative; }
+        .sidebar-user-avatar { width: 48px; height: 48px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-size: 1.3rem; border: 1px solid var(--gold); }
+        .status-dot { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: #25d366; border-radius: 50%; border: 2px solid #111; }
+        .sidebar-user-info h3 { font-size: 0.95rem; font-weight: 700; color: #fff; }
+        .sidebar-user-info span { font-size: 0.7rem; color: var(--gold); background: rgba(252,201,99,0.1); padding: 1px 8px; border-radius: 12px; font-weight: 700; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 8500; display: none; backdrop-filter: blur(3px); }
+        main { margin-top: 75px; height: calc(100vh - 75px); overflow-y: auto; padding-bottom: 110px; scroll-behavior: smooth; }
+
+        /* شريط الخانات العلوي السريع */
+        .tabs-container { display: flex; overflow-x: auto; padding: 12px; gap: 10px; background: #050505; border-bottom: 1px solid #1a1a1a; scrollbar-width: none; }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn { color: #fff; border: 1px solid rgba(255,255,255,0.08); padding: 9px 20px; border-radius: 14px; cursor: pointer; white-space: nowrap; font-size: 0.9rem; font-weight: 900; transition: 0.25s; opacity: 0.8; }
+        
+        /* تلوين التصنيفات المحددة */
+        .tab-btn[data-cat="الكل"] { background: #333; }
+        .tab-btn[data-cat="لابتوبات"] { background: #b71c1c; }
+        .tab-btn[data-cat="كمبيوتر"] { background: #0d47a1; }
+        .tab-btn[data-cat="طباعه"] { background: #00796b; }
+        .tab-btn[data-cat="احبار + ورق"] { background: #e65100; }
+        .tab-btn[data-cat="ملحقات"] { background: #7b1fa2; }
+        .tab-btn.active { background: var(--gold) !important; color: #000 !important; border-color: var(--gold); opacity: 1; transform: scale(1.02); box-shadow: 0 4px 12px var(--gold-glow); }
+
+        /* روابط وتصنيفات السايدبار الديناميكية */
+        .sidebar-menu-title { font-size: 0.75rem; color: #666; padding: 15px 15px 8px; font-weight: 900; letter-spacing: 0.5px; }
+        .sidebar-link { color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; text-decoration: none; background: #121212; border-radius: 12px; margin: 0 12px 6px; font-weight: 700; font-size: 0.85rem; border: 1px solid #1c1c1c; transition: 0.2s; cursor: pointer; }
+        .sidebar-link i.main-ico { margin-left: 10px; width: 20px; text-align: center; }
+        .sidebar-link .badge { font-size: 0.65rem; background: rgba(252,201,99,0.12); color: var(--gold); padding: 2px 8px; border-radius: 8px; }
+        .sidebar-link.active-link { background: linear-gradient(90deg, rgba(252,201,99,0.12), transparent); border-left: 3px solid var(--gold); color: var(--gold); }
+        .sidebar-return-btn { background: #111; border: 1px solid #222; color: #aaa; padding: 12px; border-radius: 12px; text-align: center; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin: auto 12px 15px; }
+
+        /* 👑 نظام عرض البريميوم الذكي الموزون والمضغوط - طبقاً للصورة المتناسقة */
+        .premium-slider { 
+            margin: 15px; 
+            min-height: 140px; 
+            border: 2px solid var(--gold); 
+            border-radius: 20px; 
+            background: linear-gradient(145deg, #0f0f0f, #181818); 
+            position: relative; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            padding: 15px; 
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9), 0 8px 25px rgba(252, 201, 99, 0.15);
+        }
+        .p-top-flex { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; margin-bottom: 5px; }
+        .p-label { background: var(--gold); color: #000; font-size: 0.65rem; font-weight: 900; padding: 3px 9px; border-radius: 6px; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(252,201,99,0.4); }
+        .p-title { color: #fff; font-weight: 900; font-size: 1.05rem; line-height: 1.4; margin-bottom: 6px; padding-left: 5px; }
+        
+        /* تجميعة السعر والزر في سطر مرن متناسق لا يطّ الكرت */
+        .p-bottom-flex { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 4px; }
+        .p-price { 
+            font-size: 1.35rem; 
+            font-weight: 900; 
+            color: var(--gold); 
+            text-shadow: 0 0 10px rgba(252, 201, 99, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .p-price span.currency { font-size: 0.8rem; color: #fff; font-weight: 400; background: #222; padding: 2px 6px; border-radius: 6px; }
+        .p-merchant { font-size: 0.7rem; color: #aaa; display: flex; align-items: center; gap: 4px; }
+        .p-merchant i { color: var(--gold); font-size: 0.75rem; }
+        
+        /* زر اتصال صغير الحجم ومدمج وموضوع بذكاء جانبي */
+        .p-order-btn { background: var(--btn-green); color: #000; border: none; padding: 6px 12px; border-radius: 10px; font-weight: 900; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); transition: 0.2s; }
+        .p-order-btn:hover { background: var(--btn-green-hover); }
+
+        .p-bar { position: absolute; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--gold)); width: 0%; transition: width 3.9s linear; box-shadow: 0 0 8px var(--gold); }
+
+        /* شبكة العروض المرتبة (Grid) */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 12px 30px 12px; }
+        .card { background: var(--card); border-radius: 18px; border: 1px solid #1f1f1f; padding: 12px; position: relative; text-align: center; display: flex; flex-direction: column; justify-content: space-between; min-height: 240px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        .card-tag { background: rgba(255,255,255,0.05); color: var(--gold); font-size: 0.6rem; padding: 3px 8px; border-radius: 6px; position: absolute; top: 10px; right: 10px; font-weight: 700; border: 1px solid rgba(252,201,99,0.2); }
+        .card-icon { font-size: 2rem; color: var(--gold); margin: 20px 0 10px; opacity: 0.9; }
+        .card h4 { font-weight: 700; font-size: 0.85rem; line-height: 1.3; color: #fff; margin-bottom: 4px; }
+        .card .merchant-name { font-size: 0.7rem; color: #777; margin-bottom: 8px; }
+        .price-tag { display: block; color: var(--gold); font-weight: 900; font-size: 0.9rem; background: #000; border-radius: 10px; padding: 6px; border: 1px solid #1c1c1c; text-shadow: 0 0 5px rgba(252,201,99,0.2); margin-bottom: 8px; }
+
+        /* زر اطلب الآن عبر الواتساب المتناسق داخل الكروت */
+        .order-btn { background: var(--btn-green); color: #000; border: none; padding: 8px 10px; border-radius: 12px; font-weight: 900; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; transition: 0.2s; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2); }
+        .order-btn:hover { background: var(--btn-green-hover); }
+
+        /* 🤖 ضبط موضع المساعد الذكي ليكون مرتفعاً بشكل احترافي ولا يغطي الأزرار السفلية */
+        .bot-trigger { 
+            position: fixed; 
+            bottom: 95px; 
+            left: 15px; 
+            width: 56px; 
+            height: 56px; 
+            background: #000; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 8000; 
+            cursor: pointer; 
+            border: 1px solid rgba(252,201,99,0.4); 
+            box-shadow: 0 4px 15px rgba(252,201,99,0.5); 
+        }
+        .bot-avatar-circle { width: 44px; height: 44px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-size: 1.4rem; }
+
+        /* نافذة المحادثة الذكية */
+        .chat-win { position: fixed; bottom: 160px; left: 15px; width: 290px; height: 350px; background: #0a0a0a; border: 2px solid var(--gold); border-radius: 18px; display: none; flex-direction: column; z-index: 8001; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .chat-header { background: var(--gold); color: #000; padding: 12px; font-weight: 900; display: flex; justify-content: space-between; font-size: 0.85rem; align-items: center; }
+        .chat-body { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: #050505; }
+        .msg { padding: 8px 12px; border-radius: 12px; font-size: 0.8rem; line-height: 1.4; max-width: 85%; }
+        .msg.bot { background: #161616; border-right: 3px solid var(--gold); align-self: flex-start; color: #fff; }
+        .msg.user { background: var(--gold); color: #000; align-self: flex-end; font-weight: 900; }
+        .chat-footer { padding: 8px; background: #0a0a0a; display: flex; gap: 6px; border-top: 1px solid #1c1c1c; }
+        .chat-footer input { flex: 1; background: #111; border: 1px solid #222; color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; outline: none; }
+
+        /* شريط الأزرار السفلي الموحد والثابت */
+        .fixed-bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; border-top: 1px solid #1c1c1c; display: flex; justify-content: space-around; align-items: center; z-index: 9999; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #777; font-size: 0.7rem; cursor: pointer; width: 55px; transition: 0.2s; text-decoration: none; font-weight: 700; }
+        .nav-item i { font-size: 1.2rem; color: #444; transition: 0.2s; }
+        .nav-item.active-nav, .nav-item:hover { color: #fff; }
+        .nav-item.active-nav i, .nav-item:hover i { color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>السوق الكبير</h2>
+            <div class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></div>
+        </div>
+        
+        <div class="sidebar-user-section">
+            <div class="sidebar-avatar-container">
+                <div class="sidebar-user-avatar"><i class="fas fa-user-tie"></i></div>
+                <div class="status-dot"></div>
+            </div>
+            <div class="sidebar-user-info">
+                <h3>المطور محمد حبيب</h3>
+                <span>تاجر معتمد • نيالا</span>
+            </div>
+        </div>
+        
+        <div class="sidebar-menu-title">كل خانات التصفح المتوفرة</div>
+        <div class="sidebar-scroll" id="sidebarMenuContainer" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; padding-bottom: 20px;"></div>
+
+        <div class="sidebar-return-btn" onclick="toggleSidebar()">
+            <i class="fas fa-chevron-right" style="margin-left:5px;"></i> إغلاق القائمة
+        </div>
+    </div>
+
+    <div class="header">
+        <a href="index.html"><i class="fas fa-arrow-right"></i></a>
+        <span>الحواسيب والطابعات</span>
+        <i class="fas fa-bars" onclick="toggleSidebar()"></i>
+    </div>
+
+    <main>
+        <div class="tabs-container" id="tabsContainer">
+            <button class="tab-btn active" data-cat="الكل" data-color="#333" data-icon="fa-desktop" onclick="filter('الكل', this)">الكل</button>
+            <button class="tab-btn" data-cat="لابتوبات" data-color="#b71c1c" data-icon="fa-laptop" onclick="filter('لابتوبات', this)">لابتوبات</button>
+            <button class="tab-btn" data-cat="كمبيوتر" data-color="#0d47a1" data-icon="fa-tv" onclick="filter('كمبيوتر', this)">كمبيوتر</button>
+            <button class="tab-btn" data-cat="طباعه" data-color="#00796b" data-icon="fa-print" onclick="filter('طباعه', this)">طباعه</button>
+            <button class="tab-btn" data-cat="احبار + ورق" data-color="#e65100" data-icon="fa-scroll" onclick="filter('احبار + ورق', this)">احبار + ورق</button>
+            <button class="tab-btn" data-cat="ملحقات" data-color="#7b1fa2" data-icon="fa-mouse" onclick="filter('ملحقات', this)">ملحقات</button>
+        </div>
+
+        <div class="premium-slider" id="slider"></div>
+
+        <div class="grid" id="grid"></div>
+    </main>
+
+    <div class="bot-trigger" onclick="toggleChat()">
+        <div class="bot-avatar-circle"><i class="fas fa-user-tie"></i></div>
+    </div>
+
+    <div class="chat-win" id="chatWin">
+        <div class="chat-header"><span>🤵 مستشار السوق الكبير</span><i class="fas fa-times" onclick="toggleChat()" style="cursor:pointer;"></i></div>
+        <div id="chatBody" class="chat-body">
+            <div class="msg bot">مرحباً بك في قسم الحواسيب والطابعات بـ السوق الكبير! كيف يمكنني مساعدتك اليوم يا هندسة؟</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="userMsg" placeholder="اكتب استفسارك هنا...">
+            <button onclick="handleSend()" style="background:var(--gold); border:none; width:38px; border-radius:10px; cursor:pointer; color:#000; display:flex; align-items:center; justify-content:center;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div class="fixed-bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-home"></i><span>الرئيسية</span>
+        </a>
+        <div class="nav-item active-nav">
+            <i class="fas fa-th-large"></i><span>الأقسام</span>
+        </div>
+        <div class="nav-item" onclick="toggleChat()">
+            <i class="fas fa-search-plus"></i><span>بحث ذكي</span>
+        </div>
+        <div class="nav-item" onclick="location.reload();" style="color: var(--gold);">
+            <i class="fas fa-sync-alt" style="color: var(--gold);"></i><span>تحديث</span>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { n: "Dell Latitude 5490 Core i5", p: "480,000", c: "لابتوبات", m: "مركز النيلين للحواسيب", l: "حي المطار", i: "fa-laptop", phone: "249912345678" },
+            { n: "HP ProBook 450 G7", p: "550,000", c: "لابتوبات", m: "جاساس تكنولوجي", l: "سوق نيالا", i: "fa-laptop", phone: "249912345678" },
+            { n: "Desktop Core i5 كاملة بالشاشة", p: "390,000", c: "كمبيوتر", m: "المهندس للتقنية", l: "حي الجبل", i: "fa-tv", phone: "249912345678" },
+            { n: "Epson L3250 WiFi طابعة تانك", p: "320,000", c: "طباعه", m: "مكتبة ومستلزمات نيالا", l: "النهضة", i: "fa-print", phone: "249912345678" },
+            { n: "عبوات حبر إبسون أصلي 103 طقم", p: "45,000", c: "احبار + ورق", m: "مكتبة نيالا الحديثة", l: "سوق نيالا", i: "fa-scroll", phone: "249912345678" },
+            { n: "ماوس لاسلكي مريح وموفر للطاقة", p: "15,000", c: "ملحقات", m: "جاساس تكنولوجي", l: "سوق نيالا", i: "fa-mouse", phone: "249912345678" }
+        ];
+
+        const premiumAds = [
+            { n: "لابتوب Lenovo ThinkPad مواصفات خارقة مهندسين", p: "680,000", c: "لابتوبات", m: "شركة تكنو برو الذكية", l: "نيالا وسط", phone: "249912345678" },
+            { n: "شاشات عرض ذكية بدقة عالية 50 بوصة 4K", p: "320,000", c: "كمبيوتر", m: "معرض الشاشات الحديثة", l: "حي السينما", phone: "249912345678" },
+            { n: "طابعة تانك ذكية إبسون حبر اقتصادي لوري", p: "310,000", c: "طباعه", m: "وكالة النيل الأزرق", l: "السكة حديد", phone: "249912345678" },
+            { n: "ورق طباعة Double A كرتونة كاملة فخر", p: "38,000", c: "احبار + ورق", m: "مكتبة جاساس", l: "موقف الجنينة", phone: "249912345678" },
+            { n: "حقائب ظهر لابتوب مقاومة للماء مع شاحن", p: "25,000", c: "ملحقات", m: "مخازن جاساس برو", l: "موقف الجنينة", phone: "249912345678" }
+        ];
+
+        let currentCategory = 'الكل';
+        let adIndex = 0;
+        let adInterval;
+
+        function toggleSidebar() { 
+            const side = document.getElementById('sidebar');
+            side.classList.toggle('active');
+            document.getElementById('overlay').style.display = side.classList.contains('active') ? 'block' : 'none';
+        }
+        
+        function toggleChat() { 
+            const w = document.getElementById('chatWin'); 
+            w.style.display = (w.style.display === 'flex') ? 'none' : 'flex'; 
+        }
+
+        function sendWhatsApp(productName, phone) {
+            const text = encodeURIComponent(`مرحباً، أريد الاستفسار عن شراء المنتج: (${productName}) المعروض في تطبيق السوق الكبير.`);
+            window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
+        }
+
+        function buildSidebarMenu() {
+            const container = document.getElementById('sidebarMenuContainer');
+            const tabs = document.querySelectorAll('.tab-btn');
+            
+            container.innerHTML = Array.from(tabs).map(btn => {
+                const cat = btn.getAttribute('data-cat');
+                const icon = btn.getAttribute('data-icon');
+                const color = btn.getAttribute('data-color') || '#fff';
+                const isActive = cat === currentCategory ? 'active-link' : '';
+                
+                return `
+                    <div class="sidebar-link ${isActive}" data-menu-cat="${cat}" onclick="sidebarFilter('${cat}')">
+                        <div><i class="fas ${icon} main-ico" style="color: ${color};"></i> <span>${cat}</span></div>
+                        <span class="badge">متوفر</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function sidebarFilter(cat) {
+            const targetBtn = document.querySelector(`.tab-btn[data-cat="${cat}"]`);
+            if(targetBtn) {
+                filter(cat, targetBtn);
+            }
+            toggleSidebar();
+        }
+
+        function renderProducts(cat = 'الكل') {
+            const grid = document.getElementById('grid');
+            const filtered = cat === 'الكل' ? products : products.filter(p => p.c === cat);
+            
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column: span 2; text-align:center; padding:40px; color:#555; font-weight:700;">لا توجد عروض حالياً في هذا القسم.</div>`;
+            } else {
+                grid.innerHTML = filtered.map(p => `
+                    <div class="card">
+                        <span class="card-tag">${p.l}</span>
+                        <div class="card-icon"><i class="fas ${p.i}"></i></div>
+                        <h4>${p.n}</h4>
+                        <p class="merchant-name">${p.m}</p>
+                        <div>
+                            <span class="price-tag">SDG ${p.p}</span>
+                            <button class="order-btn" onclick="sendWhatsApp('${p.n}', '${p.phone}')">
+                                <i class="fab fa-whatsapp"></i> اطلب الآن
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // إخراج العرض الموزون والمطابق تماماً للصورة بدون تكبير الارتفاع
+        function renderPremium() {
+            const s = document.getElementById('slider');
+            const filteredAds = currentCategory === 'الكل' ? premiumAds : premiumAds.filter(ad => ad.c === currentCategory);
+            
+            if (filteredAds.length === 0) {
+                s.innerHTML = `
+                    <div class="p-top-flex">
+                        <div class="p-label">👑 عـرض مـمـيز</div>
+                    </div>
+                    <div class="p-title">مساحة إعلانية شاغرة بقسم ${currentCategory}</div>
+                    <div class="p-bottom-flex">
+                        <div class="p-price">أعلن هنا الآن</div>
+                        <div class="p-merchant"><i class="fas fa-info-circle"></i> تواصل للحجز</div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (adIndex >= filteredAds.length) adIndex = 0;
+            const ad = filteredAds[adIndex];
+
+            s.innerHTML = `
+                <div class="p-top-flex">
+                    <div class="p-title">${ad.n}</div>
+                    <div class="p-label">✨ عرض بريمو ذكي (${ad.c})</div>
+                </div>
+                <div class="p-bottom-flex">
+                    <div>
+                        <div class="p-price">${ad.p} <span class="currency">ج.س</span></div>
+                        <div class="p-merchant"><i class="fas fa-store"></i> ${ad.m} | <i class="fas fa-map-marker-alt"></i> ${ad.l}</div>
+                    </div>
+                    <button class="p-order-btn" onclick="sendWhatsApp('${ad.n}', '${ad.phone}')">
+                        <i class="fab fa-whatsapp"></i> تواصل مع المعلن
+                    </button>
+                </div>
+                <div class="p-bar" id="pBar"></div>
+            `;
+
+            setTimeout(() => { if(document.getElementById('pBar')) document.getElementById('pBar').style.width = "100%"; }, 50);
+            adIndex++;
+        }
+
+        function startPremiumEngine() {
+            clearInterval(adInterval);
+            adIndex = 0;
+            renderPremium();
+            adInterval = setInterval(renderPremium, 4000);
+        }
+
+        function filter(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProducts(cat);
+            startPremiumEngine();
+            buildSidebarMenu();
+            
+            setTimeout(() => {
+                btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }, 50);
+        }
+
+        function handleSend() {
+            const input = document.getElementById('userMsg');
+            const body = document.getElementById('chatBody');
+            if (!input.value.trim()) return;
+            
+            body.innerHTML += `<div class="msg user">${input.value}</div>`;
+            const val = input.value;
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+            
+            setTimeout(() => {
+                body.innerHTML += `<div class="msg bot">أبشر يا هندسة محمد، جاري البحث والتحليل في قاعدة بيانات السوق الكبير عن (${val}). ستظهر العروض المتطابقة فوراً في اللوحة الذكية.</div>`;
+                body.scrollTop = body.scrollHeight;
+            }, 800);
+        }
+
+        window.onload = () => {
+            startPremiumEngine();
+            renderProducts();
+            buildSidebarMenu();
+            document.getElementById('userMsg').addEventListener("keypress", (e) => { if(e.key === "Enter") handleSend(); });
+        };
+    </script>
+</body>
+</html>

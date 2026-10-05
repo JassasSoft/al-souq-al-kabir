@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>السوق الكبير - الهواتف والملحقات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --gold: #ffbd59; --dark: #000; --card-bg: #161616; --glow: rgba(255, 189, 89, 0.15); --green: #2ecc71; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--dark); color: #fff; font-family: 'Cairo', sans-serif; overflow-x: hidden; padding-bottom: 30px; }
+
+        /* الهيدر الموحد الفخم */
+        .section-master-header { width: 100%; background: #000; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--gold); position: fixed; top: 0; left: 0; z-index: 10000; height: 60px; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+        .header-right, .header-left { display: flex; align-items: center; gap: 5px; }
+        .page-title { font-weight: 900; font-size: 1.1rem; color: #fff; margin-right: 5px; }
+        .geo-badge { font-size: 0.7rem; background: rgba(255, 189, 89, 0.1); border: 1px solid rgba(255, 189, 89, 0.3); padding: 3px 8px; border-radius: 20px; color: var(--gold); font-weight: bold; }
+        
+        .nav-icon-btn { background: none; border: none; color: var(--gold); font-size: 1.3rem; cursor: pointer; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.1s ease; }
+        .nav-icon-btn:active { transform: scale(0.85); background: rgba(255, 189, 89, 0.1); }
+
+        /* القائمة الجانبية الموحدة والمحدثة بالتمرير الذكي */
+        .sidebar-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 100000; transition: right 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .sidebar-overlay.active { right: 0; }
+        .sidebar-iframe { 
+            width: 280px; 
+            height: 100%; 
+            background: #080808; 
+            border: none; 
+            border-left: 2px solid var(--gold); 
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5); 
+            float: right;
+            overflow-y: auto; /* تفعيل التمرير العمودي من أسفل لأعلى */
+            -webkit-overflow-scrolling: touch;
+        }
+        .sidebar-iframe::-webkit-scrollbar { display: none; } /* إخفاء شريط التمرير للحفاظ على فخامة المظهر */
+
+        /* حاوية التبويبات المطور */
+        .tabs-container { margin-top: 60px; display: flex; overflow-x: auto; padding: 15px; gap: 10px; scrollbar-width: none; background: #050505; border-bottom: 1px solid #111; }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        
+        .tab-btn { padding: 10px 20px; border-radius: 12px; cursor: pointer; white-space: nowrap; font-weight: 900; border: none; color: #fff; transition: 0.3s; }
+        .tab-btn[data-cat="الكل"] { background: #222; border: 1px solid #333; }
+        .tab-btn[data-cat="سامسونج"] { background: #0d47a1; }
+        .tab-btn[data-cat="آيفون"] { background: #37474f; }
+        .tab-btn[data-cat="شاومي"] { background: #ff6900; } /* لون براند شاومي الملكي الحصري */
+        .tab-btn[data-cat="هواوي"] { background: #b71c1c; }
+        .tab-btn[data-cat="هونر"] { background: #006064; }
+        .tab-btn[data-cat="فيفو"] { background: #4a148c; }
+        .tab-btn[data-cat="اوبو"] { background: #2e7d32; }
+        .tab-btn[data-cat="إنفنكس"] { background: #ef6c00; }
+        .tab-btn[data-cat="إيتل"] { background: #bf360c; }
+        .tab-btn[data-cat="هاتف آخر"] { background: #455a64; } /* لون فخم لقسم الهواتف الأخرى */
+        .tab-btn[data-cat="الملحقات"] { background: #5d4037; }
+        .tab-btn.active { background: var(--gold) !important; color: #000 !important; box-shadow: 0 0 15px var(--gold); }
+
+        /* سلايدر البريميوم المطور */
+        .premium-slider { margin: 15px; height: 140px; border: 1px solid var(--gold); border-radius: 20px; background: linear-gradient(145deg, #111, #000); overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; box-shadow: 0 0 15px var(--glow); }
+        .p-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--gold); width: 0%; transition: width 3.9s linear; }
+
+        /* شبكة عرض كروت المنتجات الاحترافية الحقيقية */
+        .grid { display: flex; flex-direction: column; gap: 15px; padding: 15px; padding-bottom: 120px; }
+        
+        /* الكرت المطور الحصري */
+        .card { background: var(--card-bg); border-radius: 20px; overflow: hidden; border: 1px solid #222; position: relative; display: flex; flex-direction: column; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s ease; }
+        .card:active { transform: scale(0.98); border-color: var(--gold); }
+        .card-img-wrapper { position: relative; aspect-ratio: 1.4; background: #000; overflow: hidden; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s ease; }
+        .img-counter { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; font-size: 0.7rem; padding: 3px 8px; border-radius: 8px; font-weight: bold; backdrop-filter: blur(3px); }
+        
+        /* السعر وتفاصيل الكرت */
+        .price { color: var(--gold); font-weight: 900; font-size: 1.1rem; background: rgba(0,0,0,0.75); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,189,89,0.3); backdrop-filter: blur(3px); }
+        .card-meta-top { position: absolute; top: 10px; width: 100%; padding: 0 10px; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+        .brand-badge { background: var(--gold); color: #000; font-size: 0.7rem; font-weight: 900; padding: 3px 8px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        
+        .card-content { padding: 15px; text-align: right; }
+        .card-title { font-size: 0.95rem; font-weight: 700; color: #fff; line-height: 1.6; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* زر اتصال الواتساب المدمج الذكي */
+        .btn-whatsapp { background: var(--green); color: #fff; text-align: center; padding: 12px; border-radius: 14px; text-decoration: none; font-weight: 900; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 5px; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2); transition: 0.2s; }
+        .btn-whatsapp:active { background: #27ae60; transform: scale(0.97); }
+
+        /* خبير السوق والمساعد الذكي */
+        .bot-trigger { position: fixed; bottom: 25px; left: 20px; width: 65px; height: 65px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 9000; cursor: pointer; border: 3px solid #000; box-shadow: 0 0 20px rgba(255,193,7,0.4); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .bot-trigger:active { transform: scale(0.9) rotate(-15deg); }
+        .chat-win { position: fixed; bottom: 100px; left: 20px; width: 320px; height: 430px; background: #0a0a0a; border: 2.5px solid var(--gold); border-radius: 25px; display: none; flex-direction: column; z-index: 9001; animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        @keyframes slideIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .chat-header { background: var(--gold); color: #000; padding: 15px; font-weight: 900; border-radius: 22px 22px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; scroll-behavior: smooth; }
+        .msg { padding: 12px; border-radius: 15px; font-size: 0.85rem; max-width: 80%; line-height: 1.5; word-wrap: break-word; }
+        .msg.bot { background: #1a1a1a; align-self: flex-start; border-right: 4px solid var(--gold); color: #eee; }
+        .msg.user { background: var(--gold); color: #000; align-self: flex-end; font-weight: 700; }
+        .chat-input { display: flex; padding: 12px; background: #111; gap: 8px; border-radius: 0 0 25px 25px; }
+        .chat-input input { flex: 1; background: #000; border: 1.5px solid var(--gold); color: #fff; padding: 12px; border-radius: 15px; outline: none; font-size: 0.85rem; font-family: 'Cairo'; }
+        .chat-input button { background: var(--gold); border: none; width: 45px; border-radius: 15px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .chat-input button:active { transform: scale(0.9); }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay">
+        <iframe src="sidebar.html?page=mobiles" class="sidebar-iframe"></iframe>
+    </div>
+
+    <header class="section-master-header">
+        <div class="header-right">
+            <button class="nav-icon-btn" id="turbo-back-btn"><i class="fas fa-arrow-right"></i></button>
+            <span class="page-title">الهواتف والملحقات</span>
+            <span class="geo-badge" id="geoBadge">جاري التحديد...</span>
+        </div>
+        <div class="header-left">
+            <button class="nav-icon-btn" id="open-sidebar-btn"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <div class="tabs-container" id="tabsScroll">
+        <button class="tab-btn active" data-cat="الكل">الكل</button>
+        <button class="tab-btn" data-cat="سامسونج">سامسونج</button>
+        <button class="tab-btn" data-cat="آيفون">آيفون</button>
+        <button class="tab-btn" data-cat="شاومي">شاومي</button> <button class="tab-btn" data-cat="هواوي">هواوي</button>
+        <button class="tab-btn" data-cat="هونر">هونر</button>
+        <button class="tab-btn" data-cat="فيفو">فيفو</button>
+        <button class="tab-btn" data-cat="اوبو">اوبو</button>
+        <button class="tab-btn" data-cat="إنفنكس">إنفنكس</button>
+        <button class="tab-btn" data-cat="إيتل">إيتل</button>
+        <button class="tab-btn" data-cat="هاتف آخر">هاتف آخر</button> <button class="tab-btn" data-cat="الملحقات">الملحقات</button>
+    </div>
+
+    <div class="premium-slider" id="premiumSlider">
+        <div style="text-align:center;"><p style="color:#666; font-size:0.85rem;"><i class="fas fa-circle-notch fa-spin"></i> جاري تحميل العروض الحصرية...</p></div>
+    </div>
+
+    <div class="grid" id="mainGrid"></div>
+
+    <div class="bot-trigger" onclick="toggleChat()"><i class="fas fa-user-tie" style="font-size:2.2rem; color:#000;"></i></div>
+
+    <div class="chat-win" id="chatWin">
+        <div class="chat-header"><span>🤵 خبير السوق الكبير الذكي</span><i class="fas fa-times" onclick="toggleChat()" style="cursor:pointer"></i></div>
+        <div class="chat-body" id="chatArea">
+            <div class="msg bot">مرحباً بك في السوق الكبير! أنا خبيرك الذكي، كيف أخدمك اليوم يا هندسة؟ يمكنك الاستفسار عن أسعار الهواتف المتوفرة في منطقتك حالياً.</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="userMsg" placeholder="اسأل عن أي هاتف أو سعر..." onkeypress="if(event.key === 'Enter') smartChat()">
+            <button onclick="smartChat()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            databaseURL: "https://alsouq-alkabeer-2052c-default-rtdb.firebaseio.com", 
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let allProducts = []; 
+        let currentSelectedCat = "الكل";
+        let sliderInt;
+
+        const savedState = localStorage.getItem('filteredState') || "جنوب دارفور";
+        const savedCity = localStorage.getItem('filteredCity') || "نيالا";
+        document.getElementById('geoBadge').innerText = savedCity;
+
+        const mainGrid = document.getElementById('mainGrid');
+
+        mainGrid.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; color: var(--gold);">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 2.5rem; margin-bottom: 15px;"></i>
+                <p style="font-size:0.95rem; font-weight:bold; letter-spacing: 0.5px;">جاري مزامنة الإعلانات الملكية الفخمة للهواتف... 📱</p>
+            </div>`;
+
+        const adsRef = ref(db, 'حالة_الإعلانات');
+        onValue(adsRef, (snapshot) => {
+            allProducts = [];
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                for (let id in data) {
+                    const item = data[id];
+                    if (item.category_id === "1" && item.state === savedState && item.city === savedCity) {
+                        allProducts.push({ id: id, ...item });
+                    }
+                }
+            }
+            allProducts.reverse(); 
+            renderProducts(currentSelectedCat);
+        }, (error) => {
+            console.error("Firebase DB Error: ", error);
+            mainGrid.innerHTML = `<div style="text-align:center; color:#ff5959; padding:20px;"><p>حدث خطأ أثناء الاتصال بالسيرفر السحابي. أعد المحاولة لاحقاً.</p></div>`;
+        });
+
+        function renderProducts(brandFilter) {
+            const filtered = allProducts.filter(p => {
+                if (brandFilter === "الكل") return true;
+                
+                // منطق الفلترة الذكي لتبويب "الملحقات"
+                if (brandFilter === "الملحقات") {
+                    const keywords = ["شاحن", "سماعة", "كفر", "ساعة", "ملحقات", "ايربودز", "جراب", "لاصق", "باور"];
+                    return (p.sub_category && p.sub_category.includes("الملحقات")) || 
+                           (p.description && keywords.some(key => p.description.toLowerCase().includes(key)));
+                }
+
+                // منطق الفلترة المطور لشركة شاومي (ريدمي وبوكو)
+                if (brandFilter === "شاومي") {
+                    const xiaomiKeywords = ["شاومي", "xiaomi", "redmi", "ريدمي", "poco", "بوكو"];
+                    return (p.sub_category && (p.sub_category.includes("شاومي") || p.sub_category.includes("ريدمي") || p.sub_category.includes("بوكو"))) || 
+                           (p.description && xiaomiKeywords.some(key => p.description.toLowerCase().includes(key)));
+                }
+
+                // منطق الفلترة المطور لخيار "هاتف آخر"
+                if (brandFilter === "هاتف آخر") {
+                    const knownBrands = ["سامسونج", "samsung", "آيفون", "iphone", "هواوي", "huawei", "هونر", "honor", "فيفو", "vivo", "اوبو", "oppo", "إنفنكس", "infinix", "إيتل", "itel", "شاومي", "xiaomi", "redmi", "ريدمي", "poco", "بوكو", "شاحن", "سماعة", "كفر", "ساعة", "ملحقات"];
+                    return (p.sub_category && p.sub_category.includes("ماركات أخرى")) || 
+                           (p.description && !knownBrands.some(key => p.description.toLowerCase().includes(key)));
+                }
+
+                // الفلترة التقليدية لباقي الماركات المعروفة
+                return (p.sub_category && p.sub_category.includes(brandFilter)) || 
+                       (p.description && p.description.includes(brandFilter));
+            });
+
+            if (filtered.length === 0) {
+                mainGrid.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #555;">
+                        <i class="fas fa-mobile-screen-button" style="font-size: 3.5rem; margin-bottom: 15px; color: #333;"></i>
+                        <h4 style="color:#fff; margin-bottom:5px; font-weight:900;">لا توجد عروض متوفرة حالياً في قسم ${brandFilter}</h4>
+                        <p style="font-size:0.8rem; color:#aaa;">تصفح الماركات الأخرى أو كن أول من ينشر عرضاً الآن!</p>
+                    </div>`;
+                document.getElementById('premiumSlider').innerHTML = `<div style="color:#555; font-size:0.85rem; font-weight:bold; text-align:center;">في انتظار العروض الحصرية القادمة... ✨</div>`;
+                clearInterval(sliderInt);
+                return;
+            }
+
+            mainGrid.innerHTML = ""; 
+
+            filtered.forEach(product => {
+                let images = product.images || [];
+                let mainImage = images.length > 0 ? images[0] : 'https://placehold.co/600x400/161616/ffbd59?text=Al-Souq+Al-Kabir';
+                
+                const cleanWa = product.whatsapp ? product.whatsapp.replace(/[^0-9]/g, '') : '';
+                const finalWa = cleanWa.startsWith('0') ? '249' + cleanWa.substring(1) : cleanWa;
+                const waText = encodeURIComponent(`مرحباً، أرغب في الاستفسار عن جهازك المعروض في منصة السوق الكبير: ${product.description ? product.description.substring(0,25) : ''}`);
+
+                const cardHTML = `
+                    <div class="card" onclick="window.location.href='final-product.html?id=${product.id}'">
+                        <div class="card-img-wrapper">
+                            <img src="${mainImage}" alt="السوق الكبير" loading="lazy">
+                            <div class="card-meta-top">
+                                <span class="brand-badge">${product.sub_category && product.sub_category !== 'عام' && product.sub_category !== 'ماركات أخرى' ? product.sub_category : (brandFilter !== 'الكل' ? brandFilter : 'هاتف')}</span>
+                                <div class="price">${parseFloat(product.price).toLocaleString('en-US')} ج.س</div>
+                            </div>
+                            <div class="img-counter"><i class="fas fa-camera"></i> ${images.length} صور</div>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-title">${product.description}</p>
+                            <a href="https://wa.me/${finalWa}?text=${waText}" class="btn-whatsapp" onclick="event.stopPropagation();">
+                                <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> تواصل مباشرة عبر واتساب
+                            </a>
+                        </div>
+                    </div>
+                `;
+                mainGrid.innerHTML += cardHTML;
+            });
+
+            startDynamicSlider(filtered);
+        }
+
+        function startDynamicSlider(items) {
+            clearInterval(sliderInt);
+            const slider = document.getElementById('premiumSlider');
+            let idx = 0;
+            
+            function showNext() {
+                if(!items.length) return;
+                const currentItem = items[idx];
+                slider.innerHTML = `
+                    <div style="text-align:center; padding: 18px; width:100%; cursor:pointer;" onclick="window.location.href='final-product.html?id=${currentItem.id}'">
+                        <span style="background:var(--gold); color:#000; padding:3px 10px; border-radius:6px; font-weight:900; font-size:0.65rem; letter-spacing:0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">إعلان بريميوم نشط 🔥</span>
+                        <h3 style="color:#fff; margin:10px 0; font-size:0.95rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:290px; margin-left:auto; margin-right:auto;">${currentItem.description.substring(0, 50)}...</h3>
+                        <div style="color:var(--gold); font-weight:900; font-size:1rem; letter-spacing: 0.5px;">${parseFloat(currentItem.price).toLocaleString('en-US')} ج.س</div>
+                        <div class="p-bar" id="pb"></div>
+                    </div>`;
+                setTimeout(() => { if(document.getElementById('pb')) document.getElementById('pb').style.width="100%"; }, 50);
+                idx = (idx + 1) % items.length;
+            }
+            showNext(); 
+            sliderInt = setInterval(showNext, 4000);
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentSelectedCat = this.getAttribute('data-cat');
+                
+                renderProducts(currentSelectedCat);
+                this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            });
+        });
+
+        window.updatePage = function(category) {
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            currentSelectedCat = category;
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                if (tab.getAttribute('data-cat') === category) {
+                    tab.classList.add('active');
+                    tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            renderProducts(currentSelectedCat);
+        };
+    </script>
+
+    <script>
+        const backBtn = document.getElementById('turbo-back-btn');
+        backBtn.addEventListener('click', () => window.location.href = 'index.html');
+
+        const sidebar = document.getElementById('sidebarOverlay');
+        document.getElementById('open-sidebar-btn').addEventListener('click', () => sidebar.classList.add('active'));
+        sidebar.addEventListener('click', (e) => { if(e.target === sidebar) sidebar.classList.remove('active'); });
+
+        function toggleChat() { 
+            const win = document.getElementById('chatWin');
+            win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function smartChat() {
+            const input = document.getElementById('userMsg');
+            const area = document.getElementById('chatArea');
+            if(!input.value.trim()) return;
+            
+            const userText = input.value.trim();
+            area.innerHTML += `<div class="msg user">${userText}</div>`;
+            input.value = '';
+            area.scrollTop = area.scrollHeight;
+            
+            setTimeout(() => { 
+                let reply = `جاري جلب أحدث أسعار العروض لطلبك "${userText}" في أسواق نيالا وبقية محليات دارفور... لحظة واحدة يا هندسة.`;
+                
+                if(userText.includes("ايفون") || userText.includes("آيفون")) {
+                    reply = "أسعار الآيفون في المنصة تتراوح حالياً بحسب الحالة والنظافة. أنصحك بالضغط على تبويب 'آيفون' في الأعلى لرؤية الهواتف المتوفرة في منطقتك حالياً مع صورها الحقيقية والتواصل مباشرة مع صاحب الإعلان.";
+                } else if (userText.includes("سامسونج")) {
+                    reply = "أجهزة سامسونج متوفرة بكثرة اليوم في السوق، اضغط على تبويب 'سامسونج' في شريط التصنيفات العلوي لمشاهدة كافة العروض المتاحة بأسعارها الحالية.";
+                } else if (userText.includes("شاومي") || userText.includes("ريدمي") || userText.includes("بوكو")) {
+                    reply = "هواتف شاومي، ريدمي، وبوكو متوفرة الآن! اضغط على تبويب 'شاومي' المحدث باللون البرتقالي لرؤية العروض المميزة المتوفرة حالياً.";
+                }
+                
+                area.innerHTML += `<div class="msg bot">${reply}</div>`; 
+                area.scrollTop = area.scrollHeight; 
+            }, 1000);
+        }
+    </script><script>
+    // 🔓 دالة فتح القائمة الجانبية
+    function openSidebarDrawer() {
+        // بيفحص الكلاسات المشهورة عندك في التطبيق ليضمن التشغيل الفوري
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            
+            // 🧠 حركة ذكية: إجبار السايدبار داخل الـ iframe إنه يعيد قراءة الخانات أول ما يفتح
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    // 🔒 دالة إغلاق القائمة الجانبية
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+</script><script>
+    // 🔓 دالة فتح وإغلاق القائمة الجانبية (القديمة المعتمدة)
+    function openSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+
+    // 🔒 محرك حقن وتوحيد الشريط السفلي الاحترافي في صفحة القسم تلقائياً
+    function injectUniversalBottomNavbar() {
+        // 1. إضافة التنسيقات الفخمة للشريط السفلي لضمان ثباته وأناقته
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .parent-bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(12px); border-top: 1px solid #1a1a1a; height: 68px; display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 999; }
+            .parent-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: #555; gap: 4px; cursor: pointer; flex: 1; height: 100%; position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+            .parent-nav-item i { font-size: 1.15rem; }
+            .parent-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Cairo', sans-serif; }
+            .parent-nav-item.active-nav { color: #ffbd59; }
+            .parent-nav-item.active-nav::after { content: ''; position: absolute; top: 2px; width: 12px; height: 3px; background: #ffbd59; border-radius: 10px; box-shadow: 0 0 8px #ffbd59; }
+            /* إعطاء مساحة أسفل محتوى الصفحة الأساسي حتى لا يختفي تحت الشريط السفلي */
+            body { padding-bottom: 75px !important; }
+        `;
+        document.head.appendChild(style);
+
+        // 2. بناء هيكل الشريط السفلي بالربط الذكي
+        const navbar = document.createElement('nav');
+        navbar.className = 'parent-bottom-navbar';
+        navbar.innerHTML = `
+            <div class="parent-nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="parent-nav-item active-nav" onclick="openSidebarDrawer()"><i class="fas fa-th-large"></i><span>الأقسام</span></div>
+            <div class="parent-nav-item" onclick="window.location.href='smart-search.html'"><i class="fas fa-search"></i><span>بحث ذكي</span></div>
+            <div class="parent-nav-item" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i><span>تحديث</span></div>
+        `;
+        
+        document.body.appendChild(navbar);
+    }
+
+    // تشغيل المحرك فور تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', injectUniversalBottomNavbar);
+</script><!-- المحرك النهائي الشامل: سرعة خارقة + ربط تلقائي للشريط والسيرفيس بالسايدبار -->
+<script>
+    // 🧠 مصفوفة الربط الموحدة للأقسام الـ 12 في "السوق الكبير" لضمان سرعة الانتقال
+    const globalAppSections = {
+        'mobiles.html': { id: 'mobiles', name: 'الهواتف والملحقات' },
+        'computers.html': { id: 'computers', name: 'الحواسيب والطابعات' },
+        'starlink.html': { id: 'starlink', name: 'الستارلينك وملحقاته' },
+        'electricity.html': { id: 'electricity', name: 'الأجهزة الكهربائية' },
+        'clothes.html': { id: 'clothes', name: 'الملبوسات والأحذية' },
+        'furniture.html': { id: 'furniture', name: 'الأثاث والأواني' },
+        'building.html': { id: 'building', name: 'أدوات البناء' },
+        'realestate.html': { id: 'realestate', name: 'العقارات والأراضي' },
+        'vehicles.html': { id: 'vehicles', name: 'السيارات والمركبات' },
+        'motors.html': { id: 'motors', name: 'المواتر والمحركات' },
+        'crops.html': { id: 'crops', name: 'الحبوب والمحاصيل' },
+        'livestock.html': { id: 'livestock', name: 'المواشي والأعلاف' }
+    };
+
+    // 🔓 دالة فتح وإغلاق القائمة الجانبية المستقرة وسريعة الاستجابة
+    function openSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            // تأمين التحديث الفوري والذكي لبيانات السايدبار وإجباره على قراءة التابات العلوية
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+
+    // 📲 دالة التنقل الفوري فائق السرعة لمنع التهنيج في المبايل
+    function fastNavigate(targetUrl) {
+        // حفظ اسم الصفحة الحالية في الذاكرة لتسهيل العودة وربط البيانات
+        const fileName = targetUrl.split('/').pop().split('?')[0];
+        if(globalAppSections[fileName]) {
+            localStorage.setItem('current_market_page', globalAppSections[fileName].id);
+        }
+        window.location.href = targetUrl;
+    }
+
+    // 🔒 محرك حقن وبناء الشريط السفلي الاحترافي ذو الاستجابة الفورية
+    function injectUniversalBottomNavbar() {
+        // قراءة اسم الملف الحالي تلقائياً لمعرفة القسم المفتوح
+        const currentFileName = window.location.pathname.split('/').pop() || 'building.html';
+        
+        // حفظ الفئة الحالية في الكاش عشان السايدبار يقرأها أوتوماتيك لو الرابط اتغير
+        if(globalAppSections[currentFileName]) {
+            localStorage.setItem('current_market_page', globalAppSections[currentFileName].id);
+        }
+
+        // 1. حقن التنسيقات الفخمة والثابتة (الأسود الملكي مع الذهب الأصلي)
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .parent-bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(15px); border-top: 1px solid #1a1a1a; height: 68px; display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 999; }
+            .parent-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: #555; gap: 4px; cursor: pointer; flex: 1; height: 100%; position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; transition: transform 0.1s; }
+            .parent-nav-item i { font-size: 1.15rem; }
+            .parent-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Cairo', sans-serif; }
+            .parent-nav-item.active-nav { color: #ffbd59; }
+            .parent-nav-item.active-nav::after { content: ''; position: absolute; top: 2px; width: 12px; height: 3px; background: #ffbd59; border-radius: 10px; box-shadow: 0 0 8px #ffbd59; }
+            .parent-nav-item:active { transform: scale(0.92); color: #ffbd59; }
+            body { padding-bottom: 78px !important; }
+        `;
+        document.head.appendChild(style);
+
+        // 2. بناء الهيكل وربطه بالدوال السريعة fastNavigate
+        const navbar = document.createElement('nav');
+        navbar.className = 'parent-bottom-navbar';
+        navbar.innerHTML = `
+            <div class="parent-nav-item" onclick="fastNavigate('index.html')"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="parent-nav-item active-nav" onclick="openSidebarDrawer()"><i class="fas fa-th-large"></i><span>الأقسام</span></div>
+            <div class="parent-nav-item" onclick="fastNavigate('smart-search.html')"><i class="fas fa-search"></i><span>بحث ذكي</span></div>
+            <div class="parent-nav-item" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i><span>تحديث</span></div>
+        `;
+        
+        document.body.appendChild(navbar);
+    }
+
+    // تشغيل المحرك فوراً بسرعة المتصفح وبدون أي انتظار لشاشات التحميل
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectUniversalBottomNavbar);
+    } else {
+        injectUniversalBottomNavbar();
+    }
+</script>
+</body>
+</html>

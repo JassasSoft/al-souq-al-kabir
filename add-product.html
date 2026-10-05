@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>السوق الكبير | نظام النشر المطور</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --gold: #fcc963; 
+            --bg: #0b0b0b; 
+            --card: #161616; 
+            --input-bg: #222; 
+            --blue: #3498db; 
+            --danger: #ff5959; 
+            --green: #2ecc71; 
+        }
+        * { box-sizing: border-box; font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #fff; margin: 0; padding-bottom: 110px; }
+
+        /* الهيدر العلوي */
+        .header { 
+            padding: 20px 15px; background: var(--card); border-bottom: 2px solid var(--gold); 
+            display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+        .header .back-link { color: #fff; font-size: 1.2rem; text-decoration: none; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+        .header h2 { margin: 0; color: var(--gold); font-weight: 900; font-size: 1.3rem; flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .header .placeholder-div { width: 35px; }
+
+        .container { padding: 15px; max-width: 600px; margin: auto; }
+        
+        /* شريط جاهزية الإعلان الذكي */
+        .progress-container { background: #222; border-radius: 10px; height: 6px; margin: 10px 0 20px; overflow: hidden; display: none; }
+        .progress-bar { background: linear-gradient(90deg, var(--gold), var(--green)); width: 0%; height: 100%; transition: 0.4s; }
+        .progress-text { font-size: 0.75rem; color: #aaa; text-align: left; margin-top: -15px; margin-bottom: 15px; font-weight: bold; }
+
+        .section-title { color: var(--gold); font-size: 0.95rem; font-weight: 900; margin: 25px 0 15px; display: flex; align-items: center; gap: 10px; border-right: 4px solid var(--gold); padding-right: 10px; }
+
+        label { display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; color: #aaa; }
+        .input-box { width: 100%; padding: 16px; background: var(--input-bg); border: 1px solid #333; border-radius: 15px; color: #fff; outline: none; margin-bottom: 15px; font-size: 0.9rem; transition: 0.3s; font-weight: 700; font-family: 'Cairo'; }
+        .input-box:focus { border-color: var(--gold); background: #2a2a2a; }
+        textarea.input-box { min-height: 120px; resize: none; }
+
+        /* أزرار الاختيار الفرعي */
+        .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .sel-btn { background: #222; border: 1px solid #333; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; font-size: 0.9rem; color: #fff; font-weight: 900; transition: 0.3s; }
+        .sel-btn.active { border-color: var(--gold); background: rgba(252, 201, 99, 0.1); color: var(--gold); box-shadow: 0 4px 15px rgba(252, 201, 99, 0.15); }
+
+        /* منطقة الرفع وعداد الصور التفاعلي */
+        .photo-counter-badge { float: left; font-size: 0.75rem; padding: 2px 8px; border-radius: 20px; background: #222; color: var(--danger); font-weight: 700; transition: 0.3s; }
+        .photo-counter-badge.ready { color: var(--green); background: rgba(46, 204, 113, 0.1); }
+        .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; clear: both; }
+        .img-slot { aspect-ratio: 1; background: #151515; border: 2px dashed #444; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: 0.3s; }
+        .img-slot:active { transform: scale(0.95); border-color: var(--gold); }
+        .img-slot i { font-size: 1.4rem; color: var(--gold); margin-bottom: 5px; }
+        .img-slot span { font-size: 0.65rem; color: #777; font-weight: 700; text-align: center; }
+        .img-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; z-index: 10; }
+        .hidden-file { display: none; }
+
+        /* زر النشر */
+        .btn-publish { background: var(--gold); color: #000; border: none; width: 100%; padding: 18px; border-radius: 18px; font-weight: 900; font-size: 1.15rem; cursor: pointer; box-shadow: 0 10px 25px rgba(252,201,99,0.25); margin-top: 20px; transition: 0.3s; font-family: 'Cairo'; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-publish:disabled { background: #444; color: #777; cursor: not-allowed; box-shadow: none; }
+
+        /* نظام التنبيهات المخصص (Toast) */
+        .toast-notification {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: #1c1c1c; border: 1px solid var(--gold); color: #fff;
+            padding: 15px 25px; border-radius: 16px; min-width: 290px; max-width: 90%;
+            display: flex; align-items: center; gap: 12px; z-index: 4000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7); font-weight: 700; font-size: 0.9rem;
+            transition: cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s;
+        }
+        .toast-notification.show { top: 25px; }
+        .toast-notification i { color: var(--gold); font-size: 1.2rem; }
+
+        /* نافذة النجاح المخصصة المعتمدة */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: #1c1c1c; border: 1px solid var(--gold); border-radius: 25px; padding: 30px; text-align: center; width: 100%; max-width: 380px; animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-icon { width: 70px; height: 70px; background: rgba(252,201,99,0.1); border: 2px solid var(--gold); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px; }
+        .modal-card h3 { margin: 0 0 10px; color: #fff; font-size: 1.4rem; font-weight: 900; }
+        .modal-card p { margin: 0; color: #aaa; font-size: 0.9rem; font-weight: 700; line-height: 1.6; }
+
+        /* البار السفلي الموحد */
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; background: #121212; 
+            display: flex; justify-content: space-around; padding: 12px 0 18px; 
+            border-top: 1px solid #222; z-index: 2000; box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+        }
+        .nav-btn { color: #666; text-decoration: none; text-align: center; font-size: 0.75rem; font-weight: 700; position: relative; transition: 0.2s; flex: 1; }
+        .nav-btn i { display: block; font-size: 1.35rem; margin-bottom: 6px; transition: 0.3s; }
+        .nav-btn.active { color: var(--gold); }
+        
+        .nav-add-btn { background: var(--gold); color: #000 !important; width: 50px; height: 50px; border-radius: 50%; display: flex !important; align-items: center; justify-content: center; margin-top: -25px; border: 5px solid #121212; box-shadow: 0 5px 15px rgba(252,201,99,0.3); transition: 0.3s; }
+        .nav-add-btn i { font-size: 1.4rem !important; margin: 0 !important; }
+
+        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div id="customToast" class="toast-notification">
+    <i class="fas fa-exclamation-circle"></i>
+    <span id="toastMessage">الرجاء ملء الحقول المطلوبة!</span>
+</div>
+
+<div class="header">
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-right"></i></a>
+    <h2><i class="fas fa-rocket"></i> السوق الكبير 🇸🇩</h2>
+    <div class="placeholder-div"></div>
+</div>
+
+<div class="container">
+    
+    <div class="progress-container" id="progWrapper">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText" style="display:none;">جاهزية الإعلان: 0%</div>
+
+    <div class="section-title">تصنيف الإعلان</div>
+    <label>القسم الرئيسي للمنتج أو الخدمة</label>
+    <select id="mainCat" class="input-box" onchange="renderLogic(); calculateProgress();">
+        <option value="">-- اختر القسم --</option>
+        <option value="1">1/ الهواتف و الملحقات</option>
+        <option value="2">2/ الحواسيب والطابعات</option>
+        <option value="3">3/ الاستارلينك وملحقاته</option>
+        <option value="4">4/ الالكتروني والكهربائيه</option>
+        <option value="5">5/ الملبوسات و الأحذية</option>
+        <option value="6">6/ ادوات البناء</option>
+        <option value="7">7/ العربات و الاليات</option>
+        <option value="8">8/ المواتر و ملحقاته</option>
+        <option value="9">9/ العقارات والاراضي</option>
+        <option value="10">10/ المواشي والاعلاف</option>
+        <option value="11">11/ الأثاث والأواني</option>
+        <option value="12">12/ الحبوب والمحاصيل</option>
+    </select>
+    <div id="dynamicLogic"></div>
+
+    <div class="section-title">الموقع الجغرافي النشط</div>
+    <label>الولاية</label>
+    <select id="stateSelect" class="input-box" onchange="updateCities(); calculateProgress();">
+        <option value="">-- اختر الولاية --</option>
+    </select>
+    
+    <label>المنطقة / المحلية</label>
+    <select id="citySelect" class="input-box" onchange="calculateProgress();">
+        <option value="">-- اختر المنطقة --</option>
+    </select>
+
+    <div class="section-title">بيانات المنتج والسعر</div>
+    <label>الوصف الكامل للمنتج</label>
+    <textarea id="adDesc" class="input-box" placeholder="اكتب التفاصيل بدقة وبأسلوب جذاب لجذب المشترين الفوريين..." oninput="calculateProgress();"></textarea>
+    
+    <label>السعر المطلوب (ج.س)</label>
+    <input type="number" id="adPrice" class="input-box" placeholder="0.00" oninput="calculateProgress();">
+    
+    <label>رقم الواتساب الفعال للتواصل الشفّاف</label>
+    <input type="tel" id="adWhatsapp" class="input-box" placeholder="09xxxxxxxx" oninput="formatWhatsApp(this); calculateProgress();">
+
+    <div class="section-title">
+        صور المنتج 
+        <span class="photo-counter-badge" id="photoBadge">تم رفع 0 من 3 صور كحد أدنى</span>
+    </div>
+    <div class="upload-grid" id="photoContainer"></div>
+
+    <button id="submitBtn" class="btn-publish" onclick="validateAndPublish()">
+        <span>نشر الإعلان في المنصة 🚀</span>
+    </button>
+</div>
+
+<div id="successModal" class="modal">
+    <div class="modal-card">
+        <div class="modal-icon"><i class="fas fa-check"></i></div>
+        <h3>تم النشر بنجاح!</h3>
+        <p>إعلانك الآن قيد المراجعة الآلية السريعة وسيظهر لكافة مستخدمي فلاتر <b>السوق الكبير</b> فوراً.</p>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-btn"><i class="fas fa-home"></i>الرئيسية</a>
+    <a href="categories.html" class="nav-btn"><i class="fas fa-th-large"></i>الأقسام</a>
+    <a href="add-product.html" class="nav-btn nav-add-btn active"><i class="fas fa-plus"></i></a>
+    <a href="chat.html" class="nav-btn"><i class="fas fa-comments"></i>الدردشة</a>
+    <a href="profile.html" class="nav-btn"><i class="fas fa-user"></i>حسابي</a>
+</nav>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+        authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+        databaseURL: "https://alsouq-alkabeer-2052c-default-rtdb.firebaseio.com", 
+        projectId: "alsouq-alkabeer-2052c",
+        storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+        messagingSenderId: "835295635291",
+        appId: "1:835295635291:web:e1f09baff25b50fac11c7e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+        }
+    });
+
+    window.validateAndPublish = async function() {
+        const mainCat = document.getElementById('mainCat').value;
+        const stateSelectVal = document.getElementById('stateSelect').value;
+        const citySelectVal = document.getElementById('citySelect').value;
+        const adDesc = document.getElementById('adDesc').value.trim();
+        const adPrice = document.getElementById('adPrice').value;
+        const adWhatsapp = document.getElementById('adWhatsapp').value.trim();
+
+        if(!mainCat) { showToast("من فضلك اختر التصنيف الرئيسي للإعلان أولاً!"); return; }
+        if(!stateSelectVal || !citySelectVal) { showToast("الرجاء تحديد الموقع الجغرافي كاملاً!"); return; }
+        if(adDesc.length < 10) { showToast("الرجاء كتابة وصف واضح لا يقل عن 10 أحرف!"); return; }
+        if(!adPrice || adPrice <= 0) { showToast("الرجاء إدخال السعر المطلوب بشكل صحيح!"); return; }
+        if(!adWhatsapp || adWhatsapp.length < 9) { showToast("رقم الواتساب غير مكتمل أو مطلوب للتواصل!"); return; }
+        if(uploadedCount < 3) { showToast("لحفظ جودة المنصة، يرجى رفع 3 صور للمنتج على الأقل! 📸"); return; }
+
+        let selectedSubFeature = "عام";
+        const activeBtn = document.querySelector('.sel-btn.active');
+        if (activeBtn) {
+            selectedSubFeature = activeBtn.innerText;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري رفع الصور... 📸`;
+
+        const uploadedImageUrls = [];
+        const imgbbKey = "adbaa6d60dd9ade68e5f6597637dc44e"; 
+
+        try {
+            for (let file of rawPhotoFiles) {
+                if (file !== null) {
+                    const imgFormData = new FormData();
+                    imgFormData.append('image', file);
+
+                    const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+                        method: 'POST',
+                        body: imgFormData
+                    });
+
+                    const imgbbData = await imgbbResponse.json();
+                    if (imgbbData.success) {
+                        uploadedImageUrls.push(imgbbData.data.url); 
+                    }
+                }
+            }
+
+            submitBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> جاري حفظ الإعلان... ⏳`;
+
+            const adData = {
+                userId: currentUser ? currentUser.uid : "guest",
+                category_id: mainCat,
+                state: stateSelectVal,
+                city: citySelectVal,
+                description: adDesc,
+                price: parseFloat(adPrice),
+                whatsapp: adWhatsapp,
+                sub_category: selectedSubFeature, 
+                images: uploadedImageUrls, 
+                timestamp: Date.now()
+            };
+
+            const adsNodeRef = ref(db, 'ads');
+            const newPostRef = push(adsNodeRef);
+            
+            await set(newPostRef, adData);
+            
+            submitBtn.innerHTML = `تم النشر بنجاح! 🎉`;
+            showSuccessModal();
+
+        } catch (error) {
+            console.error('Critical Upload or DB Error:', error);
+            showToast("حدث خطأ غير متوقع. يرجى مراجعة الاتصال والمحاولة مرة أخرى.");
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<span>نشر الإعلان في المنصة 🚀</span>`;
+        }
+    }
+</script>
+
+<script>
+    const regionsData = {
+        "إقليم دارفور": {
+            "جنوب دارفور": ["نيالا", "كاس", "برام", "رهيد البردي", "تلس", "عد الفرسان"],
+            "شمال دارفور": ["الفاشر", "كتم", "كبكابية", "مليط", "أم كدادة"],
+            "غرب دارفور": ["الجنينة", "فوربرنقا", "كلبس", "كرينك", "هبيلا"],
+            "شرق دارفور": ["الضعين", "عسلاية", "أبو كارنكا", "عديلة", "شعيرية"],
+            "وسط دارفور": ["زالنجي", "نيرتتي", "قارسيلا", "وادي صالح", "مكجر"]
+        },
+        "إقليم كردفان": {
+            "شمال كردفان": ["الأبيض", "بارا", "أم روابة", "الرهد", "جبرة الشيخ"],
+            "جنوب كردفان": ["كادوقلي", "الدلنج", "العباسية", "تلودي", "أبو جبيهة"],
+            "غرب كردفان": ["الفولة", "النهود", "بابنوسة", "المنصورة", "غبيش"]
+        },
+        "الإقليم الشرقي": {
+            "البحر الأحمر": ["بورتسودان", "سواكن", "طوكر", "هيا", "جبيت", "سنكات"],
+            "كسلا": ["كسلا", "حلفا الجديدة", "خشم القربة", "أروما", "وقر"],
+            "القضارف": ["القضارف", "الدوكة", "الفاو", "الحواتة", "قلع النحل", "المفازة"]
+        },
+        "الإقليم الشمالي": {
+            "الشمالية": ["دنقلا", "كريمة", "مروي", "وادي حلفا", "الدبة", "دنقلا العجوز"],
+            "نهر النيل": ["عطبرة", "الدامر", "شندي", "بربر", "أبو حمد", "المتمة"]
+        },
+        "إقليم الوسط والجزيرة": {
+            "الجزيرة": ["ود مدني", "المناقل", "الحصاحيصا", "الكاملين", "رفاعة", "العقدة"],
+            "النيل الأبيض": ["ربك", "كستي", "الدويم", "القطينة", "تندلتي", "الجراري"],
+            "النيل الأزرق": ["الدمازين", "الروصيرص", "باو", "قيسان", "الكرمك"],
+            "سنار": ["سنار", "سنجة", "السوكي", "الدندر", "أبو حجار"]
+        },
+        "العاصمة": {
+            "الخرطوم": ["الخرطوم", "أم درمان", "بحري", "شرق النيل", "جبل أولياء"]
+        }
+    };
+
+    const cityData = {};
+    const stateSelect = document.getElementById('stateSelect');
+    
+    let rawPhotoFiles = [null, null, null, null, null, null];
+    let uploadedCount = 0;
+
+    for (const [regionName, states] of Object.entries(regionsData)) {
+        const group = document.createElement('optgroup');
+        group.label = regionName;
+        for (const [stateName, cities] of Object.entries(states)) {
+            cityData[stateName] = cities;
+            const opt = document.createElement('option');
+            opt.value = stateName;
+            opt.innerText = stateName;
+            group.appendChild(opt);
+        }
+        stateSelect.appendChild(group);
+    }
+
+    const photoGrid = document.getElementById('photoContainer');
+    for(let i=1; i<=6; i++) {
+        photoGrid.innerHTML += `
+            <input type="file" id="f${i}" class="hidden-file" accept="image/*" onchange="preview(this, 'v${i}', ${i-1})">
+            <div class="img-slot" onclick="document.getElementById('f${i}').click()">
+                <img id="v${i}"> <i class="fas fa-camera"></i> <span>صورة ${i}</span>
+            </div>`;
+    }
+
+    function updateCities(callback) {
+        const state = stateSelect.value;
+        const citySelect = document.getElementById('citySelect');
+        citySelect.innerHTML = '<option value="">-- اختر المنطقة --</option>';
+        if(state && cityData[state]) {
+            cityData[state].forEach(city => {
+                const opt = document.createElement('option');
+                opt.value = city; opt.innerText = city;
+                citySelect.appendChild(opt);
+            });
+        }
+        if(callback) callback();
+    }
+
+    function syncUserLocation() {
+        const savedState = localStorage.getItem('filteredState');
+        const savedCity = localStorage.getItem('filteredCity');
+        if(savedState) {
+            stateSelect.value = savedState;
+            updateCities(() => {
+                if(savedCity) {
+                    document.getElementById('citySelect').value = savedCity;
+                }
+                calculateProgress();
+            });
+        }
+    }
+
+    window.onload = () => {
+        syncUserLocation();
+        document.getElementById('progWrapper').style.display = 'block';
+        document.getElementById('progressText').style.display = 'block';
+    };
+
+    function preview(input, imgId, index) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            rawPhotoFiles[index] = file;
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById(imgId);
+                img.src = e.target.result;
+                img.style.display = 'block';
+                
+                uploadedCount = rawPhotoFiles.filter(f => f !== null).length;
+                
+                const badge = document.getElementById('photoBadge');
+                if(uploadedCount >= 3) {
+                    badge.innerText = `ممتاز، تم رفع ${uploadedCount} صور 🌟`;
+                    badge.classList.add('ready');
+                } else {
+                    badge.innerText = `تم رفع ${uploadedCount} من 3 صور كحد أدنى`;
+                    badge.classList.remove('ready');
+                }
+                calculateProgress();
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function formatWhatsApp(input) {
+        let value = input.value.replace(/[^0-9+]/g, '');
+        if(value.startsWith('+249')) {
+            value = '0' + value.substring(4);
+        }
+        input.value = value;
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('customToast');
+        document.getElementById('toastMessage').innerText = message;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 3500);
+    }
+
+    function calculateProgress() {
+        let score = 0;
+        if(document.getElementById('mainCat').value) score += 15;
+        if(stateSelect.value) score += 15;
+        if(document.getElementById('citySelect').value) score += 15;
+        if(document.getElementById('adDesc').value.trim().length >= 10) score += 15;
+        if(parseFloat(document.getElementById('adPrice').value) > 0) score += 15;
+        if(document.getElementById('adWhatsapp').value.trim().length >= 9) score += 10;
+        
+        if(uploadedCount >= 3) score += 15;
+        else if(uploadedCount > 0) score += (uploadedCount * 4);
+
+        document.getElementById('progressBar').style.width = score + '%';
+        document.getElementById('progressText').innerText = `جاهزية الإعلان: ${score}%`;
+    }
+
+    function renderLogic() {
+        const cat = document.getElementById('mainCat').value;
+        const area = document.getElementById('dynamicLogic');
+        let html = "";
+        if (cat === "9") {
+            html += `<label>نوع المعاملة العقارية</label>
+                    <div class="selector-grid">
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">بيع وعقد مسجل</div>
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">إيجار شهري</div>
+                    </div>
+                    <label>حالة العقار الحالي</label>
+                    <div class="selector-grid">
+                        <div class="sel-btn" data-type="sub2" onclick="setActive(this)">أرض خالية / فضاء</div>
+                        <div class="sel-btn" data-type="sub2" onclick="setActive(this)">مبنى جاهز / أساس خرساني</div>
+                    </div>`;
+        } else if (cat === "3") {
+            html += `<label>فئة منتج الاستارلينك</label>
+                    <div class="selector-grid">
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">بيع جهاز Starlink كاملاً</div>
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">ملحقات، قطع وصحون</div>
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">كروت إنترنت وإعادة شحن</div>
+                    </div>`;
+        } else if (["1", "7", "8"].includes(cat)) {
+            html += `<label>حالة الاستخدام والامتداد</label>
+                    <div class="selector-grid">
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">جديد (كرت كرتونة)</div>
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">مستعمل بحالة ممتازة</div>
+                    </div>`;
+        } else if (cat === "11") {
+            html += `<label>تصنيف الأثاث والأواني</label>
+                    <div class="selector-grid">
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">أثاث منزلي / مكتبي</div>
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">أواني ومستلزمات مطبخ</div>
+                    </div>`;
+        } else if (cat === "12") {
+            html += `<label>نوع المحاصيل الحالية</label>
+                    <div class="selector-grid">
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">إنتاج محلي جاهز</div>
+                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">حبوب وبذور للزراعة</div>
+                    </div>`;
+        }
+        area.innerHTML = html;
+        calculateProgress();
+    }
+
+    function setActive(el) {
+        el.parentElement.querySelectorAll('.sel-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        calculateProgress();
+    }
+
+    function showSuccessModal() {
+        const modal = document.getElementById('successModal');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            window.location.href = 'categories.html';
+        }, 2500);
+    }
+</script>
+</body>
+</html>

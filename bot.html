@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>المساعد الذكي | السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --gold: #ffbd59; --bg: #0b0b0b; --card: #1a1a1a; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+
+        .bot-header { padding: 15px; background: #111; border-bottom: 2px solid var(--gold); display: flex; align-items: center; gap: 12px; }
+        .bot-avatar { width: 45px; height: 45px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-size: 1.5rem; }
+        
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 120px; }
+        .msg { max-width: 85%; padding: 12px 18px; border-radius: 18px; font-size: 0.95rem; line-height: 1.6; }
+        .bot-msg { background: #262626; align-self: flex-start; border-bottom-right-radius: 2px; }
+        .user-msg { background: var(--gold); color: #000; align-self: flex-end; border-bottom-left-radius: 2px; font-weight: 700; }
+
+        /* منطقة الاقتراحات السريعة */
+        .suggestions { display: flex; gap: 10px; overflow-x: auto; padding: 10px 20px; flex-shrink: 0; }
+        .sug-btn { background: #222; border: 1px solid var(--gold); color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+
+        .input-box { background: #1a1a1a; padding: 15px; border-top: 1px solid #333; }
+        .input-wrapper { background: #000; border-radius: 25px; display: flex; align-items: center; padding: 5px 15px; border: 1px solid #444; }
+        .input-wrapper input { flex: 1; background: transparent; border: none; color: #fff; padding: 10px; outline: none; }
+        .send-btn { background: var(--gold); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; color: #000; }
+    </style>
+</head>
+<body>
+
+    <div class="bot-header">
+        <div class="bot-avatar"><i class="fas fa-microchip"></i></div>
+        <div>
+            <div style="font-weight: 900; color: var(--gold);">المساعد الذكي</div>
+            <div style="font-size: 0.7rem; color: #888;">متصل بجميع أقسام السوق الكبير</div>
+        </div>
+    </div>
+
+    <div class="chat-container" id="botMessages">
+        <div class="msg bot-msg">أهلاً بك في منصة السوق الكبير! أنا مساعدك الذكي. كيف يمكنني خدمتك اليوم؟</div>
+    </div>
+
+    <div class="suggestions">
+        <div class="sug-btn" onclick="autoReply('كيف أضيف إعلان؟')">إضافة إعلان ➕</div>
+        <div class="sug-btn" onclick="autoReply('أريد تفعيل اشتراكي')">تفعيل الاشتراك 👑</div>
+        <div class="sug-btn" onclick="autoReply('تواصل مع الدعم الفني')">التواصل مع الدعم 📞</div>
+        <div class="sug-btn" onclick="autoReply('عرض الأقسام')">استعراض الأقسام 📋</div>
+    </div>
+
+    <div class="input-box">
+        <div class="input-wrapper">
+            <input type="text" id="botInput" placeholder="اسألني أي شيء عن السوق...">
+            <button class="send-btn" onclick="sendToBot()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        function sendToBot() {
+            const input = document.getElementById('botInput');
+            const chat = document.getElementById('botMessages');
+            if (input.value.trim() !== "") {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'msg user-msg';
+                userDiv.innerText = input.value;
+                chat.appendChild(userDiv);
+                
+                const query = input.value;
+                input.value = "";
+                chat.scrollTop = chat.scrollHeight;
+
+                setTimeout(() => {
+                    const botDiv = document.createElement('div');
+                    botDiv.className = 'msg bot-msg';
+                    botDiv.innerText = getBotResponse(query);
+                    chat.appendChild(botDiv);
+                    chat.scrollTop = chat.scrollHeight;
+                }, 800);
+            }
+        }
+
+        function autoReply(text) {
+            document.getElementById('botInput').value = text;
+            sendToBot();
+        }
+
+        function getBotResponse(query) {
+            query = query.toLowerCase();
+            if(query.includes('إعلان')) return "لإضافة إعلان، توجه إلى زر الإضافة (+) في القائمة الرئيسية، اختر القسم، واملأ بيانات منتجك بدقة.";
+            if(query.includes('اشتراك')) return "لتفعيل اشتراكك الملكي، الرجاء إرسال صورة إشعار التحويل البنكي وسيقوم فريق Jassas Soft بمعالجته فوراً.";
+            if(query.includes('أقسام')) return "السوق الكبير يضم: هواتف، حواسيب، استارلينك، ملبوسات، عقارات، ومواشي. يمكنك تصفحها من صفحة الأقسام.";
+            if(query.includes('دعم') || query.includes('تواصل')) return "فريق الدعم جاهز لمساعدتك! هل تريد التحدث عبر الواتساب؟ (يرجى الضغط على أيقونة الواتساب في صفحة المطور).";
+            return "شكراً لاستفسارك! أنا هنا لمساعدتك في كل أقسام السوق الكبير. هل هناك شيء محدد تبحث عنه؟";
+        }
+    </script>
+</body>
+</html>

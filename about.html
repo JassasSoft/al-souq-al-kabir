@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عن السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --gold: #ffbd59; --bg: #0b0b0b; --card: #161616; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #fff; margin: 0; text-align: center; }
+        
+        .header-top { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .menu-icon { font-size: 1.5rem; color: var(--gold); cursor: pointer; }
+        
+        .container { max-width: 600px; margin: auto; padding: 20px 20px 60px; }
+        
+        .logo-box { margin-bottom: 30px; }
+        .logo-box h1 { color: var(--gold); font-size: 2.5rem; font-weight: 900; margin: 0; text-shadow: 0 0 15px rgba(255,189,89,0.3); }
+        
+        .dev-card { 
+            background: #111; padding: 30px; border-radius: 25px; 
+            border: 1px solid #333; margin-top: 40px; position: relative;
+            transition: 0.3s;
+        }
+        .dev-card:hover { border-color: var(--gold); }
+        .dev-name { color: var(--gold); font-size: 1.4rem; font-weight: 900; margin: 10px 0; }
+        
+        /* القائمة الجانبية */
+        #sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: #161616; transition: 0.3s; z-index: 1000; text-align: right; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
+        #sidebar.active { right: 0; }
+        #menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; }
+        
+        .nav-link { display: block; padding: 20px; color: #fff; text-decoration: none; border-bottom: 1px solid #222; font-weight: 700; }
+        .nav-link:hover { background: var(--card); color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="header-top">
+        <i class="fas fa-bars menu-icon" onclick="toggleMenu()"></i>
+        <div style="font-size: 0.8rem; color: var(--gold);">السوق الكبير 2.0</div>
+    </div>
+
+    <div class="container">
+        <div class="logo-box">
+            <h1>السوق الكبير</h1>
+            <p style="color: #666;">تجارة ذكية.. وصول أسرع</p>
+        </div>
+
+        <p style="line-height: 2; color: #ccc; margin-top: 30px; font-weight: 700;">
+            منصة السوق الكبير هي الوجهة الرقمية الأولى في السودان لربط الموردين والتجار بالمستهلكين. نسعى لخلق بيئة تجارية ذكية توفر الوقت وتضمن جودة الخدمات والمحاصيل والمنتجات في كل مكان.
+        </p>
+
+        <div class="dev-card">
+            <i class="fas fa-code" style="font-size: 2rem; color: var(--gold);"></i>
+            <p style="margin-bottom: 5px; font-size: 0.8rem; color: #888;">المطور الفني</p>
+            <div class="dev-name">محمد حبيب</div>
+            <div style="color: #fff; font-weight: bold; letter-spacing: 2px;">JASSAS SOFT PRO</div>
+            <p style="font-size: 0.75rem; color: #555; margin-top: 15px;">نصنع الحلول الرقمية لمستقبل التجارة في السودان</p>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 20px; color: var(--gold); font-size: 1.2rem;">
+                <a href="#" style="color:var(--gold)"><i class="fab fa-whatsapp"></i></a>
+                <a href="#" style="color:var(--gold)"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div id="menu-overlay" onclick="toggleMenu()"></div>
+    <div id="sidebar">
+        <div style="padding: 30px; border-bottom: 1px solid #333; color: var(--gold);"><h4>القائمة الرئيسية</h4></div>
+        <a href="index.html" class="nav-link"><i class="fas fa-home" style="margin-left:10px"></i> الرئيسية</a>
+        <a href="search.html" class="nav-link"><i class="fas fa-search" style="margin-left:10px"></i> البحث الذكي</a>
+        <a href="chat.html" class="nav-link"><i class="fas fa-comments" style="margin-left:10px"></i> الدردشة</a>
+        <a href="profile.html" class="nav-link"><i class="fas fa-user" style="margin-left:10px"></i> حسابي</a>
+        <a href="about.html" class="nav-link" style="color:var(--gold)"><i class="fas fa-info-circle" style="margin-left:10px"></i> عن التطبيق</a>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('menu-overlay');
+            sidebar.classList.toggle('active');
+            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

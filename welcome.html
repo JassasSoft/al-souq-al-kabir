@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مرحباً بك في السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ffbd59; /* لون الذهب المميز للسوق الكبير */
+            --bg: #0d0212;
+            --surface: #13041b;
+        }
+
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: radial-gradient(circle at top right, #220b30, var(--bg));
+            color: #fff; 
+            margin: 0; 
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .welcome-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* لمسة احترافية: أيقونة متوهجة */
+        .brand-icon {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255,189,89,0.3);
+        }
+
+        .sudan-badge { 
+            background: rgba(255, 189, 89, 0.1); 
+            border: 1px solid var(--primary); 
+            color: var(--primary); 
+            padding: 6px 20px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .hero-title span { color: var(--primary); }
+
+        .hero-desc {
+            color: #aaa;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin: 20px 0 45px;
+            max-width: 280px;
+        }
+
+        .btn-group {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: #000;
+            display: block;
+            padding: 18px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 900;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 25px rgba(255,189,89,0.25);
+            margin-bottom: 15px;
+            transition: 0.4s;
+        }
+
+        .btn-main:active { transform: scale(0.97); }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            display: block;
+            padding: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .btn-secondary:active { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-container">
+        <div class="brand-icon"><i class="fas fa-store"></i></div>
+        <div class="sudan-badge">السوق الكبير - 2026</div>
+        <h1 class="hero-title">أهلاً بك في<br><span>السوق الكبير</span></h1>
+        <p class="hero-desc">
+            بوابتك الرقمية الأولى للتجارة، المحاصيل، والخدمات بضمان وثقة.
+        </p>
+
+        <div class="btn-group">
+            <a href="register.html" class="btn-main">إنشاء حساب جديد</a>
+            <a href="login.html" class="btn-secondary">تسجيل الدخول</a>
+        </div>
+    </div>
+
+    <script>
+        console.log("السوق الكبير جاهز للانطلاق...");
+    </script>
+</body>
+</html>

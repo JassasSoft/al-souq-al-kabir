@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>السوق الكبير</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            /* هنا السحر: نستخدم الصورة كخلفية للجسم بالكامل وبدقة عالية */
+            background-image: url('splash.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* هذا المربع كان يظهر بسبب وسم <img>، قمنا بإزالته تماماً */
+    </style>
+</head>
+<body>
+
+    <script>
+        // الانتقال التلقائي للصفحة الرئيسية بعد 3 ثواني
+        setTimeout(() => {
+            window.location.href = 'index.html'; 
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>السوق الكبير | المواشي والأعلاف</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --gold: #fcc963; --dark: #000; --card: #151515; --header-h: 145px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--dark); color: #fff; height: 100vh; overflow: hidden; }
+
+        /* 🛠️ هندسة الهيدر الموحد - توزيع الاتجاهات بدقة متناهية 🛠️ */
+        .header { 
+            display: flex; 
+            align-items: center; 
+            padding: 0 15px; 
+            background: #000; 
+            border-bottom: 2px solid var(--gold); 
+            height: 80px; 
+            position: relative; 
+            z-index: 1000; 
+        }
+        /* زر الرجوع في أقصى اليمين */
+        .back-btn { 
+            color: var(--gold); 
+            font-size: 1.4rem; 
+            cursor: pointer; 
+            padding: 5px; 
+            position: absolute;
+            right: 15px;
+        } 
+        /* زر القائمة الجانبية (الثلاث شرطات) في أقصى الشمال فوق */
+        .menu-btn { 
+            color: var(--gold); 
+            font-size: 1.6rem; 
+            cursor: pointer; 
+            padding: 5px;
+            position: absolute;
+            left: 15px;
+        } 
+        /* عنوان الصفحة في المنتصف تماماً */
+        .header .title-group { 
+            text-align: center; 
+            width: 100%;
+            padding: 0 50px;
+        }
+        .header .title-group h1 { font-weight: 900; color: #fff; font-size: 1.1rem; margin: 0; }
+        .header .title-group span { font-size: 0.75rem; color: var(--gold); font-weight: bold; }
+
+        /* 🔽 القائمة الجانبية الاحترافية تفتح وتتحرك من جهة الشمال (اليسار) 🔽 */
+        .sidebar { 
+            position: fixed; 
+            top: 0; 
+            left: -300px; 
+            width: 280px; 
+            height: 100vh; 
+            background: rgba(10, 10, 10, 0.96); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px); 
+            z-index: 9999; 
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-right: 2px solid var(--gold); 
+            box-shadow: 10px 0 40px rgba(0,0,0,0.9); 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .sidebar.active { left: 0; }
+        
+        /* كرت الهوية الفخم للمطور */
+        .sidebar-brand-profile { padding: 30px 20px; background: linear-gradient(135deg, #111 0%, #000 100%); border-bottom: 1px solid rgba(252, 201, 99, 0.2); display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .sidebar-brand-profile .user-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; background: #1a1a1a; color: var(--gold); font-size: 1.4rem; }
+        .sidebar-brand-profile h2 { font-size: 1.05rem; font-weight: 900; color: #fff; }
+        .sidebar-brand-profile p { font-size: 0.7rem; color: var(--gold); font-weight: 700; }
+        .sidebar-brand-profile .close-icon { position: absolute; top: 25px; left: 20px; color: #888; font-size: 1.2rem; cursor: pointer; }
+
+        /* عناصر المنيو الجانبي المتناسق مع الألوان */
+        .sidebar-content { flex: 1; padding: 15px 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+        
+        .tab-btn[data-type="الكل"], .side-link[data-type="الكل"] { background: #424242; }
+        .tab-btn[data-type="أبقار"], .side-link[data-type="أبقار"] { background: #4a148c; }
+        .tab-btn[data-type="ابل"], .side-link[data-type="ابل"] { background: #7e5109; }
+        .tab-btn[data-type="ضان"], .side-link[data-type="ضان"] { background: #1e293b; }
+        .tab-btn[data-type="أعلاف"], .side-link[data-type="أعلاف"] { background: #064e3b; }
+        .tab-btn[data-type="أليفة"], .side-link[data-type="أليفة"] { background: #641e16; }
+
+        .side-link { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; color: #fff; text-decoration: none; border-radius: 12px; font-weight: 700; transition: 0.2s; font-size: 0.85rem; opacity: 0.85; border: 2px solid transparent; }
+        .side-link i { color: #fff; width: 25px; text-align: center; font-size: 0.95rem; }
+        .side-link span { flex: 1; text-align: right; margin-right: 10px; }
+        .side-link:active { transform: scale(0.97); }
+
+        .tab-btn.active, .side-link.active-system { background: var(--gold) !important; color: #000 !important; transform: scale(1.03); border: 2px solid #fff !important; box-shadow: 0 0 15px rgba(252, 201, 99, 0.6); opacity: 1; }
+        .side-link.active-system i { color: #000 !important; }
+
+        .sidebar-footer { padding: 15px; border-top: 1px solid #1c1c1c; background: #050505; text-align: center; font-size: 0.65rem; color: #555; font-weight: bold; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 9998; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+
+        /* شريط الخانات العلوي الملون */
+        .tabs-container { display: flex; overflow-x: auto; padding: 12px 15px; gap: 12px; background: #000; scrollbar-width: none; height: 65px; }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn { padding: 8px 24px; border-radius: 12px; cursor: pointer; white-space: nowrap; font-size: 0.85rem; font-weight: 900; border: 2px solid transparent; transition: 0.3s; color: #fff; }
+
+        /* العرض الرئيسي */
+        .main-scroll { height: calc(100vh - var(--header-h) - 65px); overflow-y: auto; padding-bottom: 40px; scroll-behavior: smooth; }
+        .premium-slider { margin: 15px; height: 120px; border: 1px solid var(--gold); border-radius: 20px; background: linear-gradient(145deg, #0a0a0a, #1a1a1a); overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }
+        .p-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--gold); width: 0%; transition: width 3900ms linear; }
+
+        /* شبكة الكروت */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px; }
+        .card { background: var(--card); border-radius: 18px; border: 1px solid #222; padding: 15px; position: relative; transition: 0.2s; display: flex; flex-direction: column; justify-content: space-between; }
+        .card:active { transform: scale(0.96); }
+        .card-tag { background: var(--gold); color: #000; font-size: 0.6rem; padding: 3px 8px; border-radius: 6px; position: absolute; top: 12px; left: 12px; font-weight: 900; }
+        .card h4 { text-align: center; font-size: 0.85rem; margin-top: 20px; margin-bottom: 5px; color: #fff; }
+        .card p { text-align: center; font-size: 0.72rem; color: #888; margin-bottom: 10px; }
+        .card .price-box { background: #000; color: var(--gold); text-align: center; padding: 8px; border-radius: 12px; font-weight: 900; border: 1px solid #222; font-size: 0.85rem; margin-bottom: 8px; }
+        .buy-btn { background: #25d366; color: #000; padding: 9px; border-radius: 11px; font-weight: 900; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 0.75rem; border: none; width: 100%; cursor: pointer; }
+
+        /* شريط التنقل السفلي */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: #080808; border-top: 1px solid #1c1c1c; display: flex; justify-content: space-around; align-items: center; z-index: 10002; padding: 0 10px; }
+        .nav-item { color: #666; text-align: center; text-decoration: none; font-size: 0.72rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-weight: bold; width: 20%; cursor: pointer; }
+        .nav-item i { font-size: 1.25rem; }
+        .nav-item.active { color: var(--gold); }
+        .nav-item.exit-btn { color: #ff3b30; }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="sidebar" id="sideNav">
+        <div class="sidebar-brand-profile">
+            <i class="fas fa-times close-icon" onclick="toggleMenu()"></i>
+            <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+            <h2>المطور محمد حبيب</h2>
+            <p>تاجر معتمد ومؤسس Jassas Soft</p>
+        </div>
+        <div class="sidebar-content">
+            <a href="#" class="side-link" data-type="الكل" id="menu-الكل" onclick="navigateSmart('الكل')"><span>نظام الكل المفتوح</span><i class="fas fa-border-all"></i></a>
+            <a href="#" class="side-link" data-type="أبقار" id="menu-أبقار" onclick="navigateSmart('أبقار')"><span>أبقار هجين</span><i class="fas fa-cow"></i></a>
+            <a href="#" class="side-link" data-type="ابل" id="menu-ابل" onclick="navigateSmart('ابل')"><span>ابل وسلالات صادر</span><i class="fas fa-hippo"></i></a>
+            <a href="#" class="side-link" data-type="ضان" id="menu-ضان" onclick="navigateSmart('ضان')"><span>ضان وحملان</span><i class="fas fa-cloud"></i></a>
+            <a href="#" class="side-link" data-type="أعلاف" id="menu-أعلاف" onclick="navigateSmart('أعلاف')"><span>أعلاف ومطاحن</span><i class="fas fa-seedling"></i></a>
+            <a href="#" class="side-link" data-type="أليفة" id="menu-أليفة" onclick="navigateSmart('أليفة')"><span>حيوانات أليفة</span><i class="fas fa-dog"></i></a>
+        </div>
+        <div class="sidebar-footer">
+            Jassas Soft Pro &copy; 2026
+        </div>
+    </div>
+
+    <div class="fixed-top-group" style="position: fixed; top: 0; width: 100%; z-index: 1000;">
+        <header class="header">
+            <i class="fas fa-arrow-right back-btn" onclick="window.history.back()"></i>
+            
+            <div class="title-group">
+                <h1>المواشي والأعلاف</h1>
+                <span>السوق الكبير - الخيار الذكي الأول</span>
+            </div>
+            
+            <i class="fas fa-bars menu-btn" onclick="toggleMenu()"></i>
+        </header>
+
+        <nav class="tabs-container" id="tabBar">
+            <button class="tab-btn active" data-type="الكل" id="chip-الكل" onclick="applyFilter('الكل', this)">الكل</button>
+            <button class="tab-btn" data-type="أبقار" id="chip-أبقار" onclick="applyFilter('أبقار', this)">أبقار</button>
+            <button class="tab-btn" data-type="ابل" id="chip-ابل" onclick="applyFilter('ابل', this)">ابل</button>
+            <button class="tab-btn" data-type="ضان" id="chip-ضان" onclick="applyFilter('ضان', this)">ضان</button>
+            <button class="tab-btn" data-type="أعلاف" id="chip-أعلاف" onclick="applyFilter('أعلاف', this)">أعلاف</button>
+            <button class="tab-btn" data-type="أليفة" id="chip-أليفة" onclick="applyFilter('أليفة', this)">أليفة</button>
+        </nav>
+    </div>
+
+    <main class="main-scroll" style="margin-top: var(--header-h);">
+        <div class="premium-slider" id="adSlider"></div>
+
+        <div class="grid" id="mainGrid">
+            <div class="card" data-cat="أليفة">
+                <span class="card-tag">بريميو</span>
+                <h4>كلاب جيرمن شيبرد</h4>
+                <p>حراسة ذكية مدربة بالكامل</p>
+                <div class="price-box">450,000 SDG</div>
+                <button class="buy-btn" onclick="window.location.href='https://wa.me/249923211001'"><i class="fab fa-whatsapp"></i> اطلب الآن</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="window.location.href='index.html'"><i class="fas fa-home"></i>الرئيسية</div>
+        <div class="nav-item"><i class="fas fa-envelope"></i>الرسائل</div>
+        <div class="nav-item"><i class="fas fa-user"></i>حسابي</div>
+        <div class="nav-item exit-btn"><i class="fas fa-power-off"></i>خروج</div>
+    </nav>
+
+    <script>
+        function toggleMenu() { 
+            const sidebar = document.getElementById('sideNav');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active'); 
+            overlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+        }
+
+        let activeCat = 'الكل';
+        let timer;
+
+        function applyFilter(cat, btn) {
+            activeCat = cat;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            
+            document.querySelectorAll('.card').forEach(c => {
+                c.style.display = (cat === 'الكل' || c.dataset.cat === cat) ? 'flex' : 'none';
+            });
+            
+            document.querySelectorAll('.side-link').forEach(link => link.classList.remove('active-system'));
+            const activeLink = document.getElementById(`menu-${cat}`);
+            if(activeLink) activeLink.classList.add('active-system');
+
+            startPremium();
+        }
+
+        function navigateSmart(catName) {
+            toggleMenu();
+            const targetBtn = document.getElementById(`chip-${catName}`);
+            applyFilter(catName, targetBtn);
+            if (targetBtn) {
+                setTimeout(() => {
+                    targetBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }, 50);
+            }
+        }
+
+        function startPremium() {
+            clearInterval(timer);
+            const slider = document.getElementById('adSlider');
+            const items = Array.from(document.querySelectorAll('.card')).filter(c => activeCat === 'الكل' || c.dataset.cat === activeCat);
+            let i = 0;
+            function run() {
+                if(!items.length) { slider.innerHTML = `<p style="color:#555; font-size:0.8rem; font-weight:bold;">قريباً تتوفر عروض ومزادات ${activeCat} المميزة</p>`; return; }
+                const data = items[i];
+                slider.innerHTML = `
+                    <div style="padding:15px; text-align:center; width:100%">
+                        <span style="background:var(--gold); color:#000; padding:2px 10px; border-radius:5px; font-weight:900; font-size:0.65rem">عرض بريميو الملكي</span>
+                        <h3 style="color:var(--gold); margin:5px 0; font-size:1rem; font-weight:900">${data.querySelector('h4').innerText}</h3>
+                        <p style="color:#aaa; font-size:0.75rem; margin:0">${data.querySelector('p').innerText}</p>
+                        <div class="p-bar" id="pProgress"></div>
+                    </div>`;
+                setTimeout(() => { if(document.getElementById('pProgress')) document.getElementById('pProgress').style.width = "100%"; }, 50);
+                i = (i + 1) % items.length;
+            }
+            run(); timer = setInterval(run, 4000);
+        }
+
+        window.onload = function() {
+            applyFilter('الكل', document.getElementById('chip-الكل'));
+        };
+    </script><script>
+    // 🔓 دالة فتح القائمة الجانبية
+    function openSidebarDrawer() {
+        // بيفحص الكلاسات المشهورة عندك في التطبيق ليضمن التشغيل الفوري
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            
+            // 🧠 حركة ذكية: إجبار السايدبار داخل الـ iframe إنه يعيد قراءة الخانات أول ما يفتح
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    // 🔒 دالة إغلاق القائمة الجانبية
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+</script><script>
+    // 🔓 دالة فتح وإغلاق القائمة الجانبية (القديمة المعتمدة)
+    function openSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+
+    // 🔒 محرك حقن وتوحيد الشريط السفلي الاحترافي في صفحة القسم تلقائياً
+    function injectUniversalBottomNavbar() {
+        // 1. إضافة التنسيقات الفخمة للشريط السفلي لضمان ثباته وأناقته
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .parent-bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(12px); border-top: 1px solid #1a1a1a; height: 68px; display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 999; }
+            .parent-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: #555; gap: 4px; cursor: pointer; flex: 1; height: 100%; position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+            .parent-nav-item i { font-size: 1.15rem; }
+            .parent-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Cairo', sans-serif; }
+            .parent-nav-item.active-nav { color: #ffbd59; }
+            .parent-nav-item.active-nav::after { content: ''; position: absolute; top: 2px; width: 12px; height: 3px; background: #ffbd59; border-radius: 10px; box-shadow: 0 0 8px #ffbd59; }
+            /* إعطاء مساحة أسفل محتوى الصفحة الأساسي حتى لا يختفي تحت الشريط السفلي */
+            body { padding-bottom: 75px !important; }
+        `;
+        document.head.appendChild(style);
+
+        // 2. بناء هيكل الشريط السفلي بالربط الذكي
+        const navbar = document.createElement('nav');
+        navbar.className = 'parent-bottom-navbar';
+        navbar.innerHTML = `
+            <div class="parent-nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="parent-nav-item active-nav" onclick="openSidebarDrawer()"><i class="fas fa-th-large"></i><span>الأقسام</span></div>
+            <div class="parent-nav-item" onclick="window.location.href='smart-search.html'"><i class="fas fa-search"></i><span>بحث ذكي</span></div>
+            <div class="parent-nav-item" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i><span>تحديث</span></div>
+        `;
+        
+        document.body.appendChild(navbar);
+    }
+
+    // تشغيل المحرك فور تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', injectUniversalBottomNavbar);
+</script><!-- المحرك النهائي الشامل: سرعة خارقة + ربط تلقائي للشريط والسيرفيس بالسايدبار -->
+<script>
+    // 🧠 مصفوفة الربط الموحدة للأقسام الـ 12 في "السوق الكبير" لضمان سرعة الانتقال
+    const globalAppSections = {
+        'mobiles.html': { id: 'mobiles', name: 'الهواتف والملحقات' },
+        'computers.html': { id: 'computers', name: 'الحواسيب والطابعات' },
+        'starlink.html': { id: 'starlink', name: 'الستارلينك وملحقاته' },
+        'electricity.html': { id: 'electricity', name: 'الأجهزة الكهربائية' },
+        'clothes.html': { id: 'clothes', name: 'الملبوسات والأحذية' },
+        'furniture.html': { id: 'furniture', name: 'الأثاث والأواني' },
+        'building.html': { id: 'building', name: 'أدوات البناء' },
+        'realestate.html': { id: 'realestate', name: 'العقارات والأراضي' },
+        'vehicles.html': { id: 'vehicles', name: 'السيارات والمركبات' },
+        'motors.html': { id: 'motors', name: 'المواتر والمحركات' },
+        'crops.html': { id: 'crops', name: 'الحبوب والمحاصيل' },
+        'livestock.html': { id: 'livestock', name: 'المواشي والأعلاف' }
+    };
+
+    // 🔓 دالة فتح وإغلاق القائمة الجانبية المستقرة وسريعة الاستجابة
+    function openSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) {
+            drawer.classList.add('active');
+            // تأمين التحديث الفوري والذكي لبيانات السايدبار وإجباره على قراءة التابات العلوية
+            const sidebarIframe = drawer.querySelector('iframe');
+            if (sidebarIframe && sidebarIframe.contentWindow && typeof sidebarIframe.contentWindow.loadDynamicTabs === 'function') {
+                sidebarIframe.contentWindow.loadDynamicTabs();
+            }
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const drawer = document.getElementById('sidebarContainer') || document.getElementById('sidebarOverlay') || document.querySelector('.sidebar-panel');
+        if (drawer) drawer.classList.remove('active');
+    }
+
+    // 📲 دالة التنقل الفوري فائق السرعة لمنع التهنيج في المبايل
+    function fastNavigate(targetUrl) {
+        // حفظ اسم الصفحة الحالية في الذاكرة لتسهيل العودة وربط البيانات
+        const fileName = targetUrl.split('/').pop().split('?')[0];
+        if(globalAppSections[fileName]) {
+            localStorage.setItem('current_market_page', globalAppSections[fileName].id);
+        }
+        window.location.href = targetUrl;
+    }
+
+    // 🔒 محرك حقن وبناء الشريط السفلي الاحترافي ذو الاستجابة الفورية
+    function injectUniversalBottomNavbar() {
+        // قراءة اسم الملف الحالي تلقائياً لمعرفة القسم المفتوح
+        const currentFileName = window.location.pathname.split('/').pop() || 'building.html';
+        
+        // حفظ الفئة الحالية في الكاش عشان السايدبار يقرأها أوتوماتيك لو الرابط اتغير
+        if(globalAppSections[currentFileName]) {
+            localStorage.setItem('current_market_page', globalAppSections[currentFileName].id);
+        }
+
+        // 1. حقن التنسيقات الفخمة والثابتة (الأسود الملكي مع الذهب الأصلي)
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .parent-bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(15px); border-top: 1px solid #1a1a1a; height: 68px; display: flex; align-items: center; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom); z-index: 999; }
+            .parent-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: #555; gap: 4px; cursor: pointer; flex: 1; height: 100%; position: relative; text-decoration: none; -webkit-tap-highlight-color: transparent; transition: transform 0.1s; }
+            .parent-nav-item i { font-size: 1.15rem; }
+            .parent-nav-item span { font-size: 0.65rem; font-weight: 700; font-family: 'Cairo', sans-serif; }
+            .parent-nav-item.active-nav { color: #ffbd59; }
+            .parent-nav-item.active-nav::after { content: ''; position: absolute; top: 2px; width: 12px; height: 3px; background: #ffbd59; border-radius: 10px; box-shadow: 0 0 8px #ffbd59; }
+            .parent-nav-item:active { transform: scale(0.92); color: #ffbd59; }
+            body { padding-bottom: 78px !important; }
+        `;
+        document.head.appendChild(style);
+
+        // 2. بناء الهيكل وربطه بالدوال السريعة fastNavigate
+        const navbar = document.createElement('nav');
+        navbar.className = 'parent-bottom-navbar';
+        navbar.innerHTML = `
+            <div class="parent-nav-item" onclick="fastNavigate('index.html')"><i class="fas fa-home"></i><span>الرئيسية</span></div>
+            <div class="parent-nav-item active-nav" onclick="openSidebarDrawer()"><i class="fas fa-th-large"></i><span>الأقسام</span></div>
+            <div class="parent-nav-item" onclick="fastNavigate('smart-search.html')"><i class="fas fa-search"></i><span>بحث ذكي</span></div>
+            <div class="parent-nav-item" onclick="window.location.reload()"><i class="fas fa-sync-alt"></i><span>تحديث</span></div>
+        `;
+        
+        document.body.appendChild(navbar);
+    }
+
+    // تشغيل المحرك فوراً بسرعة المتصفح وبدون أي انتظار لشاشات التحميل
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectUniversalBottomNavbar);
+    } else {
+        injectUniversalBottomNavbar();
+    }
+</script>
+</body>
+</html>

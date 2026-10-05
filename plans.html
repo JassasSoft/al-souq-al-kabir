@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>باقات الاشتراك والتوثيق | السوق الكبير</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- مكتبات الـ Firebase الأساسية -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root { 
+            --gold: #ffbd59; 
+            --bg: #0b0b0b; 
+            --card: #161616; 
+            --silver: #c0c0c0; 
+            --smart-blue: #3498db; 
+            --smart-blue-dark: #1f4068; 
+            --bronze-green: #2ecc71; 
+            --switch-bg: #222;
+        }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 20px 15px 40px 15px; font-weight: 700; -webkit-tap-highlight-color: transparent; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+        .back-link { color: var(--gold); text-decoration: none; font-size: 1.2rem; }
+        .header h1 { flex: 1; text-align: center; font-size: 1.3rem; color: var(--gold); margin: 0; font-weight: 900; }
+        .plans-container { display: flex; flex-direction: column; gap: 20px; max-width: 500px; margin: auto; }
+        
+        .plan-card { background: var(--card); border: 2px solid #252525; border-radius: 25px; padding: 22px; position: relative; transition: 0.3s; overflow: hidden; }
+        .plan-premium::before { content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.04), transparent); transform: skewX(-25deg); animation: shine 4s infinite; }
+        @keyframes shine { 100% { left: 150%; } }
+        
+        .plan-normal { border-color: var(--bronze-green); } 
+        .plan-retail { border-color: var(--silver); }
+        .plan-wholesale { border-color: var(--smart-blue); background: linear-gradient(145deg, var(--card), #0f1c2e); } 
+        .plan-ads-premium { border-color: var(--gold); background: linear-gradient(145deg, var(--card), #22180a); }
+
+        .badge { position: absolute; top: 15px; left: -35px; background: var(--gold); color: #000; padding: 5px 40px; transform: rotate(-45deg); font-size: 0.72rem; font-weight: 900; }
+        .badge.badge-green { background: var(--bronze-green); color: #000; }
+        .badge.badge-blue { background: var(--smart-blue); color: #fff; }
+        
+        .card-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .plan-icon { font-size: 2rem; }
+        .plan-name { font-size: 1.25rem; display: block; font-weight: 900; }
+        .plan-desc { color: #9a9a9a; font-size: 0.8rem; margin-bottom: 15px; display: block; font-weight: 400; min-height: 35px; line-height: 1.4; }
+        
+        .switch-title { font-size: 0.78rem; color: var(--gold); margin: 5px 5px 5px 0; display: block; font-weight: 700; }
+        .switch-container { display: flex; background: var(--switch-bg); padding: 4px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #2d2d2d; }
+        .switch-btn { flex: 1; padding: 8px; background: transparent; border: none; color: #8c8c8c; font-family: 'Cairo'; font-weight: 700; font-size: 0.78rem; cursor: pointer; border-radius: 8px; transition: 0.25s; text-align: center; }
+        
+        .plan-normal .switch-btn.active { background: var(--bronze-green); color: #000; font-weight: 900; }
+        .plan-retail .switch-btn.active { background: var(--silver); color: #000; font-weight: 900; }
+        .plan-wholesale .switch-btn.active { background: linear-gradient(135deg, var(--smart-blue), var(--smart-blue-dark)); color: #fff; font-weight: 900; }
+
+        .price-tag { background: rgba(255,255,255,0.01); padding: 10px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #1e1e1e; text-align: center; }
+        .price-display { font-size: 1.45rem; color: var(--gold); display: block; font-weight: 900; }
+        .price-period { font-size: 0.8rem; color: #7f7f7f; font-weight: 400; display: block; margin-top: 2px; }
+        
+        .features { list-style: none; padding: 0; margin-bottom: 20px; min-height: 85px; }
+        .features li { font-size: 0.8rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; font-weight: 400; color: #e0e0e0; }
+        
+        .btn-sub { width: 100%; padding: 12px; border-radius: 15px; border: none; font-weight: 900; font-size: 1rem; cursor: pointer; transition: 0.2s; font-family: 'Cairo'; }
+        .btn-normal-style { background: var(--bronze-green); color: #000; }
+        .btn-retail-style { background: var(--silver); color: #000; }
+        .btn-wholesale-style { background: linear-gradient(135deg, var(--smart-blue), #2980b9); color: #fff; }
+        .btn-ads-style { background: linear-gradient(135deg, var(--gold), #db9d35); color: #000; }
+        .btn-sub:active { transform: scale(0.97); }
+        
+        .support-box { text-align: center; margin-top: 35px; padding: 15px; border-top: 1px solid #1a1a1a; color: #666; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="profile.html" class="back-link"><i class="fas fa-arrow-right"></i></a>
+        <h1>باقات وتوثيقات السوق الكبير</h1>
+        <div style="width: 24px;"></div> 
+    </div>
+
+    <div class="plans-container">
+        
+        <!-- 1️⃣ كارت التاجر العادي -->
+        <div class="plan-card plan-normal" id="card_normal">
+            <div class="badge badge-green">حساب عادي</div>
+            <div class="card-meta">
+                <span class="plan-icon">👤</span>
+                <div>
+                    <span class="plan-name" id="title_normal">تاجر عادي بسيط</span>
+                </div>
+            </div>
+            <span class="plan-desc">باقة مرنة مخصصة للأفراد والبيع السريع والدقيق بالمنصة.</span>
+            
+            <span class="switch-title">حالة التوثيق:</span>
+            <div class="switch-container">
+                <button class="switch-btn active" onclick="setNormalVerify('basic', this)">عادي بدون توثيق ❌</button>
+                <button class="switch-btn" onclick="setNormalVerify('verified', this)">عادي موثق 🟢</button>
+            </div>
+
+            <span class="switch-title">مدة الاشتراك:</span>
+            <div class="switch-container">
+                <button class="switch-btn active" onclick="setNormalDuration('1week', this)">أسبوع واحد</button>
+                <button class="switch-btn" onclick="setNormalDuration('2weeks', this)">أسبوعين</button>
+            </div>
+
+            <div class="price-tag">
+                <span class="price-display" id="price_normal_val">15,000 ج.س</span>
+                <span class="price-period" id="period_normal">صلاحية النشر والظهور المتفق عليها</span>
+            </div>
+            <ul class="features" id="features_normal"></ul>
+            <button class="btn-sub btn-normal-style" onclick="submitSelection('normal')">الانتقال للشات للتفعيل</button>
+        </div>
+
+        <!-- 2️⃣ كارت التاجر القطاعي -->
+        <div class="plan-card plan-retail plan-premium">
+            <div class="badge">الأكثر طلباً</div>
+            <div class="card-meta">
+                <span class="plan-icon">🏪</span>
+                <div>
+                    <span class="plan-name" style="color: var(--silver);">تاجر قطاعي متميز</span>
+                </div>
+            </div>
+            <span class="plan-desc">للمحلات التجارية والخدمية والورش التي تحتاج انتشاراً واسعاً.</span>
+            
+            <span class="switch-title">حالة التوثيق:</span>
+            <div class="switch-container">
+                <button class="switch-btn active" onclick="setRetailVerify('basic', this)">قطاعي بدون توثيق ❌</button>
+                <button class="switch-btn" onclick="setRetailVerify('verified', this)">قطاعي موثق فضي ⚪</button>
+            </div>
+
+            <span class="switch-title">مدة الاشتراك:</span>
+            <div class="switch-container">
+                <button class="switch-btn active" onclick="setRetailDuration('1month', this)">شهر واحد</button>
+                <button class="switch-btn" onclick="setRetailDuration('2months', this)">شهرين كاملين</button>
+            </div>
+
+            <div class="price-tag">
+                <span class="price-display" id="price_retail_val">75,000 ج.س</span>
+                <span class="price-period" id="period_retail">الميزات والصلاحيات المتاحة للباقة</span>
+            </div>
+            <ul class="features" id="features_retail"></ul>
+            <button class="btn-sub btn-retail-style" onclick="submitSelection('retail')">الانتقال للشات للتفعيل</button>
+        </div>
+
+        <!-- 3️⃣ كارت مورد الجملة -->
+        <div class="plan-card plan-wholesale plan-premium">
+            <div class="badge badge-blue">مورد معتمد</div>
+            <div class="card-meta">
+                <span class="plan-icon">💎</span>
+                <div>
+                    <span class="plan-name" style="color: #00c6ff;">مورد جملة / شركات</span>
+                </div>
+            </div>
+            <span class="plan-desc">لكبار الموردين والمصانع وأصحاب الأنشطة الضخمة بالسوق.</span>
+            
+            <span class="switch-title">حالة التوثيق:</span>
+            <div class="switch-container">
+                <button class="switch-btn active" onclick="setWholesaleVerify('basic', this)">جملة بدون توثيق ❌</button>
+                <button class="switch-btn" onclick="setWholesaleVerify('verified', this)">جملة موثق بالكامل 🔵</button>
+            </div>
+
+            <span class="switch-title">مدة الاشتراك:</span>
+            <div class="switch-container">
+                <button class="switch-btn active" onclick="setWholesaleDuration('1month', this)">شهر واحد</button>
+                <button class="switch-btn" onclick="setWholesaleDuration('2months', this)">شهرين كاملين</button>
+            </div>
+
+            <div class="price-tag">
+                <span class="price-display" id="price_wholesale_val">150,000 ج.س</span>
+                <span class="price-period" id="period_wholesale">باقة السيطرة الكاملة على المتجر</span>
+            </div>
+            <ul class="features" id="features_wholesale"></ul>
+            <button class="btn-sub btn-wholesale-style" onclick="submitSelection('wholesale')">الانتقال للشات للتفعيل</button>
+        </div>
+
+        <!-- 4️⃣ كارت الإعلانات البريميوم الذكية -->
+        <div class="plan-card plan-ads-premium plan-premium">
+            <span class="plan-icon" style="color: var(--gold);">🚀</span>
+            <span class="plan-name" style="color: var(--gold);">الإعلانات البريميوم الذكية</span>
+            <span class="plan-desc">باقة منفردة ومستقلة لتثبيت إعلان عريض وتفجير المشاهدات فوراً بجانب باقتك الأساسية.</span>
+            <div class="price-tag">
+                <span class="price-display" id="price_premium_ads">50,000 ج.س</span>
+                <span class="price-period">تثبيت فوري وتصدر نتائج البحث</span>
+            </div>
+            <ul class="features">
+                <li><i class="fas fa-bolt" style="color:var(--gold);"></i> مضاعفة اتصالات ومشاهدات الإعلان 10 مرات</li>
+                <li><i class="fas fa-star" style="color:var(--gold);"></i> تتوفر وتعمل بالتوازي مع أي اشتراك حالي</li>
+            </ul>
+            <button class="btn-sub btn-ads-style" onclick="submitSelection('premium_ads')">شراء الإعلان البريميوم الآن</button>
+        </div>
+
+    </div>
+
+    <div class="support-box">
+        <p>تحتاج دعم طارئ في عمليات الحسابات والاشتراكات?</p>
+        <p style="color: var(--gold); font-weight: 900;">تواصل مباشر مع الإدارة الفنية: 0923211001</p>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            databaseURL: "https://alsouq-alkabeer-2052c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e"
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const database = firebase.database();
+
+        const currentMerchantUid = localStorage.getItem('user_device_id') || 'user_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('user_device_id', currentMerchantUid);
+
+        let serverPrices = {
+            normal_basic_1week: 15000, normal_basic_2weeks: 25000,
+            normal_verified_1week: 30000, normal_verified_2weeks: 50000,
+            retail_basic_1month: 60000, retail_basic_2months: 110000,
+            retail_verified_1month: 75000, retail_verified_2months: 130000,
+            wholesale_basic_1month: 120000, wholesale_basic_2months: 220000,
+            wholesale_verified_1month: 150000, wholesale_verified_2months: 280000,
+            premium_ads: 50000
+        };
+
+        let config = {
+            normal: { verify: 'basic', duration: '1week' },
+            retail: { verify: 'basic', duration: '1month' },
+            wholesale: { verify: 'basic', duration: '1month' }
+        };
+
+        let currentSelections = {};
+
+        window.addEventListener('DOMContentLoaded', () => {
+            database.ref('admin_settings/prices').on('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const p = snapshot.val();
+                    if(p.nb_1w) serverPrices.normal_basic_1week = parseInt(p.nb_1w);
+                    if(p.nb_2w) serverPrices.normal_basic_2weeks = parseInt(p.nb_2w);
+                    if(p.nv_1w) serverPrices.normal_verified_1week = parseInt(p.nv_1w);
+                    if(p.nv_2w) serverPrices.normal_verified_2weeks = parseInt(p.nv_2w);
+                    if(p.rb_1m) serverPrices.retail_basic_1month = parseInt(p.rb_1m);
+                    if(p.rb_2m) serverPrices.retail_basic_2months = parseInt(p.rb_2m);
+                    if(p.rv_1m) serverPrices.retail_verified_1month = parseInt(p.rv_1m);
+                    if(p.rv_2m) serverPrices.retail_verified_2months = parseInt(p.rv_2m);
+                    if(p.wb_1m) serverPrices.wholesale_basic_1month = parseInt(p.wb_1m);
+                    if(p.wb_2m) serverPrices.wholesale_basic_2months = parseInt(p.wb_2m);
+                    if(p.wv_1m) serverPrices.wholesale_verified_1month = parseInt(p.wv_1m);
+                    if(p.wv_2m) serverPrices.wholesale_verified_2months = parseInt(p.wv_2m);
+                    if(p.premium_ads) serverPrices.premium_ads = parseInt(p.premium_ads);
+                }
+                updateAllCardsUI();
+            });
+        });
+
+        function setNormalVerify(val, btn) { clearActive(btn); config.normal.verify = val; updateNormalCard(); }
+        function setNormalDuration(val, btn) { clearActive(btn); config.normal.duration = val; updateNormalCard(); }
+        function updateNormalCard() {
+            let key = `normal_${config.normal.verify}_${config.normal.duration}`;
+            let price = serverPrices[key];
+            let durationText = config.normal.duration === '1week' ? 'أسبوع واحد' : 'أسبوعين';
+            let isVerified = config.normal.verify === 'verified';
+            
+            document.getElementById('price_normal_val').innerText = price.toLocaleString() + " ج.س";
+            document.getElementById('title_normal').innerText = isVerified ? "تاجر عادي موثق 🟢" : "تاجر عادي بسيط";
+            document.getElementById('period_normal').innerText = `صلاحية النشر والظهور: ${durationText}`;
+            
+            document.getElementById('features_normal').innerHTML = isVerified ? 
+                `<li><i class="fas fa-check-circle" style="color:var(--bronze-green);"></i> شارة توثيق برونزية خضراء بجانب اسمك 🟢</li>
+                 <li><i class="fas fa-check-circle" style="color:var(--bronze-green);"></i> نشر حتى 5 إعلانات نشطة ومكثفة</li>
+                 <li><i class="fas fa-check-circle" style="color:var(--bronze-green);"></i> ظهور متقدم فوق الحسابات غير الموثقة</li>` :
+                `<li><i class="fas fa-check-circle" style="color:var(--bronze-green);"></i> نشر حتى 3 إعلانات نشطة بالمنصة</li>
+                 <li><i class="fas fa-check-circle" style="color:var(--bronze-green);"></i> ظهور قياسي عادي في محركات البحث</li>
+                 <li><i class="fas fa-times-circle" style="color:#666;"></i> بدون أي شارة توثيق لحسابك الشخصي</li>`;
+
+            currentSelections.normal = { plan: `تاجر عادي (${isVerified ? 'موثق' : 'بدون توثيق'}) - ${durationText}`, price: price, verify: isVerified ? 'برونزي_أخضر' : 'لا_يوجد' };
+            vibrateDevice();
+        }
+
+        function setRetailVerify(val, btn) { clearActive(btn); config.retail.verify = val; updateRetailCard(); }
+        function setRetailDuration(val, btn) { clearActive(btn); config.retail.duration = val; updateRetailCard(); }
+        function updateRetailCard() {
+            let key = `retail_${config.retail.verify}_${config.retail.duration}`;
+            let price = serverPrices[key];
+            let durationText = config.retail.duration === '1month' ? 'شهر واحد' : 'شهرين';
+            let isVerified = config.retail.verify === 'verified';
+            
+            document.getElementById('price_retail_val').innerText = price.toLocaleString() + " ج.س";
+            document.getElementById('period_retail').innerText = `باقة التجار القطاعي - مدة ${durationText}`;
+            
+            document.getElementById('features_retail').innerHTML = isVerified ? 
+                `<li><i class="fas fa-certificate" style="color:var(--silver);"></i> شارة التوثيق الفضية الرسمية الفخمة ⚪</li>
+                 <li><i class="fas fa-bolt" style="color:var(--silver);"></i> أولوية ظهور ممتازة فوق الحسابات العادية</li>
+                 <li><i class="fas fa-check-circle" style="color:var(--silver);"></i> دعم فني وتجاري مخصص ومفتوح للمحل</li>` :
+                `<li><i class="fas fa-check-circle" style="color:var(--silver);"></i> ميزات النشر القطاعي بدون شارة فضية</li>
+                 <li><i class="fas fa-check-circle" style="color:var(--silver);"></i> ظهور متوسط داخل تصنيفات المحلات</li>
+                 <li><i class="fas fa-times-circle" style="color:#666;"></i> لا يتضمن ميزات ثقة التوثيق الفضي للزبائن</li>`;
+
+            currentSelections.retail = { plan: `تاجر قطاعي (${isVerified ? 'موثق فضي' : 'بدون توثيق'}) - ${durationText}`, price: price, verify: isVerified ? 'فضي' : 'لا_يوجد' };
+            vibrateDevice();
+        }
+
+        function setWholesaleVerify(val, btn) { clearActive(btn); config.wholesale.verify = val; updateWholesaleCard(); }
+        function setWholesaleDuration(val, btn) { clearActive(btn); config.wholesale.duration = val; updateWholesaleCard(); }
+        function updateWholesaleCard() {
+            let key = `wholesale_${config.wholesale.verify}_${config.wholesale.duration}`;
+            let price = serverPrices[key];
+            let durationText = config.wholesale.duration === '1month' ? 'شهر واحد' : 'شهرين';
+            let isVerified = config.wholesale.verify === 'verified';
+            
+            document.getElementById('price_wholesale_val').innerText = price.toLocaleString() + " ج.س";
+            document.getElementById('period_wholesale').innerText = `باقة كبار الموردين والجملة - مدة ${durationText}`;
+            
+            document.getElementById('features_wholesale').innerHTML = isVerified ? 
+                `<li><i class="fas fa-crown" style="color:#00c6ff;"></i> شارة التوثيق الزرقاء الاحترافية للشركات 🔵</li>
+                 <li><i class="fas fa-store" style="color:#00c6ff;"></i> متجر إلكتروني معتمد وتثبيت تلقائي بالواجهة</li>
+                 <li><i class="fas fa-chart-line" style="color:#00c6ff;"></i> تفجير مبيعات وتصدر كامل لكافة نتائج البحث</li>` :
+                `<li><i class="fas fa-check-circle" style="color:#00c6ff;"></i> فتح خيارات البيع بالجملة للكميات الكبيرة</li>
+                 <li><i class="fas fa-check-circle" style="color:#00c6ff;"></i> ظهور تجاري منتظم داخل تصنيفات الجملة</li>
+                 <li><i class="fas fa-times-circle" style="color:#666;"></i> لا يشمل الشارة الاحترافية الموثقة أو التثبيت العالي</li>`;
+
+            currentSelections.wholesale = { plan: `مورد جملة (${isVerified ? 'موثق معتمد' : 'بدون توثيق'}) - ${durationText}`, price: price, verify: isVerified ? 'شارة_زرقاء' : 'لا_يوجد' };
+            vibrateDevice();
+        }
+
+        function updateAllCardsUI() {
+            updateNormalCard();
+            updateRetailCard();
+            updateWholesaleCard();
+            document.getElementById('price_premium_ads').innerText = serverPrices.premium_ads.toLocaleString() + " ج.س";
+            currentSelections.premium_ads = { plan: 'باقة إعلانات بريميوم ذكية مستقلة', price: serverPrices.premium_ads, verify: 'لا_يوجد' };
+        }
+
+        function clearActive(clickedBtn) {
+            let parent = clickedBtn.parentElement;
+            let buttons = parent.getElementsByClassName('switch-btn');
+            for(let b of buttons) { b.classList.remove('active'); }
+            clickedBtn.classList.add('active');
+        }
+
+        function vibrateDevice() { if (window.navigator.vibrate) { window.navigator.vibrate(15); } }
+
+        function submitSelection(category) {
+            let choice = currentSelections[category];
+            
+            // تصفير وقائي وتأمين الـ LocalStorage من التداخل
+            localStorage.removeItem('chosen_plan_name');
+            localStorage.removeItem('chosen_plan_price');
+            localStorage.setItem('chosen_plan_name', choice.plan);
+            localStorage.setItem('chosen_plan_price', choice.price);
+            localStorage.setItem('chosen_plan_verify', choice.verify);
+            
+            // مزامنة حية وفورية مع عقدة الفايربيس المؤقتة
+            database.ref('temp_merchant_selections/' + currentMerchantUid).set({
+                planName: choice.plan,
+                price: choice.price,
+                verifyType: choice.verify,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => {
+                window.location.href = "chat.html?action=initialize_activation";
+            }).catch((err) => {
+                // التحويل في حال انقطاع أو ضعف الشبكة اعتماداً على الكاش المحلي
+                window.location.href = "chat.html?action=initialize_activation";
+            });
+        }
+    </script>
+</body>
+</html>
