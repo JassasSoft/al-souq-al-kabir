@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>إشعارات السوق الكبير</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -90,6 +90,11 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(15px); } to { transform: translateY(0); } }
     </style>
+<meta name="theme-color" content="#0f0a14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="theme.css">
+<script src="esc.js"></script>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 
@@ -149,7 +154,7 @@
     <!-- البار السفلي الذكي لـ السوق الكبير -->
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-home"></i>الرئيسية</a>
-        <a href="categories.html" class="nav-item"><i class="fas fa-th-large"></i>الأقسام</a>
+        <a href="index.html" class="nav-item"><i class="fas fa-th-large"></i>الأقسام</a>
         <a href="add-product.html" class="nav-item nav-add-btn"><i class="fas fa-plus"></i></a>
         <a href="chat.html" class="nav-item"><i class="fas fa-comments"></i>الرسائل</a>
         <a href="notifications.html" class="nav-item active"><i class="fas fa-bell"></i>تنبيهات <span class="badge" id="b-count">2</span></a>
@@ -217,5 +222,7 @@
     }
 </script>
 
+<script src="app.js" defer></script>
+<script src="shell.js" defer></script>
 </body>
 </html>

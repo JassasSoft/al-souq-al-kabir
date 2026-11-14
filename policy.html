@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>الخصوصية والشروط - السوق الكبير</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -22,6 +22,11 @@
         .btn-agree { width:100%; padding:18px; background:var(--gold); border:none; border-radius:15px; font-weight:900; font-family:'Cairo'; font-size:1.1rem; color:#000; cursor:pointer; margin-top:25px; transition:0.3s; box-shadow: 0 5px 15px rgba(255,189,89,0.2); }
         .btn-agree:active { transform: scale(0.98); }
     </style>
+<meta name="theme-color" content="#0f0a14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="theme.css">
+<script src="esc.js"></script>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
 
@@ -96,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         '.fa-plus-circle': 'add-product.html',
         '.fa-user': 'profile.html',
         '.fa-bell': 'notifications.html',
-        '.fa-th-large': 'categories.html'
+        '.fa-th-large': 'index.html'
     };
     Object.keys(links).forEach(selector => {
         document.querySelectorAll(selector).forEach(icon => {
@@ -107,5 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-</body><script src="shared.js"></script>
+<script src="app.js" defer></script>
+<script src="shell.js" defer></script>
+</body>
 </html>

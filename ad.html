@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0a14">
+<title>تفاصيل الإعلان | السوق الكبير</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--ink:#0f0a14;--surface:#1a1322;--raise:#241a2f;--line:rgba(255,255,255,.09);--gold:#f2b84b;--gold-soft:#ffd98a;--text:#f5f1ea;--muted:#a79fb3;--wa:#25d366}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{color-scheme:dark}
+body{background:var(--ink);color:var(--text);font-family:'IBM Plex Sans Arabic','Cairo',Tahoma,sans-serif;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+a{color:inherit;text-decoration:none}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;background:rgba(15,10,20,.96);border-bottom:1px solid var(--line)}
+.top b{font-size:1rem}
+.icon-btn{width:44px;height:44px;border:0;border-radius:50%;background:var(--surface);color:var(--text);font-size:1.05rem;display:grid;place-items:center;cursor:pointer}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;aspect-ratio:4/3;background:var(--surface);position:relative}
+.gal::-webkit-scrollbar{display:none}
+.gal img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center}
+.gal .none{flex:0 0 100%;display:grid;place-items:center;color:var(--muted);font-size:3rem}
+.count{position:absolute;bottom:12px;inset-inline-end:12px;background:rgba(0,0,0,.6);padding:3px 10px;border-radius:999px;font-size:.78rem}
+.wrap{padding:16px;max-width:720px;margin:auto}
+.price{font-size:1.7rem;font-weight:700;color:var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.8rem;color:var(--gold-soft)}
+.chip i{margin-inline-end:6px}
+.sold{display:inline-block;background:#4a1a1f;color:#ffd7d7;padding:4px 12px;border-radius:999px;font-size:.8rem;margin-bottom:8px}
+h2{font-size:1rem;margin:18px 0 8px}
+.desc{white-space:pre-wrap;line-height:1.9;color:#e7e1da;overflow-wrap:anywhere}
+.row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.lnk{flex:1;min-width:140px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;font-size:.88rem;padding:12px;border-radius:14px;cursor:pointer}
+.bar{position:fixed;inset-inline:0;bottom:0;z-index:30;display:flex;gap:10px;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(15,10,20,.97);border-top:1px solid var(--line)}
+.btn{flex:1;height:50px;border:0;border-radius:15px;font:inherit;font-weight:700;font-size:.98rem;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.wa{background:var(--wa);color:#05260f}
+.ghost{background:var(--surface);color:var(--gold-soft);border:1px solid rgba(242,184,75,.4)}
+.btn:disabled{opacity:.5}
+.skel{background:linear-gradient(90deg,#241a2f 25%,#2f2340 50%,#241a2f 75%);background-size:200% 100%;animation:sh 1.4s linear infinite;border-radius:10px}
+@keyframes sh{to{background-position:-200% 0}}
+.line{height:18px;margin-top:14px}
+.state{text-align:center;padding:80px 24px;color:var(--muted)}
+.state i{font-size:2.6rem;color:var(--gold);display:block;margin-bottom:14px}
+.toast{position:fixed;inset-inline:16px;bottom:calc(100px + env(safe-area-inset-bottom,0px));margin-inline:auto;max-width:340px;z-index:60;background:var(--raise);border:1px solid rgba(242,184,75,.4);padding:12px 16px;border-radius:14px;text-align:center;font-size:.9rem}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="icon-btn" id="back" aria-label="رجوع"><i class="fa-solid fa-arrow-right"></i></button>
+  <b>تفاصيل الإعلان</b>
+  <button class="icon-btn" id="share" aria-label="مشاركة"><i class="fa-solid fa-share-nodes"></i></button>
+</header>
+<main id="view" aria-busy="true">
+  <div class="gal skel"></div>
+  <div class="wrap"><div class="skel line" style="width:40%;height:30px"></div><div class="skel line" style="width:90%"></div><div class="skel line" style="width:70%"></div></div>
+</main>
+<div class="bar" id="bar" hidden>
+  <a class="btn wa" id="waBtn" target="_blank" rel="noopener" hidden><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+  <button class="btn ghost" id="chatBtn" type="button"><i class="fa-regular fa-comments"></i> راسل داخل التطبيق</button>
+</div>
+<script type="module">
+import { firebaseApp as app, onUser } from './auth.js';
+import { CATS } from './geo.js';
+import { getDatabase, ref, get, onValue, update, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+const db = getDatabase(app, 'https://alsouq-alkabeer-2052c-default-rtdb.europe-west1.firebasedatabase.app');
+const $ = id => document.getElementById(id);
+const id = new URLSearchParams(location.search).get('id') || '';
+let user = null, ad = null, sold = false;
+
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const toast = m => { const t = el('div', 'toast', m); t.setAttribute('role', 'status'); document.body.append(t); setTimeout(() => t.remove(), 2600); };
+function ago(ts) {
+  const s = Math.max(1, (Date.now() - ts) / 1000);
+  if (s < 3600) return 'منذ ' + Math.ceil(s / 60) + ' دقيقة';
+  if (s < 86400) return 'منذ ' + Math.floor(s / 3600) + ' ساعة';
+  return 'منذ ' + Math.floor(s / 86400) + ' يوم';
+}
+function state(icon, msg) {
+  const d = el('div', 'state'); const i = el('i', 'fa-solid ' + icon); d.append(i, el('p', null, msg));
+  $('view').replaceChildren(d); $('view').setAttribute('aria-busy', 'false'); $('bar').hidden = true;
+}
+function paintBar() {
+  if (!ad) return;
+  const owner = ad.userId, mine = user && user.uid === owner;
+  $('chatBtn').hidden = mine || !owner || owner === 'guest';
+  $('chatBtn').disabled = sold;
+  let n = String(ad.whatsapp || '').replace(/\D/g, '');
+  if (n.startsWith('0') && n.length === 10) n = '249' + n.slice(1);
+  $('waBtn').hidden = n.length < 8 || sold;
+  if (n.length >= 8) $('waBtn').href = 'https://wa.me/' + n + '?text=' + encodeURIComponent('مرحبًا، أنا مهتم بإعلانك في السوق الكبير: ' + String(ad.description || '').slice(0, 60));
+  $('bar').hidden = $('chatBtn').hidden && $('waBtn').hidden;
+  const o = $('ownerBtn'); if (o) { o.hidden = !mine; o.textContent = sold ? 'إعادة الإعلان كمتاح' : 'تحديد الإعلان كمباع'; }
+}
+function render() {
+  const v = el('div');
+  const gal = el('div', 'gal');
+  const imgs = (Array.isArray(ad.images) ? ad.images : []).filter(u => typeof u === 'string' && /^https:\/\//.test(u));
+  if (imgs.length) {
+    imgs.forEach(u => { const im = el('img'); im.src = u; im.alt = ''; im.loading = 'lazy'; gal.append(im); });
+    if (imgs.length > 1) {
+      const c = el('span', 'count', '1/' + imgs.length); gal.append(c);
+      gal.addEventListener('scroll', () => { c.textContent = (Math.round(Math.abs(gal.scrollLeft) / gal.clientWidth) + 1) + '/' + imgs.length; }, { passive: true });
+    }
+  } else { const n = el('div', 'none'); n.append(el('i', 'fa-regular fa-image')); gal.append(n); }
+  const w = el('div', 'wrap');
+  const sd = el('span', 'sold', 'تم البيع'); sd.id = 'soldTag'; sd.hidden = !sold;
+  w.append(sd, el('div', 'price', isFinite(ad.price) ? Number(ad.price).toLocaleString('en-US') + ' ج.س' : ''));
+  const chips = el('div', 'chips');
+  const add = (icon, text) => { if (!text) return; const c = el('span', 'chip'); c.append(el('i', 'fa-solid ' + icon), document.createTextNode(text)); chips.append(c); };
+  add('fa-tag', CATS[ad.category_id]); add('fa-location-dot', [ad.city, ad.state].filter(Boolean).join(' - ')); add('fa-clock', ad.timestamp ? ago(ad.timestamp) : '');
+  w.append(chips, el('h2', null, 'الوصف'), el('p', 'desc', ad.description || ''));
+  const row = el('div', 'row');
+  const ob = el('button', 'lnk', ''); ob.id = 'ownerBtn'; ob.type = 'button'; ob.hidden = true;
+  ob.onclick = () => update(ref(db, 'ads_status/' + id), { status: sold ? 'available' : 'sold' }).catch(() => toast('تعذر تحديث الحالة'));
+  const rp = el('button', 'lnk', 'الإبلاغ عن الإعلان'); rp.type = 'button';
+  rp.onclick = async () => {
+    if (!user) return location.href = 'login.html?next=' + encodeURIComponent('ad.html?id=' + id);
+    const reason = (prompt('ما سبب البلاغ؟ (احتيال، محتوى مخالف، سعر وهمي...)') || '').trim().slice(0, 300);
+    if (!reason) return;
+    try { await push(ref(db, 'reports'), { adId: id, reason, by: user.uid, timestamp: serverTimestamp() }); toast('تم استلام بلاغك. شكرًا لك'); } catch (e) { toast('تعذر إرسال البلاغ'); }
+  };
+  row.append(ob, rp); w.append(row); v.append(gal, w);
+  $('view').replaceChildren(v); $('view').setAttribute('aria-busy', 'false');
+  document.title = String(ad.description || 'إعلان').slice(0, 40) + ' | السوق الكبير';
+  paintBar();
+}
+$('back').onclick = () => history.length > 1 ? history.back() : location.href = 'index.html';
+$('share').onclick = async () => {
+  const data = { title: 'السوق الكبير', url: location.href };
+  try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(location.href); toast('تم نسخ الرابط'); } } catch (e) {}
+};
+$('chatBtn').onclick = () => {
+  if (!user) return location.href = 'login.html?next=' + encodeURIComponent('ad.html?id=' + id);
+  location.href = 'chat.html?chatId=chat_' + user.uid + '_' + ad.userId + '&traderId=' + encodeURIComponent(ad.userId) + '&adId=' + encodeURIComponent(id);
+};
+onUser(u => { user = u; paintBar(); });
+
+if (!/^[-\w]{5,60}$/.test(id)) state('fa-circle-exclamation', 'رابط الإعلان غير صحيح');
+else get(ref(db, 'ads/' + id)).then(s => {
+  if (!s.exists()) return state('fa-box-open', 'هذا الإعلان غير موجود أو تم حذفه');
+  ad = s.val(); render();
+  onValue(ref(db, 'ads_status/' + id), st => {
+    sold = !!(st.val() && st.val().status === 'sold');
+    const t = $('soldTag'); if (t) t.hidden = !sold; paintBar();
+  });
+}).catch(() => state('fa-wifi', 'تعذر تحميل الإعلان. تحقق من الاتصال وحاول مرة أخرى'));
+</script>
+</body>
+</html>

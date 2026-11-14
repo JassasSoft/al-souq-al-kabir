@@ -1,0 +1,15 @@
+# أسرار: لا تدخل الريبو أبدًا
+.env
+.env.*
+*.pem
+*.key
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+google-services.json.bak
+# صور المستخدمين مكانها Firebase Storage مش GitHub
+uploads/
+# أدوات
+node_modules/
+.firebase/
+*.log
+.DS_Store

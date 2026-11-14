@@ -1,0 +1,48 @@
+/* واجهة موحّدة للصفحات الجديدة: ألوان، خطوط، شريط علوي، شبكة بطاقات، أزرار، خانات */
+:root{--ink:#0f0a14;--surface:#1a1322;--raise:#241a2f;--line:rgba(255,255,255,.09);--gold:#f2b84b;--gold-soft:#ffd98a;--violet:#7b3fe4;--text:#f5f1ea;--muted:#a79fb3;--bad:#ff8a8a;--ok:#8be0a8;--r:16px;--ease:cubic-bezier(.22,.8,.3,1)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{color-scheme:dark;background:var(--ink)}
+body{min-height:100vh;background:var(--ink);color:var(--text);font-family:'IBM Plex Sans Arabic','Cairo','Segoe UI',Tahoma,sans-serif;line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
+.bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;background:rgba(15,10,20,.97);border-bottom:1px solid var(--line)}
+.bar h1{flex:1;font-size:1.05rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{width:44px;height:44px;border:0;border-radius:50%;background:var(--surface);color:var(--text);font-size:1.05rem;display:grid;place-items:center;cursor:pointer;flex:none}
+.ib:active{background:var(--raise)}
+.wrap{width:100%;max-width:1100px;margin-inline:auto;padding:14px 16px}
+.field{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:0 14px;transition:border-color .2s,box-shadow .2s}
+.field:focus-within{border-color:var(--gold);box-shadow:0 0 0 4px rgba(242,184,75,.12)}
+.field i{color:var(--muted)}
+.field input,.field select,.field textarea{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:16px;padding:14px 0}
+.field select option{background:var(--surface)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-size:.85rem;padding:8px 14px;border-radius:999px;cursor:pointer;transition:all .2s}
+.chip.on{background:var(--gold);color:#1b1200;border-color:var(--gold);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding-top:6px}
+.card{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:block;transition:transform .2s var(--ease)}
+.card:active{transform:scale(.985)}
+.card .ph{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--raise)}
+.card .meta{padding:10px 12px 12px}
+.card .t{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .p{color:var(--gold);font-weight:700;margin-top:2px}
+.card .loc{color:var(--muted);font-size:.76rem;margin-top:2px}
+.card.prem{border-color:rgba(242,184,75,.55);box-shadow:0 6px 22px rgba(242,184,75,.15)}
+.badge{position:absolute;top:10px;inset-inline-start:10px;background:var(--gold);color:#1b1200;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px}
+.badge.sold{background:#4a1a1f;color:#ffd7d7}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:14px;padding:13px 20px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#ffd98a,#f2b84b 55%,#d99a2b);color:#1b1200}
+.btn.ghost{background:var(--surface);color:var(--gold-soft);border:1px solid rgba(242,184,75,.4)}
+.btn.danger{background:#4a1a1f;color:#ffd7d7}
+.btn:disabled{opacity:.55;cursor:wait}
+.state{text-align:center;color:var(--muted);padding:56px 20px}
+.state i{display:block;font-size:2.4rem;color:var(--gold);margin-bottom:12px}
+.state .btn{margin-top:16px}
+.skel{background:linear-gradient(90deg,#241a2f 25%,#2f2340 50%,#241a2f 75%);background-size:200% 100%;animation:sh 1.4s linear infinite;border-radius:10px}
+@keyframes sh{to{background-position:-200% 0}}
+.msg{margin-top:12px;font-size:.88rem;padding:10px 14px;border-radius:12px}
+.msg.err{color:var(--bad);background:rgba(255,122,122,.1)}
+.msg.ok{color:var(--ok);background:rgba(80,200,120,.1)}
+@media (min-width:900px){.grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}

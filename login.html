@@ -1,97 +1,169 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - السوق الكبير</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --gold: #ffbd59; --bg: #0b0b0b; --card: #161616; }
-        
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            font-weight: 900; 
-            background: var(--bg); 
-            color: #fff; 
-            margin: 0; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            overflow: hidden; 
-        }
-        
-        .login-container { 
-            width: 90%; max-width: 400px; background: var(--card); 
-            padding: 40px 30px; border-radius: 30px; 
-            border: 1px solid #333; text-align: center; position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-        
-        .back-circle { 
-            position: absolute; top: 20px; right: 20px; width: 45px; height: 45px; 
-            background: rgba(255,189,89,0.1); border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            color: var(--gold); text-decoration: none; border: 1px solid var(--gold);
-            transition: 0.3s;
-        }
-
-        .logo-area { font-size: 2.8rem; font-weight: 900; color: var(--gold); margin-bottom: 5px; }
-        .subtitle { color: #888; font-size: 1rem; margin-bottom: 30px; font-weight: 700; }
-
-        .input-group { position: relative; margin-bottom: 20px; }
-        .input-group i { position: absolute; right: 18px; top: 18px; color: var(--gold); font-size: 1.2rem; }
-        
-        input { 
-            width: 100%; padding: 18px 50px 18px 15px; background: #222; 
-            border: 1px solid #444; border-radius: 15px; color: #fff; 
-            font-family: 'Cairo'; font-weight: 900; box-sizing: border-box; 
-            transition: 0.3s; font-size: 1rem;
-        }
-        input:focus { border-color: var(--gold); background: #282828; outline: none; }
-
-        .btn-login { 
-            width: 100%; padding: 18px; background: var(--gold); border: none; 
-            border-radius: 15px; font-weight: 900; cursor: pointer; 
-            font-size: 1.2rem; margin-top: 10px; transition: 0.3s;
-            box-shadow: 0 10px 20px rgba(255,189,89,0.2);
-            color: #000;
-        }
-        .btn-login:active { transform: scale(0.95); }
-
-        .footer-links { margin-top: 25px; font-size: 0.95rem; }
-        .footer-links a { color: var(--gold); text-decoration: none; font-weight: 900; margin: 0 5px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0a14">
+<title>الدخول | السوق الكبير</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-48.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--ink:#0f0a14;--surface:#1a1322;--raise:#241a2f;--line:rgba(255,255,255,.09);--gold:#f2b84b;--gold-soft:#ffd98a;--violet:#7b3fe4;--text:#f5f1ea;--muted:#a79fb3;--bad:#ff8a8a;--ease:cubic-bezier(.22,.8,.3,1)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{color-scheme:dark}
+body{min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--text);font-family:'IBM Plex Sans Arabic','Cairo',Tahoma,sans-serif;position:relative;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;z-index:-1;width:460px;height:460px;border-radius:50%;animation:drift 14s ease-in-out infinite alternate}
+body::before{background:radial-gradient(circle,rgba(123,63,228,.38),transparent 65%);top:-170px;inset-inline-start:-140px}
+body::after{background:radial-gradient(circle,rgba(242,184,75,.24),transparent 65%);bottom:-200px;inset-inline-end:-160px;animation-delay:-6s}
+@keyframes drift{to{transform:translate(36px,28px) scale(1.1)}}
+.wrap{width:100%;max-width:400px;position:relative}
+.back{position:absolute;top:-4px;inset-inline-start:0;width:44px;height:44px;border-radius:50%;background:var(--surface);display:grid;place-items:center;color:var(--text);text-decoration:none}
+.hero{text-align:center;padding-top:6px}
+.hero img{width:124px;height:124px;object-fit:contain;filter:drop-shadow(0 8px 26px rgba(242,184,75,.35))}
+.hero h1{font-size:1.7rem;font-weight:700;margin-top:4px;background:linear-gradient(180deg,#ffe3a1,#e6a93a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);font-size:.9rem;margin:2px 0 22px}
+.rise{animation:rise .65s var(--ease) both;animation-delay:calc(var(--i,0)*70ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.hero img{animation:pop .9s var(--ease) both}
+@keyframes pop{from{opacity:0;transform:scale(.7) rotate(-6deg)}to{opacity:1;transform:none}}
+.tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:16px;padding:4px}
+.tabs::before{content:"";position:absolute;inset-block:4px;inset-inline-start:4px;width:calc(50% - 4px);background:var(--raise);border-radius:12px;transition:transform .3s var(--ease)}
+body[data-mode=signup] .tabs::before{transform:translateX(-100%)}
+.tabs button{position:relative;border:0;background:none;color:var(--muted);font:inherit;font-weight:500;padding:12px;cursor:pointer;border-radius:12px}
+.tabs button[aria-selected=true]{color:var(--gold-soft)}
+body[data-mode=login] .signup-only{display:none}
+.field{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:0 16px;margin-top:12px;transition:border-color .2s,box-shadow .2s}
+.field:focus-within{border-color:var(--gold);box-shadow:0 0 0 4px rgba(242,184,75,.12)}
+.field i{color:var(--muted);width:18px;text-align:center}
+.field input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:16px;padding:16px 0}
+.field input::placeholder{color:#7d7589}
+.field button{background:none;border:0;color:var(--muted);cursor:pointer;padding:8px;margin-inline-end:-8px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.seg button{border:1px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;padding:13px;border-radius:14px;cursor:pointer;transition:all .2s}
+.seg button.on{background:var(--gold);color:#1b1200;border-color:var(--gold);font-weight:700}
+.terms{display:flex;gap:10px;align-items:center;margin-top:14px;font-size:.85rem;color:var(--muted)}
+.terms input{width:18px;height:18px;accent-color:var(--gold)}
+.terms a{color:var(--gold-soft)}
+.err{margin-top:12px;color:var(--bad);font-size:.88rem;background:rgba(255,122,122,.1);padding:10px 14px;border-radius:12px}
+.go{width:100%;margin-top:18px;height:54px;border:0;border-radius:16px;background:linear-gradient(135deg,#ffd98a,#f2b84b 55%,#d99a2b);color:#1b1200;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;box-shadow:0 10px 28px rgba(242,184,75,.28);position:relative;transition:transform .15s}
+.go:active{transform:scale(.98)}
+.go:disabled{cursor:wait;opacity:.9}
+.go.load span{opacity:0}
+.go.load::after{content:"";position:absolute;inset:0;margin:auto;width:22px;height:22px;border:3px solid rgba(27,18,0,.25);border-top-color:#1b1200;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.guest{display:block;text-align:center;margin-top:18px;color:var(--muted);font-size:.9rem;text-decoration:none}
+.guest b{color:var(--gold-soft);font-weight:500}
+.forgot{background:none;border:0;color:var(--gold-soft);font:inherit;font-size:.85rem;margin-top:10px;cursor:pointer;padding:6px 2px}
+body[data-mode=signup] .login-only{display:none}
+.hint{color:var(--muted);font-size:.8rem;margin:8px 4px 0}
+.ok{margin-top:12px;color:#8be0a8;font-size:.88rem;background:rgba(80,200,120,.1);padding:10px 14px;border-radius:12px}
+.tinfo{margin-top:12px;background:var(--surface);border:1px solid rgba(242,184,75,.28);border-radius:16px;padding:14px 16px;font-size:.88rem;line-height:1.8;animation:rise .35s var(--ease) both}
+.tinfo b{display:block;color:var(--gold-soft);font-size:.98rem;margin-bottom:2px}
+.tinfo p{color:#e7e1da}
+.tinfo ul{list-style:none;margin-top:8px}
+.tinfo li{position:relative;padding-inline-start:22px;color:var(--muted)}
+.tinfo li::before{content:"\2713";position:absolute;inset-inline-start:0;color:var(--gold)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
 </head>
-<body>
+<body data-mode="login">
+<main class="wrap">
+  <a class="back" href="index.html" aria-label="رجوع"><i class="fa-solid fa-arrow-right"></i></a>
+  <header class="hero">
+    <img src="logo-mark.webp" alt="" width="124" height="124" fetchpriority="high">
+    <h1>السوق الكبير</h1>
+    <p>تسوق بأمان من أي مكان في السودان</p>
+  </header>
+  <div class="tabs rise" style="--i:1" role="tablist">
+    <button type="button" role="tab" id="tLogin" aria-selected="true">دخول</button>
+    <button type="button" role="tab" id="tSignup" aria-selected="false">حساب جديد</button>
+  </div>
+  <form id="f" novalidate>
+    <div class="field signup-only rise" style="--i:2"><i class="fa-regular fa-user" aria-hidden="true"></i><input id="name" autocomplete="name" placeholder="الاسم الكامل" aria-label="الاسم الكامل"></div>
+    <div class="field rise" style="--i:2"><i class="fa-regular fa-envelope" aria-hidden="true"></i><input id="email" type="email" inputmode="email" autocomplete="email" dir="ltr" placeholder="البريد الإلكتروني" aria-label="البريد الإلكتروني"></div>
+    <div class="field rise" style="--i:3"><i class="fa-solid fa-lock" aria-hidden="true"></i><input id="pass" type="password" autocomplete="current-password" placeholder="كلمة المرور" aria-label="كلمة المرور"><button type="button" id="eye" aria-label="إظهار كلمة المرور"><i class="fa-regular fa-eye"></i></button></div>
+    <button type="button" class="forgot login-only" id="forgot">نسيت كلمة المرور؟</button>
+    <div class="field signup-only rise" style="--i:3"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i><input id="wa" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="رقم واتساب للتواصل (اختياري)" aria-label="رقم واتساب"></div>
+    <p class="hint signup-only">يظهر للمشترين والتجار للتواصل معك. يمكنك تركه الآن وإضافته لاحقًا.</p>
+    <div class="seg signup-only" role="radiogroup" aria-label="نوع الحساب"><button type="button" class="on" data-t="consumer" role="radio" aria-checked="true">مستفيد</button><button type="button" data-t="merchant" role="radio" aria-checked="false">تاجر</button></div>
+    <div class="tinfo signup-only" id="tinfo" aria-live="polite"></div>
+    <label class="terms signup-only"><input type="checkbox" id="terms"><span>أوافق على <a href="policy.html">الشروط والخصوصية</a></span></label>
+    <p class="err" id="err" role="alert" hidden></p>
+    <p class="ok" id="ok" role="status" hidden></p>
+    <button class="go rise" style="--i:4" id="go" type="submit"><span>دخول</span></button>
+  </form>
+  <a class="guest rise" style="--i:5" href="index.html">أو <b>تصفّح كزائر</b></a>
+</main>
+<script type="module">
+import { signUp, signIn, resetPassword, arabicError, onUser } from './auth.js';
+const $ = id => document.getElementById(id);
+let mode = 'login', type = 'consumer';
+const q = new URLSearchParams(location.search);
+const next = /^[\w-]+\.html(\?[\w=&%.-]*)?$/.test(q.get('next') || '') ? q.get('next') : 'index.html';
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const fail = m => { $('ok').hidden = true; $('err').textContent = m; $('err').hidden = false; };
+const good = m => { $('err').hidden = true; $('ok').textContent = m; $('ok').hidden = false; };
 
-    <div class="login-container">
-        <a href="index.html" class="back-circle">
-            <i class="fas fa-arrow-right"></i>
-        </a>
-        
-        <!-- تم تحديث اسم التطبيق الثابت هنا -->
-        <div class="logo-area">السوق الكبير</div>
-        <p class="subtitle">منصتك التجارية المتكاملة بين يديك</p>
-
-        <form onsubmit="event.preventDefault(); window.location.href='index.html';">
-            <div class="input-group">
-                <i class="fas fa-phone"></i>
-                <input type="tel" placeholder="رقم الهاتف" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" placeholder="كلمة المرور" required>
-            </div>
-            <button type="submit" class="btn-login">دخول المنصة</button>
-        </form>
-
-        <div class="footer-links">
-            <span>ليس لديك حساب؟</span>
-            <a href="register.html">إنشاء حساب جديد</a>
-        </div>
-    </div>
-
+function setMode(m) {
+  mode = m; document.body.dataset.mode = m;
+  $('tLogin').setAttribute('aria-selected', m === 'login'); $('tSignup').setAttribute('aria-selected', m === 'signup');
+  $('go').firstElementChild.textContent = m === 'login' ? 'دخول' : 'إنشاء الحساب';
+  $('pass').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+  $('err').hidden = true; $('ok').hidden = true;
+}
+$('tLogin').onclick = () => setMode('login'); $('tSignup').onclick = () => setMode('signup');
+if (q.get('mode') === 'signup') setMode('signup');
+const INFO = {
+  merchant: { t: 'أنت المحرك الأساسي للمنصة!', d: 'كتاجر في السوق الكبير ستتمكن من إعلان وعرض بضائعك وخدماتك بأحدث الوسائل الذكية لضمان انتشار عروضك والوصول للمستهلكين فوراً وبكل سهولة.',
+    l: ['انشر إعلاناتك في أقسام السوق مع صورك وسعرك', 'يتواصل معك العملاء مباشرة عبر واتساب أو الدردشة', 'لوحة تاجر لمتابعة إعلاناتك واشتراكك', 'باقات اشتراك وشارة تاجر معتمد وإعلانات مميزة في الواجهة'] },
+  consumer: { t: 'مرحباً بك في عالم الفخامة!', d: 'بصفتك مستفيداً، صُممت المنصة خصيصاً لتلبية احتياجاتك الاستهلاكية واليومية بأسرع وأسهل الطرق وبأعلى مستويات الأمان التجاري.',
+    l: ['تصفّح كل الأقسام وابحث حسب الولاية والمدينة', 'تواصل مع البائع مباشرة عبر واتساب أو الدردشة', 'أبلغ عن أي إعلان مخالف لحماية الجميع', 'يمكنك التحوّل إلى تاجر في أي وقت من حسابك'] }
+};
+function showInfo() {
+  const i = INFO[type], box = $('tinfo'), b = document.createElement('b'), p = document.createElement('p'), ul = document.createElement('ul');
+  b.textContent = i.t; p.textContent = i.d;
+  i.l.forEach(x => { const li = document.createElement('li'); li.textContent = x; ul.append(li); });
+  box.replaceChildren(b, p, ul);
+}
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  type = b.dataset.t; showInfo();
+  document.querySelectorAll('.seg button').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-checked', x === b); });
+});
+showInfo();
+$('eye').onclick = () => {
+  const show = $('pass').type === 'password'; $('pass').type = show ? 'text' : 'password';
+  $('eye').firstElementChild.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+};
+$('forgot').onclick = async () => {
+  const email = $('email').value.trim();
+  if (!EMAIL.test(email)) return fail('أدخل بريدك الإلكتروني أولًا ثم اضغط "نسيت كلمة المرور"');
+  try { await resetPassword(email); good('إذا كان البريد مسجلًا فسيصلك رابط إعادة التعيين. تفقد أيضًا الرسائل غير المرغوبة'); }
+  catch (e) { fail(arabicError(e)); }
+};
+$('f').addEventListener('submit', async e => {
+  e.preventDefault(); $('err').hidden = true; $('ok').hidden = true;
+  const email = $('email').value.trim(), password = $('pass').value, name = $('name').value.trim(), whatsapp = $('wa').value;
+  if (!EMAIL.test(email)) return fail('أدخل بريدًا إلكترونيًا صحيحًا');
+  if (!password) return fail('أدخل كلمة المرور');
+  if (mode === 'signup') {
+    if (name.length < 2) return fail('أدخل اسمك الكامل');
+    if (password.length < 6) return fail('كلمة المرور يجب أن تكون ٦ أحرف على الأقل');
+    if (!$('terms').checked) return fail('وافق على الشروط والخصوصية للمتابعة');
+  }
+  $('go').disabled = true; $('go').classList.add('load');
+  try {
+    if (mode === 'signup') await signUp({ email, password, name, type, whatsapp }); else await signIn({ email, password });
+    location.replace(next);
+  } catch (err) {
+    fail(arabicError(err)); $('go').disabled = false; $('go').classList.remove('load');
+  }
+});
+onUser(u => { if (u) location.replace(next); });
+</script>
 </body>
 </html>

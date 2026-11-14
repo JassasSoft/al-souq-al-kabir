@@ -1,1304 +1,427 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="theme-color" content="#0d0212">
-    <title>السوق الكبير | الشاشة الرئيسية</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        :root {
-            --gold: #ffbd59;
-            --gold-light: #ffd699;
-            --gold-dark: #cc9533;
-            --gold-glow: rgba(255, 189, 89, 0.4);
-            --bg-primary: #0d0212;
-            --bg-secondary: #1a0a2e;
-            --bg-card: #161616;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --shadow-gold: 0 8px 32px rgba(255, 189, 89, 0.3);
-            --radius-sm: 12px;
-            --radius-md: 16px;
-            --radius-lg: 24px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            overflow-x: hidden;
-            width: 100%;
-            max-width: 100vw;
-        }
-
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding-bottom: 100px;
-        }
-
-        /* الهيدر */
-        .master-header {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 15px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 2px solid var(--gold);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 4px 30px rgba(255, 189, 89, 0.2);
-        }
-
-        .header-top {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-btn {
-            background: rgba(255, 189, 89, 0.1);
-            border: 2px solid var(--gold);
-            color: var(--gold);
-            font-size: 1.4rem;
-            cursor: pointer;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-sm);
-            transition: var(--transition);
-        }
-
-        .header-btn:active {
-            transform: scale(0.9);
-            background: var(--gold);
-            color: #000;
-        }
-
-        .master-header img {
-            width: 140px;
-            height: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 10px rgba(255, 189, 89, 0.3));
-        }
-
-        .geo-indicator {
-            font-size: 0.9rem;
-            color: var(--gold);
-            font-weight: 700;
-            background: rgba(255, 189, 89, 0.1);
-            padding: 8px 20px;
-            border-radius: 50px;
-            border: 1.5px solid var(--gold);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .geo-indicator:active {
-            background: var(--gold);
-            color: #000;
-        }
-
-        /* شريط الإعلانات */
-        .ticker-container {
-            background: linear-gradient(90deg, #1a0a2e 0%, #0d0212 50%, #1a0a2e 100%);
-            height: 42px;
-            overflow: hidden;
-            position: relative;
-            border-bottom: 1px solid rgba(255, 189, 89, 0.3);
-            cursor: pointer;
-        }
-
-        .ticker-text {
-            display: flex;
-            white-space: nowrap;
-            position: absolute;
-            animation: ticker 35s linear infinite;
-        }
-
-        .ticker-text span {
-            padding: 0 50px;
-            color: var(--gold);
-            font-weight: 700;
-            line-height: 42px;
-            font-size: 0.95rem;
-            text-shadow: 0 2px 8px rgba(255, 189, 89, 0.5);
-        }
-
-        @keyframes ticker {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-
-        /* عناوين الأقسام */
-        .sec-header {
-            padding: 25px 20px 15px;
-            color: var(--gold);
-            font-weight: 900;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .sec-header i {
-            margin-left: 8px;
-            filter: drop-shadow(0 2px 8px var(--gold-glow));
-        }
-
-        .sec-header a {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-decoration: none;
-            border-bottom: 2px dashed var(--gold);
-        }
-
-        /* السلايدر */
-        .premium-slider {
-            display: flex;
-            overflow-x: auto;
-            gap: 15px;
-            padding: 0 20px 25px;
-            scrollbar-width: none;
-            scroll-snap-type: x mandatory;
-        }
-
-        .premium-slider::-webkit-scrollbar {
-            display: none;
-        }
-
-        .p-card {
-            min-width: 85%;
-            height: 180px;
-            border-radius: var(--radius-lg);
-            border: 2px solid var(--gold);
-            position: relative;
-            overflow: hidden;
-            background: #000;
-            cursor: pointer;
-            flex-shrink: 0;
-            scroll-snap-align: center;
-            box-shadow: var(--shadow-gold);
-        }
-
-        .p-card:active {
-            transform: scale(0.98);
-        }
-
-        .p-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.7;
-        }
-
-        .p-card .p-info {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.95));
-            font-weight: 800;
-            color: #fff;
-            font-size: 1.1rem;
-        }
-
-        /* شبكة الأقسام */
-        .grid-matrix {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding: 10px 15px 30px;
-            width: 100%;
-        }
-
-        .cat-box {
-            background: linear-gradient(145deg, var(--bg-card) 0%, #0f0f0f 100%);
-            border-radius: var(--radius-md);
-            padding: 20px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 2px solid rgba(255, 189, 89, 0.2);
-            text-decoration: none;
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-        }
-
-        .cat-box:active {
-            transform: scale(0.95);
-            border-color: var(--gold);
-            box-shadow: var(--shadow-gold);
-        }
-
-        .cat-icon-circle {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin-bottom: 12px;
-            border: 2.5px solid var(--gold);
-            box-shadow: 0 4px 20px var(--shadow-gold), inset 0 0 20px rgba(255, 189, 89, 0.2);
-            transition: var(--transition);
-        }
-
-        .cat-box:active .cat-icon-circle {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .cat-label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-align: center;
-            line-height: 1.4;
-        }
-
-        /* التدرجات */
-        .grad-mobiles { background: linear-gradient(145deg, #1e1b4b, #000); color: #60a5fa !important; }
-        .grad-computers { background: linear-gradient(145deg, #062f4f, #000); color: #38bdf8 !important; }
-        .grad-starlink { background: linear-gradient(145deg, #2e1065, #000); color: #c084fc !important; }
-        .grad-electronics { background: linear-gradient(145deg, #14532d, #000); color: #4ade80 !important; }
-        .grad-fashion { background: linear-gradient(145deg, #701a75, #000); color: #f472b6 !important; }
-        .grad-furniture { background: linear-gradient(145deg, #7c2d12, #000); color: #fb923c !important; }
-        .grad-building { background: linear-gradient(145deg, #451a03, #000); color: #f59e0b !important; }
-        .grad-realestate { background: linear-gradient(145deg, #115e59, #000); color: #2dd4bf !important; }
-        .grad-cars { background: linear-gradient(145deg, #1f2937, #000); color: #e5e7eb !important; }
-        .grad-motors { background: linear-gradient(145deg, #991b1b, #000); color: #f87171 !important; }
-        .grad-crops { background: linear-gradient(145deg, #064e3b, #000); color: #34d399 !important; }
-        .grad-livestock { background: linear-gradient(145deg, #3f2b12, #000); color: #fbbf24 !important; }
-
-        /* القائمة الجانبية */
-        .sidebar-overlay {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 9999;
-            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            justify-content: flex-start;
-        }
-
-        .sidebar-overlay.active {
-            right: 0;
-        }
-
-        .sidebar-panel {
-            width: 85%;
-            max-width: 320px;
-            height: 100%;
-            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-            border-left: 3px solid var(--gold);
-            display: flex;
-            flex-direction: column;
-            padding: 25px 20px;
-            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.9);
-            overflow-y: auto;
-        }
-
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 2px solid rgba(255, 189, 89, 0.3);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        .sidebar-title {
-            color: var(--gold);
-            font-size: 1.2rem;
-            font-weight: 900;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .close-sidebar-btn {
-            background: rgba(255, 189, 89, 0.1);
-            border: 2px solid var(--gold);
-            color: var(--gold);
-            border-radius: var(--radius-sm);
-            width: 42px;
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .close-sidebar-btn:active {
-            background: var(--gold);
-            color: #000;
-            transform: rotate(90deg);
-        }
-
-        .user-card-side {
-            background: rgba(255, 189, 89, 0.08);
-            border: 2px solid rgba(255, 189, 89, 0.3);
-            border-radius: var(--radius-md);
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            cursor: pointer;
-        }
-
-        .user-card-side:active {
-            background: rgba(255, 189, 89, 0.15);
-            transform: scale(0.98);
-        }
-
-        .user-avatar {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            background: var(--gold);
-            color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border: 3px solid #fff;
-            box-shadow: 0 4px 15px var(--shadow-gold);
-        }
-
-        .user-info h4 {
-            font-size: 1rem;
-            color: #fff;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-
-        .user-info p {
-            font-size: 0.8rem;
-            color: var(--gold);
-        }
-
-        .side-menu-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .side-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 18px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: var(--radius-sm);
-            color: #fff;
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 700;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: var(--transition);
-        }
-
-        .side-item i {
-            width: 25px;
-            text-align: center;
-            color: var(--gold);
-            font-size: 1.2rem;
-        }
-
-        .side-item:active {
-            background: rgba(255, 189, 89, 0.2);
-            border-color: var(--gold);
-            transform: translateX(-5px);
-        }
-
-        .side-item.highlight {
-            background: linear-gradient(90deg, rgba(255, 189, 89, 0.2), transparent);
-            border-color: var(--gold);
-        }
-
-        /* ==========================================
-           🤖 المساعد الذكي - تصميم إنسان احترافي
-        ========================================== */
-        .smart-assistant {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 360px;
-            max-width: 90%;
-            max-height: 70vh;
-            background: linear-gradient(145deg, #1a0a2e, #0d0212);
-            border: 2px solid var(--gold);
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(255, 189, 89, 0.3);
-            z-index: 9998;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            animation: slideUp 0.4s ease-out;
-        }
-
-        .smart-assistant.active {
-            display: flex;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        .assistant-header {
-            background: linear-gradient(90deg, var(--gold), var(--gold-dark));
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: relative;
-        }
-
-        /* صورة الإنسان - أفاتار */
-        .assistant-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            border: 3px solid #000;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            flex-shrink: 0;
-        }
-
-        .assistant-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .assistant-avatar i {
-            font-size: 1.8rem;
-            color: var(--gold-dark);
-        }
-
-        .assistant-header-info {
-            flex: 1;
-        }
-
-        .assistant-header-info h3 {
-            color: #000;
-            font-size: 1rem;
-            font-weight: 900;
-            margin: 0;
-        }
-
-        .assistant-status {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.75rem;
-            color: #000;
-            font-weight: 600;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .close-assistant {
-            background: rgba(0, 0, 0, 0.2);
-            border: none;
-            color: #000;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .close-assistant:active {
-            background: rgba(0, 0, 0, 0.4);
-            transform: rotate(90deg);
-        }
-
-        .assistant-body {
-            padding: 15px;
-            min-height: 250px;
-            max-height: 50vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .message {
-            max-width: 85%;
-            padding: 12px 15px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            animation: messageIn 0.3s ease-out;
-        }
-
-        @keyframes messageIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.bot {
-            background: rgba(255, 189, 89, 0.1);
-            border: 1px solid rgba(255, 189, 89, 0.3);
-            color: #fff;
-            align-self: flex-start;
-            border-bottom-right-radius: 5px;
-        }
-
-        .message.user {
-            background: var(--gold);
-            color: #000;
-            align-self: flex-end;
-            border-bottom-left-radius: 5px;
-            font-weight: 600;
-        }
-
-        .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 12px 15px;
-            background: rgba(255, 189, 89, 0.1);
-            border: 1px solid rgba(255, 189, 89, 0.3);
-            border-radius: 15px;
-            align-self: flex-start;
-            width: fit-content;
-        }
-
-        .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            background: var(--gold);
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-            30% { transform: translateY(-10px); opacity: 1; }
-        }
-
-        .assistant-footer {
-            padding: 15px;
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid rgba(255, 189, 89, 0.2);
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .assistant-input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 189, 89, 0.3);
-            border-radius: 25px;
-            padding: 12px 18px;
-            color: #fff;
-            font-size: 0.9rem;
-            outline: none;
-            transition: all 0.3s;
-            font-family: 'Cairo', sans-serif;
-        }
-
-        .assistant-input:focus {
-            border-color: var(--gold);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .assistant-input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .send-button {
-            background: var(--gold);
-            border: none;
-            color: #000;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 189, 89, 0.4);
-            flex-shrink: 0;
-        }
-
-        .send-button:active {
-            transform: scale(0.9);
-        }
-
-        /* زر فتح المساعد - صورة إنسان */
-        .assistant-toggle {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 65px;
-            height: 65px;
-            background: linear-gradient(145deg, var(--gold), var(--gold-dark));
-            border: 3px solid #fff;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 6px 25px rgba(255, 189, 89, 0.5);
-            z-index: 9997;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .assistant-toggle img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .assistant-toggle i {
-            font-size: 1.8rem;
-            color: #000;
-        }
-
-        .assistant-toggle:active {
-            transform: scale(0.9);
-        }
-
-        .assistant-toggle::after {
-            content: '';
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 18px;
-            height: 18px;
-            background: #22c55e;
-            border-radius: 50%;
-            border: 3px solid var(--bg-primary);
-            animation: pulse 2s infinite;
-        }
-
-        /* ==========================================
-           📱 الشريط السفلي
-        ========================================== */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 2px solid var(--gold);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 9999;
-            box-shadow: 0 -4px 20px rgba(255, 189, 89, 0.2);
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            text-decoration: none;
-            color: var(--text-secondary);
-            transition: all 0.3s;
-            padding: 5px 15px;
-        }
-
-        .nav-item i {
-            font-size: 1.3rem;
-            transition: all 0.3s;
-        }
-
-        .nav-item span {
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .nav-item.active {
-            color: var(--gold);
-        }
-
-        .nav-item.active i {
-            transform: scale(1.2);
-            filter: drop-shadow(0 2px 8px var(--gold-glow));
-        }
-
-        /* Media Queries */
-        @media (min-width: 768px) {
-            .grid-matrix {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-                padding: 15px 25px 40px;
-            }
-            .cat-icon-circle {
-                width: 75px;
-                height: 75px;
-                font-size: 1.8rem;
-            }
-            .cat-label {
-                font-size: 0.95rem;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .grid-matrix {
-                grid-template-columns: repeat(4, 1fr);
-                max-width: 1200px;
-                margin: 0 auto;
-                gap: 25px;
-            }
-            .cat-icon-circle {
-                width: 85px;
-                height: 85px;
-                font-size: 2rem;
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .cat-box {
-            animation: fadeInUp 0.6s ease-out forwards;
-            opacity: 0;
-        }
-
-        .cat-box:nth-child(1) { animation-delay: 0.05s; }
-        .cat-box:nth-child(2) { animation-delay: 0.1s; }
-        .cat-box:nth-child(3) { animation-delay: 0.15s; }
-        .cat-box:nth-child(4) { animation-delay: 0.2s; }
-        .cat-box:nth-child(5) { animation-delay: 0.25s; }
-        .cat-box:nth-child(6) { animation-delay: 0.3s; }
-        .cat-box:nth-child(7) { animation-delay: 0.35s; }
-        .cat-box:nth-child(8) { animation-delay: 0.4s; }
-        .cat-box:nth-child(9) { animation-delay: 0.45s; }
-        .cat-box:nth-child(10) { animation-delay: 0.5s; }
-        .cat-box:nth-child(11) { animation-delay: 0.55s; }
-        .cat-box:nth-child(12) { animation-delay: 0.6s; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0a14">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>السوق الكبير</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --ink:#0f0a14; --surface:#1a1322; --raise:#241a2f; --line:rgba(255,255,255,.08);
+  --gold:#f2b84b; --gold-soft:#ffd98a; --text:#f5f1ea; --muted:#a79fb3;
+  --r-s:10px; --r-m:16px; --r-l:22px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;scroll-padding-top:80px}
+body{
+  font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;
+  background:var(--ink);color:var(--text);line-height:1.6;
+  padding-bottom:calc(88px + env(safe-area-inset-bottom,0px));
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
+.icon-btn{
+  width:44px;height:44px;border:0;border-radius:50%;background:var(--surface);
+  color:var(--text);font-size:1.1rem;display:grid;place-items:center;cursor:pointer;position:relative;
+}
+.icon-btn:active{background:var(--raise)}
+.dot{position:absolute;top:10px;inset-inline-start:11px;width:9px;height:9px;border-radius:50%;background:var(--gold);border:2px solid var(--ink)}
+
+/* الهيدر */
+.top{
+  position:sticky;top:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;
+  background:rgba(15,10,20,.92);border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:8px;font-size:1.15rem;color:var(--gold-soft)}.brand img{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(242,184,75,.35))}
+
+/* البحث: العنصر الأهم في السوق */
+.hero{padding:18px 16px 6px}
+.hero h1{font-size:1.45rem;font-weight:700;line-height:1.35;margin-bottom:14px;max-width:18ch}
+.search{
+  display:flex;align-items:center;gap:10px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-l);padding:6px 16px 6px 6px;
+}
+.search:focus-within{border-color:var(--gold)}
+.search>i{color:var(--muted);margin-inline-start:10px}
+.search input{
+  flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);
+  font:inherit;font-size:1rem;padding:12px 0;
+}
+.search input::placeholder{color:var(--muted)}
+.geo{
+  display:flex;align-items:center;gap:6px;border:0;cursor:pointer;
+  background:var(--raise);color:var(--gold-soft);font:inherit;font-size:.8rem;font-weight:500;
+  padding:10px 14px;border-radius:var(--r-m);white-space:nowrap;
+}
+
+/* لافتة التاجر */
+.sell{
+  margin:16px 16px 4px;padding:16px 18px;border-radius:var(--r-l);
+  background:linear-gradient(120deg,#3a2a12,#1f1626 70%);
+  border:1px solid rgba(242,184,75,.35);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.sell b{display:block;font-size:1rem}
+.sell span{font-size:.82rem;color:var(--muted)}
+.sell .cta{
+  background:var(--gold);color:#1b1200;font-weight:700;font-size:.9rem;
+  padding:10px 18px;border-radius:var(--r-m);white-space:nowrap;
+}
+
+.sec{display:flex;align-items:baseline;justify-content:space-between;padding:26px 16px 12px}
+.sec h2{font-size:1.1rem;font-weight:700}
+.sec a{font-size:.85rem;color:var(--gold-soft)}
+
+/* الإعلانات المميزة */
+.ads{display:flex;gap:12px;overflow-x:auto;padding:0 16px 4px;scroll-snap-type:x mandatory;scrollbar-width:none}
+.ads::-webkit-scrollbar{display:none}
+.ad{flex:0 0 72%;max-width:300px;scroll-snap-align:start;background:var(--surface);border-radius:var(--r-m);overflow:hidden;border:1px solid var(--line)}
+.ad .ph{aspect-ratio:16/10;background:var(--raise);width:100%;object-fit:cover;display:block}
+.ad .meta{padding:12px 14px 14px}
+.ad .t{font-weight:500;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ad .p{color:var(--gold);font-weight:700;font-size:.95rem;margin-top:2px}
+.skel .ph,.skel .t,.skel .p{
+  background:linear-gradient(90deg,var(--raise) 25%,#2f2340 50%,var(--raise) 75%);
+  background-size:200% 100%;animation:sh 1.4s linear infinite;border-radius:6px;color:transparent;
+}
+.skel .t{height:16px;width:70%}.skel .p{height:14px;width:35%;margin-top:8px}
+@keyframes sh{to{background-position:-200% 0}}
+
+/* الأقسام */
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px}
+.cat{
+  background:var(--surface);border-radius:var(--r-m);padding:16px 6px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;
+  border:1px solid transparent;transition:border-color .2s,background .2s;
+}
+.cat:active{background:var(--raise);border-color:var(--gold)}
+.cat i{font-size:1.55rem;color:var(--c,var(--gold))}
+.cat span{font-size:.8rem;font-weight:500;line-height:1.35}
+
+/* القائمة الجانبية */
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s;z-index:90}
+.veil.open{opacity:1;pointer-events:auto}
+.drawer{
+  position:fixed;top:0;bottom:0;inset-inline-start:0;width:min(84%,320px);z-index:100;
+  background:var(--surface);transform:translateX(100%);transition:transform .28s ease;
+  padding:calc(16px + env(safe-area-inset-top,0px)) 16px 20px;overflow-y:auto;
+  border-inline-end:1px solid var(--line);
+}
+.drawer.open{transform:none}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.dh b{font-size:1.05rem}
+.ucard{display:flex;align-items:center;gap:12px;background:var(--raise);padding:14px;border-radius:var(--r-m);margin-bottom:14px}
+.av{width:46px;height:46px;border-radius:50%;background:var(--gold);color:#1b1200;display:grid;place-items:center;font-size:1.2rem}
+.ucard b{display:block;font-size:.95rem}.ucard small{color:var(--muted);font-size:.78rem}
+.menu a{display:flex;align-items:center;gap:14px;padding:14px 8px;border-bottom:1px solid var(--line);font-size:.95rem}
+.menu i{width:22px;text-align:center;color:var(--gold)}
+
+/* مساعد + شريط سفلي */
+.fab{
+  position:fixed;inset-inline-start:16px;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:40;
+  width:52px;height:52px;border-radius:50%;background:var(--raise);color:var(--gold);
+  display:grid;place-items:center;font-size:1.3rem;border:1px solid rgba(242,184,75,.4);
+  box-shadow:0 6px 20px rgba(0,0,0,.45);
+}
+.nav{
+  position:fixed;inset-inline:0;bottom:0;z-index:60;
+  display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));
+  background:rgba(15,10,20,.96);border-top:1px solid var(--line);
+}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:.7rem;padding:4px 0}
+.nav a i{font-size:1.2rem}
+.nav a.on{color:var(--gold)}
+.nav .add i{
+  width:52px;height:52px;margin-top:-26px;border-radius:50%;background:var(--gold);color:#1b1200;
+  display:grid;place-items:center;font-size:1.3rem;border:4px solid var(--ink);
+}
+.nav .add{color:var(--text)}
+@media (min-width:768px){
+  body{max-width:720px;margin-inline:auto}
+  .cats{grid-template-columns:repeat(4,1fr)}
+}
+.news{background:var(--surface);border-bottom:1px solid var(--line);height:38px;display:flex;align-items:center;padding:0 16px;font-size:.85rem;color:var(--gold-soft)}
+.news i{margin-inline-end:10px;flex:none}
+.news .track{overflow:hidden;flex:1;white-space:nowrap}
+.news .track span{display:inline-block}
+.news .run span{animation:mq 22s linear infinite}
+@keyframes mq{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
+.sheet-veil{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:110;opacity:0;pointer-events:none;transition:opacity .2s}
+.sheet-veil.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;inset-inline:0;bottom:0;z-index:120;max-height:75vh;display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r-l) var(--r-l) 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));transform:translateY(100%);visibility:hidden;transition:transform .25s,visibility .25s}
+.sheet.open{transform:none;visibility:visible}
+.sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sh-list{overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sh-list button{background:var(--raise);color:var(--text);border:1px solid transparent;border-radius:var(--r-s);padding:13px 10px;font:inherit;font-size:.9rem;cursor:pointer}
+.sh-list button.on{border-color:var(--gold);color:var(--gold-soft)}
+.sh-list .back{grid-column:1/-1;background:none;color:var(--gold-soft);text-align:start;padding:6px 2px}
+.ad{position:relative}
+.ad .loc{color:var(--muted);font-size:.78rem;margin-top:2px}
+.ad.prem{border-color:rgba(242,184,75,.55);box-shadow:0 6px 22px rgba(242,184,75,.15)}
+.ad .badge{position:absolute;top:10px;inset-inline-start:10px;background:linear-gradient(110deg,#f2b84b 40%,#fff3c9 50%,#f2b84b 60%);background-size:220% 100%;color:#1b1200;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{to{background-position:-120% 0}}
+.empty{text-align:center;color:var(--muted);padding:18px 16px;font-size:.9rem}
+[hidden]{display:none!important}
+.offline{background:#4a1a1f;color:#ffd7d7;text-align:center;font-size:.82rem;padding:7px 12px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body>
+<div class="offline" id="offline" role="status" hidden>أنت غير متصل بالإنترنت. تظهر الصفحات المحفوظة فقط.</div>
+<header class="top">
+  <button class="icon-btn" id="menuBtn" aria-label="فتح القائمة" aria-expanded="false" aria-controls="drawer"><i class="fa-solid fa-bars"></i></button>
+  <a class="brand" href="index.html" aria-label="السوق الكبير"><img src="logo-mark.webp" alt="" width="38" height="38" decoding="async" fetchpriority="high"><b>السوق الكبير</b></a>
+  <a class="icon-btn" href="notifications.html" aria-label="الإشعارات"><i class="fa-regular fa-bell"></i><b class="dot" id="notifDot" hidden></b></a>
+</header>
+<div class="news" id="news" role="status"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i><div class="track" id="newsTrack"><span id="newsText">مرحبًا بكم في السوق الكبير</span></div></div>
 
-    <header class="master-header">
-        <div class="header-top">
-            <button class="header-btn" id="openSidebarBtn" aria-label="فتح القائمة">
-                <i class="fas fa-bars"></i>
-            </button>
-            <img src="long.png" alt="السوق الكبير" loading="lazy">
-            <button class="header-btn" onclick="location.href='profile.html'" aria-label="الملف الشخصي">
-                <i class="fas fa-user-circle"></i>
-            </button>
-        </div>
-        <div class="geo-indicator" onclick="openLocationPicker()">
-            <i class="fas fa-map-marker-alt"></i>
-            <span id="currentGeoLabel">جاري التحديد...</span>
-        </div>
-    </header>
+<main>
+  <section class="hero">
+    <h1>اشترِ وبِع في أكبر سوق سوداني</h1>
+    <form class="search" action="search.html" role="search">
+      <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      <input type="search" name="q" placeholder="ابحث عن هاتف، عربة، أرض…" autocomplete="off" enterkeyhint="search" aria-label="بحث">
+      <button type="button" class="geo" id="geoBtn"><i class="fa-solid fa-location-dot" aria-hidden="true"></i><span id="geoLabel">نيالا</span></button>
+    </form>
+  </section>
 
-    <div class="ticker-container" onclick="fastNavigate('ads-center.html')">
-        <div class="ticker-text" id="ticker-box">
-            <span>جاري تحميل التحديثات والإعلانات الفورية...</span>
-        </div>
-    </div>
+  <a class="sell" href="add-product.html">
+    <div><b>عندك شيء للبيع؟</b><span>انشر إعلانك ويوصل لآلاف المشترين</span></div>
+    <span class="cta">أضف إعلانك</span>
+  </a>
 
-    <div class="sec-header">
-        <span><i class="fas fa-gem"></i> إعلانات البريميوم</span>
-        <a href="ads-center.html">عرض الكل</a>
-    </div>
-    
-    <div class="premium-slider">
-        <div class="p-card" onclick="fastNavigate('ads-center.html')">
-            <img src="long.png" alt="تجار موثوقون" loading="lazy">
-            <div class="p-info">تجار موثوقون</div>
-        </div>
-        <div class="p-card" onclick="fastNavigate('ads-center.html')">
-            <img src="long.png" alt="عروض حصرية" loading="lazy">
-            <div class="p-info">عروض حصرية وخصومات</div>
-        </div>
-    </div>
+  <section id="premiumSec" hidden>
+    <div class="sec"><h2><i class="fa-solid fa-crown" style="color:var(--gold);font-size:.85em" aria-hidden="true"></i> إعلانات مميزة</h2></div>
+    <div class="ads" id="ads"></div>
+  </section>
+  <div class="sec"><h2>أحدث الإعلانات</h2><a href="search.html">عرض الكل</a></div>
+  <div class="ads" id="latest" aria-busy="true"><div class="ad skel"><div class="ph"></div><div class="meta"><div class="t">.</div><div class="p">.</div></div></div><div class="ad skel"><div class="ph"></div><div class="meta"><div class="t">.</div><div class="p">.</div></div></div><div class="ad skel"><div class="ph"></div><div class="meta"><div class="t">.</div><div class="p">.</div></div></div></div>
+  <p class="empty" id="latestEmpty" hidden>لا توجد إعلانات بعد. كن أول من ينشر إعلانًا!</p>
 
-    <div class="sec-header">
-        <span><i class="fas fa-th-large"></i> أقسام السوق</span>
-    </div>
-    
-    <div class="grid-matrix">
-        <a href="category-mobiles.html?cat=1" class="cat-box">
-            <div class="cat-icon-circle grad-mobiles"><i class="fas fa-mobile-alt"></i></div>
-            <span class="cat-label">الهواتف والملحقات</span>
-        </a>
-        <a href="computers.html?cat=2" class="cat-box">
-            <div class="cat-icon-circle grad-computers"><i class="fas fa-desktop"></i></div>
-            <span class="cat-label">الحواسيب والطابعات</span>
-        </a>
-        <a href="category-starlink.html?cat=3" class="cat-box">
-            <div class="cat-icon-circle grad-starlink"><i class="fas fa-satellite-dish"></i></div>
-            <span class="cat-label">ستارلينك وملحقاته</span>
-        </a>
-        <a href="electronics.html?cat=4" class="cat-box">
-            <div class="cat-icon-circle grad-electronics"><i class="fas fa-plug"></i></div>
-            <span class="cat-label">الأجهزة الإلكترونية</span>
-        </a>
-        <a href="fashion_mall.html?cat=5" class="cat-box">
-            <div class="cat-icon-circle grad-fashion"><i class="fas fa-shirt"></i></div>
-            <span class="cat-label">الملبوسات والأحذية</span>
-        </a>
-        <a href="furniture.html?cat=6" class="cat-box">
-            <div class="cat-icon-circle grad-furniture"><i class="fas fa-couch"></i></div>
-            <span class="cat-label">الأثاث والأواني</span>
-        </a>
-        <a href="building_materials.html?cat=7" class="cat-box">
-            <div class="cat-icon-circle grad-building"><i class="fas fa-tools"></i></div>
-            <span class="cat-label">أدوات البناء</span>
-        </a>
-        <a href="realestate.html?cat=9" class="cat-box">
-            <div class="cat-icon-circle grad-realestate"><i class="fas fa-home"></i></div>
-            <span class="cat-label">العقارات والأراضي</span>
-        </a>
-        <a href="category-cars.html?cat=10" class="cat-box">
-            <div class="cat-icon-circle grad-cars"><i class="fas fa-car"></i></div>
-            <span class="cat-label">العرَبات والاسبيرات</span>
-        </a>
-        <a href="motors.html?cat=11" class="cat-box">
-            <div class="cat-icon-circle grad-motors"><i class="fas fa-motorcycle"></i></div>
-            <span class="cat-label">المواتر والملحقات</span>
-        </a>
-        <a href="grains_and_crops.html?cat=12" class="cat-box">
-            <div class="cat-icon-circle grad-crops"><i class="fas fa-seedling"></i></div>
-            <span class="cat-label">الحبوب والمحاصيل</span>
-        </a>
-        <a href="livestock_and_feed.html?cat=13" class="cat-box">
-            <div class="cat-icon-circle grad-livestock"><i class="fas fa-cow"></i></div>
-            <span class="cat-label">المواشي والأعلاف</span>
-        </a>
-    </div>
+  <div class="sec"><h2>أقسام السوق</h2></div>
+  <nav class="cats" aria-label="أقسام السوق">
+    <a class="cat" style="--c:#7aa7ff" href="category.html?cat=1"><i class="fa-solid fa-mobile-screen"></i><span>الهواتف والملحقات</span></a>
+    <a class="cat" style="--c:#4cc3f0" href="category.html?cat=2"><i class="fa-solid fa-desktop"></i><span>الحواسيب والطابعات</span></a>
+    <a class="cat" style="--c:#c28bff" href="category.html?cat=3"><i class="fa-solid fa-satellite-dish"></i><span>ستارلينك وملحقاته</span></a>
+    <a class="cat" style="--c:#59d98e" href="category.html?cat=4"><i class="fa-solid fa-plug"></i><span>الأجهزة الإلكترونية</span></a>
+    <a class="cat" style="--c:#f58bc0" href="category.html?cat=5"><i class="fa-solid fa-shirt"></i><span>الملبوسات والأحذية</span></a>
+    <a class="cat" style="--c:#ff9d5c" href="category.html?cat=11"><i class="fa-solid fa-couch"></i><span>الأثاث والأواني</span></a>
+    <a class="cat" style="--c:#f2b84b" href="category.html?cat=6"><i class="fa-solid fa-screwdriver-wrench"></i><span>أدوات البناء</span></a>
+    <a class="cat" style="--c:#3fd6c2" href="category.html?cat=9"><i class="fa-solid fa-house"></i><span>العقارات والأراضي</span></a>
+    <a class="cat" style="--c:#e5e7eb" href="category.html?cat=7"><i class="fa-solid fa-car"></i><span>العربات والاسبيرات</span></a>
+    <a class="cat" style="--c:#ff7a7a" href="category.html?cat=8"><i class="fa-solid fa-motorcycle"></i><span>المواتر والملحقات</span></a>
+    <a class="cat" style="--c:#7be0a8" href="category.html?cat=12"><i class="fa-solid fa-seedling"></i><span>الحبوب والمحاصيل</span></a>
+    <a class="cat" style="--c:#e8c15a" href="category.html?cat=10"><i class="fa-solid fa-paw"></i><span>المواشي والأعلاف</span></a>
+  </nav>
+</main>
 
-    <!-- القائمة الجانبية -->
-    <div class="sidebar-overlay" id="sidebarOverlay">
-        <div class="sidebar-panel">
-            <div class="sidebar-header">
-                <div class="sidebar-title">
-                    <i class="fas fa-sliders-h"></i>
-                    مركز الخدمات
-                </div>
-                <div class="close-sidebar-btn" id="closeSidebarBtn">
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
+<div class="sheet-veil" id="sheetVeil"></div>
+<section class="sheet" id="geoSheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sh-head"><b id="sheetTitle">اختر الولاية</b><button class="icon-btn" id="sheetClose" type="button" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="sh-list" id="sheetList"></div>
+</section>
+<div class="veil" id="veil"></div>
+<aside class="drawer" id="drawer" aria-label="القائمة الرئيسية">
+  <div class="dh"><b>القائمة</b><button class="icon-btn" id="closeBtn" aria-label="إغلاق القائمة"><i class="fa-solid fa-xmark"></i></button></div>
+  <a class="ucard" id="userCard" href="login.html">
+    <div class="av"><i class="fa-solid fa-user"></i></div>
+    <div><b id="userName">تسجيل الدخول</b><small id="userMeta">أنشئ حسابك أو سجّل دخولك</small></div>
+  </a>
+  <div class="menu">
+    <a href="add-product.html"><i class="fa-solid fa-circle-plus"></i>إضافة إعلان</a>
+    <a href="chat.html"><i class="fa-regular fa-comments"></i>المحادثات</a>
+    <a href="my-ads.html"><i class="fa-solid fa-list"></i>إعلاناتي</a>
+    <a href="plans.html"><i class="fa-solid fa-crown"></i>الباقات والاشتراكات</a>
+    <a href="about.html"><i class="fa-solid fa-circle-info"></i>عن السوق الكبير</a>
+    <a href="policy.html"><i class="fa-solid fa-shield-halved"></i>الخصوصية والشروط</a>
+    <a href="#" id="logoutBtn" hidden><i class="fa-solid fa-right-from-bracket"></i>تسجيل الخروج</a>
+    <a href="#" id="installBtn" hidden><i class="fa-solid fa-download"></i>ثبّت التطبيق على هاتفك</a>
+  </div>
+</aside>
 
-            <div class="user-card-side" onclick="fastNavigate('profile.html')">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-info">
-                    <h4>المطور محمد حبيب</h4>
-                    <p><i class="fas fa-check-circle"></i> تاجر معتمد • نيالا</p>
-                </div>
-            </div>
 
-            <div class="side-menu-list">
-                <a href="add-ad.html" class="side-item highlight">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>إضافة إعلان جديد</span>
-                </a>
-                <a href="chat-list.html" class="side-item">
-                    <i class="fas fa-comments"></i>
-                    <span>المحادثات المباشرة</span>
-                </a>
-                <a href="my-ads.html" class="side-item">
-                    <i class="fas fa-list-alt"></i>
-                    <span>إعلاناتي المعروضة</span>
-                </a>
-                <a href="verify-receipt.html" class="side-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>الفحص الجنائي للإشعارات</span>
-                </a>
-                <a href="plans.html" class="side-item">
-                    <i class="fas fa-crown"></i>
-                    <span>خطط الباقات والاشتراكات</span>
-                </a>
-                <a href="profile.html" class="side-item">
-                    <i class="fas fa-user-cog"></i>
-                    <span>إعدادات الحساب والبروفايل</span>
-                </a>
-            </div>
-        </div>
-    </div>
+<nav class="nav" aria-label="التنقل">
+  <a class="on" href="index.html" aria-current="page"><i class="fa-solid fa-house"></i>الرئيسية</a>
+  <a href="category.html"><i class="fa-solid fa-table-cells-large"></i>الأقسام</a>
+  <a class="add" href="add-product.html"><i class="fa-solid fa-plus"></i>أضف</a>
+  <a href="chat.html"><i class="fa-regular fa-comments"></i>المحادثات</a>
+  <a href="profile.html"><i class="fa-regular fa-user"></i>حسابي</a>
+</nav>
 
-    <!--  المساعد الذكي - تصميم إنسان -->
-    <div id="smartAssistant" class="smart-assistant">
-        <div class="assistant-header">
-            <div class="assistant-avatar">
-                <!-- صورة الإنسان - يمكن استبدالها بصورة حقيقية -->
-                <i class="fas fa-user-tie"></i>
-            </div>
-            <div class="assistant-header-info">
-                <h3>مستشار السوق الكبير</h3>
-                <div class="assistant-status">
-                    <span class="status-dot"></span>
-                    <span>متصل الآن</span>
-                </div>
-            </div>
-            <button class="close-assistant" onclick="toggleAssistant()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="assistant-body" id="chatBody">
-            <div class="message bot">
-                مرحباً بك في السوق الكبير!  أنا مستشارك الذكي، هنا لمساعدتك في العثور على أفضل المنتجات والخدمات. كيف يمكنني مساعدتك اليوم؟
-            </div>
-        </div>
-        <div class="assistant-footer">
-            <input type="text" placeholder="اكتب سؤالك هنا..." class="assistant-input" id="assistantInput">
-            <button class="send-button" onclick="sendMessage()">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    </div>
-    
-    <!-- زر فتح المساعد - صورة إنسان -->
-    <button class="assistant-toggle" onclick="toggleAssistant()">
-        <i class="fas fa-user-tie"></i>
-    </button>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var drawer=$('#drawer'),veil=$('#veil'),menu=$('#menuBtn');
+  drawer.inert=true;
+  function toggle(open){
+    drawer.classList.toggle('open',open);veil.classList.toggle('open',open);
+    menu.setAttribute('aria-expanded',String(open));drawer.inert=!open;
+    (open?$('#closeBtn'):menu).focus();
+  }
+  menu.onclick=function(){toggle(true)};
+  $('#closeBtn').onclick=veil.onclick=function(){toggle(false)};
+  addEventListener('keydown',function(e){if(e.key==='Escape'&&drawer.classList.contains('open'))toggle(false)});
 
-    <!-- الشريط السفلي -->
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <i class="fas fa-home"></i>
-            <span>الرئيسية</span>
-        </a>
-        <a href="my-ads.html" class="nav-item">
-            <i class="fas fa-shopping-bag"></i>
-            <span>الطلبات</span>
-        </a>
-        <a href="profile.html" class="nav-item">
-            <i class="fas fa-user"></i>
-            <span>حسابي</span>
-        </a>
-        <a href="login.html" class="nav-item">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>خروج</span>
-        </a>
-    </nav>
+  // الموقع: يستخدم دالتك الحالية إن وُجدت
+  $('#geoBtn').onclick=function(){if(typeof openLocationPicker==='function')openLocationPicker()};
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  // بيانات المستخدم تأتي من Firebase Auth (استدعِ renderUser من onAuthStateChanged)
+  window.renderUser=function(u){
+    $('#userName').textContent=(u&&u.name)||'تسجيل الدخول';
+    $('#userMeta').textContent=u?((u.verified?'تاجر معتمد':'عضو')+(u.city?' • '+u.city:'')):'أنشئ حسابك أو سجّل دخولك';
+    $('#userCard').setAttribute('href',u?'profile.html':'login.html');
+  };
+  renderUser(null);
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
-            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
-            projectId: "alsouq-alkabeer-2052c",
-            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
-            messagingSenderId: "835295635291",
-            appId: "1:835295635291:web:e1f09baff25b50fac11c7e",
-            measurementId: "G-WTC5HE9BB1"
-        };
+  // الإعلانات المميزة من Firestore: renderAds([{id,title,price,img}]) — النصوص تُدرج كنص فقط (آمن من XSS)
+  window.renderAds=function(list){
+    var box=$('#ads');box.textContent='';box.setAttribute('aria-busy','false');
+    list.forEach(function(a){
+      var el=document.createElement('a');el.className='ad';
+      el.href='product-view-v2.html?id='+encodeURIComponent(a.id);
+      var im=document.createElement('img');im.className='ph';im.loading='lazy';im.alt='';
+      if(/^https:\/\//.test(a.img||''))im.src=a.img;
+      var m=document.createElement('div');m.className='meta';
+      var t=document.createElement('div');t.className='t';t.textContent=a.title||'';
+      var p=document.createElement('div');p.className='p';p.textContent=a.price||'';
+      m.append(t,p);el.append(im,m);box.append(el);
+    });
+  };
+  // تثبيت التطبيق + وضع عدم الاتصال + Service Worker
+  var promptEv;
+  addEventListener('beforeinstallprompt',function(e){e.preventDefault();promptEv=e;$('#installBtn').hidden=false});
+  $('#installBtn').onclick=function(x){x.preventDefault();if(promptEv){promptEv.prompt();promptEv=null;$('#installBtn').hidden=true}};
+  function net(){$('#offline').hidden=navigator.onLine}
+  addEventListener('online',net);addEventListener('offline',net);net();
+  if('serviceWorker' in navigator)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+})();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+// إعداد الويب العام (ليس سرًّا). الحماية الحقيقية: Rules + App Check
+const app = initializeApp({
+  apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+  authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+  projectId: "alsouq-alkabeer-2052c",
+  storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+  messagingSenderId: "835295635291",
+  appId: "1:835295635291:web:e1f09baff25b50fac11c7e",
+  measurementId: "G-WTC5HE9BB1"
+});
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
 
-        function loadActiveGeo() {
-            const savedState = localStorage.getItem('filteredState') || "جنوب دارفور";
-            const savedCity = localStorage.getItem('filteredCity') || "نيالا";
-            document.getElementById('currentGeoLabel').innerText = `${savedCity} - ${savedState}`;
-        }
-        loadActiveGeo();
+// 1) شريط الإعلان: نص فقط (textContent) لمنع حقن الأكواد
+const TICKER = 'إعلان متحرك في الشريط';
+const track = $('newsTrack'), newsText = $('newsText');
+onSnapshot(query(collection(db, 'ads'), where('type', '==', TICKER)), snap => {
+  let best = null, latest = -1;
+  snap.forEach(d => {
+    const x = d.data();
+    const t = x.timestamp && x.timestamp.toMillis ? x.timestamp.toMillis() : 0;
+    if (typeof x.text === 'string' && x.text.trim() && t >= latest) { best = x.text.trim(); latest = t; }
+  });
+  if (!best) return;
+  newsText.textContent = best.slice(0, 300);
+  track.classList.remove('run');
+  requestAnimationFrame(() => { if (newsText.scrollWidth > track.clientWidth) track.classList.add('run'); });
+}, err => console.error('ticker:', err));
 
-        onSnapshot(collection(db, "ads"), (snapshot) => {
-            let text = "مرحباً بكم في تطبيق السوق الكبير 🇸🇩";
-            snapshot.forEach((doc) => { 
-                if(doc.data().type === "إعلان متحرك في الشريط") {
-                    text = doc.data().text; 
-                } 
-            });
-            document.getElementById('ticker-box').innerHTML = `<span>${text}</span>`;
-        });
+// 2) الموقع: نفس مفاتيح التخزين القديمة
+const get = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
+const put = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const st = () => get('filteredState', 'جنوب دارفور');
+const ct = () => get('filteredCity', 'نيالا');
+$('geoLabel').textContent = ct();
 
-        window.fastNavigate = function(url) { 
-            document.body.style.opacity = '0.8';
-            setTimeout(() => {
-                window.location.href = url;
-            }, 100);
-        };
+const sheet = $('geoSheet'), sveil = $('sheetVeil'), list = $('sheetList'), title = $('sheetTitle');
+const toggle = o => { sheet.classList.toggle('open', o); sveil.classList.toggle('open', o); };
+function btn(label, cls, fn) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = label; if (cls) b.className = cls; b.onclick = fn; list.append(b);
+}
+function showStates() {
+  title.textContent = 'اختر الولاية'; list.textContent = '';
+  Object.keys(SUDAN).forEach(s => btn(s, s === st() ? 'on' : '', () => showCities(s)));
+}
+function showCities(s) {
+  title.textContent = s; list.textContent = '';
+  btn('رجوع للولايات', 'back', showStates);
+  SUDAN[s].forEach(c => btn(c, s === st() && c === ct() ? 'on' : '', () => {
+    put('filteredState', s); put('filteredCity', c); $('geoLabel').textContent = c; toggle(false);
+    document.dispatchEvent(new CustomEvent('souq:geo', { detail: { state: s, city: c } }));
+  }));
+}
+window.openLocationPicker = () => { showStates(); toggle(true); };
+$('sheetClose').onclick = sveil.onclick = () => toggle(false);
+addEventListener('keydown', e => { if (e.key === 'Escape') toggle(false); });
 
-        document.querySelectorAll('.cat-box').forEach(box => {
-            box.addEventListener('click', function(e) {
-                e.preventDefault();
-                this.style.transform = 'scale(0.95)';
-                this.style.borderColor = 'var(--gold)';
-                
-                const href = this.getAttribute('href');
-                const savedState = localStorage.getItem('filteredState') || "جنوب دارفور";
-                const savedCity = localStorage.getItem('filteredCity') || "نيالا";
-                
-                const separator = href.includes('?') ? '&' : '?';
-                const finalUrl = `${href}${separator}state=${encodeURIComponent(savedState)}&city=${encodeURIComponent(savedCity)}`;
-                
-                setTimeout(() => {
-                    window.location.href = finalUrl;
-                }, 50);
-            });
-        });
+// 3) تمرير الولاية والمدينة للأقسام والبحث (كما في الكود الأصلي)
+document.querySelector('.cats').addEventListener('click', e => {
+  const a = e.target.closest('a.cat'); if (!a) return;
+  const u = new URL(a.getAttribute('href'), location.href);
+  u.searchParams.set('state', st()); u.searchParams.set('city', ct());
+  a.setAttribute('href', u.pathname.split('/').pop() + u.search);
+});
+document.querySelector('.search').addEventListener('submit', e => {
+  ['state', 'city'].forEach(n => {
+    let i = e.target.querySelector('[name=' + n + ']');
+    if (!i) { i = document.createElement('input'); i.type = 'hidden'; i.name = n; e.target.append(i); }
+    i.value = n === 'state' ? st() : ct();
+  });
+});
+import { getDatabase, ref, query as rtQuery, orderByChild, limitToLast, onValue, get as rtGet } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+const rtdb = getDatabase(app, 'https://alsouq-alkabeer-2052c-default-rtdb.europe-west1.firebasedatabase.app');
+const fmt = n => Number(n).toLocaleString('en-US') + ' ج.س';
+function card(id, a, premium) {
+  const el = document.createElement('a'); el.className = 'ad' + (premium ? ' prem' : '');
+  el.href = 'ad.html?id=' + encodeURIComponent(id);
+  const im = document.createElement('img'); im.className = 'ph'; im.loading = 'lazy'; im.alt = '';
+  const src = Array.isArray(a.images) ? a.images[0] : null;
+  if (typeof src === 'string' && /^https:\/\//.test(src)) im.src = src;
+  const m = document.createElement('div'); m.className = 'meta';
+  const t = document.createElement('div'); t.className = 't'; t.textContent = String(a.description || '').slice(0, 70);
+  const p = document.createElement('div'); p.className = 'p'; p.textContent = isFinite(a.price) ? fmt(a.price) : '';
+  const l = document.createElement('div'); l.className = 'loc'; l.textContent = [a.city, a.state].filter(Boolean).join(' - ');
+  m.append(t, p, l); el.append(im, m);
+  if (premium) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = 'مميز'; el.append(b); }
+  return el;
+}
+const fill = (box, list, premium) => { box.textContent = ''; box.setAttribute('aria-busy', 'false'); list.forEach(r => box.append(card(r[0], r[1], premium))); };
+onValue(rtQuery(ref(rtdb, 'ads'), orderByChild('timestamp'), limitToLast(12)), snap => {
+  const items = []; snap.forEach(c => { items.unshift([c.key, c.val()]); });
+  fill($('latest'), items, false); $('latest').hidden = items.length === 0; $('latestEmpty').hidden = items.length > 0;
+}, err => { console.error('latest:', err); $('latest').hidden = true; $('latestEmpty').hidden = false; });
+// المميزة: premium_ads/{adId}/until (تُدار من admin-premium.html)
+onValue(rtQuery(ref(rtdb, 'premium_ads'), limitToLast(10)), async snap => {
+  const now = Date.now(), ids = [];
+  snap.forEach(c => { const v = c.val(); if (v && typeof v.until === 'number' && v.until > now) ids.push(c.key); });
+  const rows = (await Promise.all(ids.map(async id => { try { const s = await rtGet(ref(rtdb, 'ads/' + id)); return s.exists() ? [id, s.val()] : null; } catch (e) { return null; } }))).filter(Boolean);
+  if (rows.length) fill($('ads'), rows, true);
+  $('premiumSec').hidden = rows.length === 0;
+}, err => console.error('premium:', err));
 
-        const sidebar = document.getElementById('sidebarOverlay');
-        document.getElementById('openSidebarBtn').addEventListener('click', () => sidebar.classList.add('active'));
-        document.getElementById('closeSidebarBtn').addEventListener('click', () => sidebar.classList.remove('active'));
-        sidebar.addEventListener('click', (e) => { 
-            if(e.target === sidebar) sidebar.classList.remove('active'); 
-        });
-
-        window.openLocationPicker = function() {
-            console.log("فتح نافذة اختيار الموقع...");
-        };
-
-        // ==========================================
-        // 🤖 نظام المساعد الذكي المتقدم
-        // ==========================================
-        
-        const chatBody = document.getElementById('chatBody');
-        const assistantInput = document.getElementById('assistantInput');
-
-        window.toggleAssistant = function() {
-            const assistant = document.getElementById('smartAssistant');
-            assistant.classList.toggle('active');
-        };
-
-        function addMessage(text, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            messageDiv.textContent = text;
-            chatBody.appendChild(messageDiv);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-
-        function showTyping() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'typing-indicator';
-            typingDiv.id = 'typingIndicator';
-            typingDiv.innerHTML = '<span></span><span></span><span></span>';
-            chatBody.appendChild(typingDiv);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-
-        function removeTyping() {
-            const typing = document.getElementById('typingIndicator');
-            if (typing) typing.remove();
-        }
-
-        // قاعدة المعرفة الذكية
-        const knowledgeBase = {
-            'مرحبا': 'أهلاً وسهلاً بك في السوق الكبير! 🎉 كيف يمكنني مساعدتك اليوم؟',
-            'اهلا': 'أهلاً بك! أنا هنا لخدمتك. ما الذي تبحث عنه؟',
-            'هلا': 'هلا والله! تفضل، كيف أقدر أساعدك؟',
-            'السلام': 'وعليكم السلام ورحمة الله! كيف يمكنني مساعدتك؟',
-            
-            'سعر': '💰 الأسعار في السوق الكبير تتفاوت حسب المنتج والتاجر. يمكنك تصفح الأقسام المختلفة لمعرفة الأسعار الحالية. هل تبحث عن منتج معين؟',
-            'اسعار': '💰 لدينا آلاف المنتجات بأسعار تنافسية! تصفح الأقسام أو أخبرني بما تبحث عنه وسأساعدك في العثور على أفضل العروض.',
-            'غالي': ' نحرص على تقديم أفضل الأسعار! يمكنك مقارنة الأسعار بين التجار، أو الانتظار للعروض والخصومات الأسبوعية.',
-            'رخيص': '✨ لدينا عروض يومية وخصومات تصل إلى 50%! تابع قسم العروض أو اشترك في الباقة البريميوم للحصول على عروض حصرية.',
-            
-            'توصيل': '🚚 نعم، نوفر خدمة التوصيل لجميع ولايات السودان! التوصيل داخل نيالا خلال 24 ساعة، والولايات الأخرى خلال 2-5 أيام عمل.',
-            'شحن': '📦 الشحن متاح لجميع المناطق. تكلفة الشحن تعتمد على الوزن والمسافة. يمكن للتاجر تحديد تكلفة الشحن أو تكون على حساب المشتري.',
-            'توصيل سريع': '⚡ نعم! نوفر خدمة التوصيل السريع خلال ساعات قليلة داخل نفس المدينة بتكلفة إضافية بسيطة.',
-            
-            'دفع': '💳 طرق الدفع المتاحة:\n• الدفع عند الاستلام\n• بنكك\n• فوري\n• التحويل البنكي\n• بطاقات الائتمان',
-            'دفع الكتروني': ' ندعم الدفع الإلكتروني عبر:\n• بنك الخرطوم\n• بنك فيصل الإسلامي\n• بنك الأسرة\n• بنك المستقبل\n• وجميع البنوك السودانية',
-            
-            'تاجر': ' لدينا 3 أنواع من التجار:\n1️⃣ تاجر عادي - للبيع المؤقت\n2️⃣ تاجر قطاعي - للبيع بالتجزئة\n3️⃣ تاجر جملة - للبيع بالجملة\n\nأي نوع يناسبك؟',
-            'اشتراك': '📋 الاشتراك للتجار:\n• الباقة المجانية - 3 إعلانات\n• الباقة البرونزية - 10 إعلانات\n• الباقة الفضية - 25 إعلان\n• الباقة الذهبية - إعلانات غير محدودة\n\nتفضل بزيارة صفحة الباقات لمزيد من التفاصيل.',
-            'باقات': ' الباقات المتاحة:\n• مجانية: 0 جنيه - 3 إعلانات\n• برونزية: 5,000 جنيه - 10 إعلانات\n• فضية: 15,000 جنيه - 25 إعلان\n• ذهبية: 50,000 جنيه - غير محدود',
-            
-            'هاتف': '📱 قسم الهواتف والملحقات يحتوي على أحدث الهواتف الذكية وملحقاتها من جميع الماركات العالمية. تصفح القسم الآن!',
-            'موبايل': '📱 لدينا تشكيلة واسعة من الهواتف: Samsung, iPhone, Huawei, Xiaomi, Oppo والمزيد! ما الماركة التي تفضلها؟',
-            'لابتوب': ' قسم الحواسيب يحتوي على لابتوبات بجميع المواصفات والأسعار. من الاستخدام المكتبي إلى الألعاب الاحترافية.',
-            'كمبيوتر': ' حواسيب مكتبية ومحمولة متوفرة! ماركات: Dell, HP, Lenovo, Asus, Apple. ما استخدامك الرئيسي؟',
-            
-            'ستارلينك': '📡 ستارلينك متوفر في السوق الكبير! أسعار Competitive مع ضمان وصيانة. هل تريد معرفة الأسعار الحالية؟',
-            'انترنت': ' نوفر أجهزة ستارلينك للاتصال بالإنترنت عالي السرعة في جميع أنحاء السودان. مثالي للمناطق النائية!',
-            
-            'عقار': '🏠 قسم العقارات يحتوي على:\n• أراضي للبيع\n• منازل\n• شقق\n• محلات تجارية\n• مزارع\n\nما نوع العقار الذي تبحث عنه؟',
-            'ارض': ' لدينا أراضي في مختلف المواقع بأسعار مناسبة. هل تبحث في نيالا أم ولاية أخرى؟',
-            'بيت': '🏡 منازل للبيع والإيجار متوفرة! من الفلل الفاخرة إلى المنازل الاقتصادية. ما ميزانيتك؟',
-            
-            'سيارة': '🚗 قسم السيارات يحتوي على:\n• سيارات جديدة ومستعملة\n• جميع الماركات\n• أسعار تنافسية\n• فحص فني متوفر\n\nما نوع السيارة التي تبحث عنها؟',
-            'عربية': ' لدينا تشكيلة واسعة من السيارات! تويوتا، هيونداي، كيا، مرسيدس، BMW والمزيد. هل تبحث عن سيارة جديدة أم مستعملة؟',
-            
-            'موتور': '️ المواتر متوفرة بجميع الماركات! Bajaj, TVS, Honda وغيرها. أسعار تبدأ من 150,000 جنيه.',
-            'دراجة': '🏍️ دراجات نارية بجميع الأحجام! من 125cc للاستخدام اليومي إلى 250cc للاستخدام التجاري.',
-            
-            'زراعة': '🌾 قسم الحبوب والمحاصيل يحتوي على:\n• ذرة\n• قمح\n• دخن\n• سمسم\n• فول سوداني\n• وغيرها\n\nأسعار الجملة والتجزئة متوفرة!',
-            'حبوب': '🌾 حبوب ومحاصيل طازجة من المزارع مباشرة! ذرة، قمح، دخن، سمسم بأسعار منافسة.',
-            'خضار': '🥬 خضروات وفواكه طازجة يومياً من المزارع! توصيل سريع لجميع المناطق.',
-            
-            'مواشي': '🐄 قسم المواشي والأعلاف يحتوي على:\n• أبقار\n• أغنام\n• ماعز\n• إبل\n• أعلاف بجميع الأنواع',
-            'حيوانات': '🐄🐐 نوفر مواشي صحية ومحصنة! أسعار الجملة والتجزئة. هل تبحث للعيد أم للاستخدام اليومي؟',
-            
-            'اثاث': '️ أثاث منزلي ومكتبي بجميع الأنواع! من الأثاث الكلاسيكي إلى المودرن. توصيل وتركيب متاح.',
-            'ملابس': '👕👗 ملبوسات رجالية ونسائية وأطفال! أحدث الموضات بأسعار مناسبة. ماركات عالمية ومحلية.',
-            
-            'ضمان': '✅ جميع المنتجات المباعة عبر السوق الكبير تتمتع بضمان التاجر. نحن نضمن حقوقك كمشتري!',
-            'جودة': '✨ نحرص على جودة المنتجات! التجار المعتمدون فقط يمكنهم البيع، ويمكنك تقييمهم بعد الشراء.',
-            
-            'شكوى': '📝 نأسف لسماع ذلك! يمكنك تقديم شكوى عبر:\n1. قسم الشكاوى في البروفايل\n2. التواصل مع خدمة العملاء\n3. إرسال رسالة مباشرة للتاجر\n\nسنحل مشكلتك في أسرع وقت!',
-            'مشكلة': '🔧 لا تقلق! أنا هنا لمساعدتك. صف لي المشكلة بالتفصيل وسأجد لك الحل المناسب.',
-            
-            'مساعدة': ' أنا هنا لمساعدتك! يمكنني مساعدتك في:\n• البحث عن منتجات\n• معرفة الأسعار\n• معلومات عن التجار\n• طرق الدفع والشحن\n• حل المشاكل\n\nما الذي تحتاجه؟',
-            'help': '🤝 I\'m here to help! I can assist you with:\n• Finding products\n• Price information\n• Trader details\n• Payment & shipping\n• Problem solving\n\nWhat do you need?',
-            
-            'شكرا': 'العفو! 😊 سعيد بخدمتك. هل هناك أي شيء آخر يمكنني مساعدتك فيه؟',
-            'شكراً': 'على الرحب والسعة! 🌟 أنا دائماً هنا لخدمتك. هل تحتاج أي مساعدة أخرى؟',
-            
-            'وداعا': 'مع السلامة! 👋 شكراً لزيارتك السوق الكبير. نتمنى لك تجربة تسوق ممتعة!',
-            'باي': 'باي باي! 😊 أتمنى لك يوماً سعيداً. عد إلينا anytime!',
-            
-            'عروض': '🔥 عروض اليوم:\n• خصم 20% على الهواتف\n• عروض حصرية على الأجهزة الإلكترونية\n• تخفيضات على الأثاث\n\nتابع قسم العروض البريميوم!',
-            'خصم': '💥 لدينا خصومات يومية تصل إلى 50%! اشترك في الباقة البريميوم للحصول على عروض حصرية قبل الجميع.',
-            
-            'تقييم': '⭐ يمكنك تقييم التجار والمنتجات بعد الشراء! التقييمات تساعد المشترين الآخرين في اتخاذ قرارات أفضل.',
-            'مراجعات': ' المراجعات والتقييمات متاحة لكل منتج! اقرأ تجارب المشترين السابقين قبل الشراء.',
-            
-            'اتصال': '📞 يمكنك التواصل معنا عبر:\n• واتساب: +249 XXX XXX XXX\n• البريد: info@alsouqalkabir.com\n• أو اسألني مباشرة هنا!',
-            'تواصل': '📧 طرق التواصل:\n• الدعم الفني: 24/7\n• واتساب مباشر\n• البريد الإلكتروني\n• أو اسألني هنا وسأرد فوراً!',
-            
-            'أقسام': '📂 أقسام السوق الكبير:\n1. الهواتف والملحقات\n2. الحواسيب والطابعات\n3. ستارلينك\n4. الأجهزة الإلكترونية\n5. الملبوسات\n6. الأثاث\n7. أدوات البناء\n8. العقارات\n9. السيارات\n10. المواتر\n11. الحبوب والمحاصيل\n12. المواشي والأعلاف\n\nأي قسم يهمك؟',
-            'اقسام': '📂 لدينا 12 قسماً رئيسياً! من الإلكترونيات إلى العقارات إلى المواشي. كل ما تحتاجه في مكان واحد!',
-            
-            'نيالا': '📍 نيالا - عاصمة جنوب دارفور! نخدم جميع أحياء نيالا بتوصيل سريع خلال 24 ساعة.',
-            'الخرطوم': '🏙️ نعم، نخدم الخرطوم وجميع ولايات السودان! التوصيل متاح لجميع المناطق.',
-            
-            'default': ' لم أفهم سؤالك تماماً. هل يمكنك إعادة صياغته؟ أو يمكنك سؤالي عن:\n• الأسعار\n• التوصيل\n• الأقسام\n• الباقات\n• طرق الدفع\n\nأنا هنا لمساعدتك! '
-        };
-
-        function getSmartResponse(message) {
-            const lowerMsg = message.toLowerCase().trim();
-            
-            // البحث عن تطابق في قاعدة المعرفة
-            for (const [key, response] of Object.entries(knowledgeBase)) {
-                if (lowerMsg.includes(key)) {
-                    return response;
-                }
-            }
-            
-            // ردود ذكية للكلمات غير المفهومة
-            if (lowerMsg.includes('?') || lowerMsg.includes('؟')) {
-                return 'سؤال جيد!  دعني أساعدك. هل تقصد الاستفسار عن الأسعار، التوصيل، أو الأقسام؟';
-            }
-            
-            if (lowerMsg.length < 3) {
-                return 'يمكنك كتابة سؤالك بالتفصيل لأتمكن من مساعدتك بشكل أفضل! 😊';
-            }
-            
-            return knowledgeBase['default'];
-        }
-
-        window.sendMessage = function() {
-            const message = assistantInput.value.trim();
-            if (!message) return;
-            
-            // إضافة رسالة المستخدم
-            addMessage(message, 'user');
-            assistantInput.value = '';
-            
-            // إظهار مؤشر الكتابة
-            showTyping();
-            
-            // محاكاة التفكير والرد السريع
-            const thinkingTime = Math.random() * 1000 + 500; // 0.5-1.5 ثانية
-            
-            setTimeout(() => {
-                removeTyping();
-                const response = getSmartResponse(message);
-                addMessage(response, 'bot');
-            }, thinkingTime);
-        };
-
-        // إرسال عند الضغط على Enter
-        assistantInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-    </script>
+import { SUDAN } from './geo.js';
+import { onUser, signOutUser } from './auth.js';
+onUser(u => { window.renderUser(u ? { name: u.displayName || 'عضو' } : null); $('logoutBtn').hidden = !u; });
+$('logoutBtn').onclick = async e => { e.preventDefault(); if (confirm('هل تريد تسجيل الخروج؟')) { await signOutUser(); location.reload(); } };
+</script>
+<script src="shell.js" defer></script>
 </body>
 </html>

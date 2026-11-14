@@ -1,508 +1,252 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>السوق الكبير | نظام النشر المطور</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root { 
-            --gold: #fcc963; 
-            --bg: #0b0b0b; 
-            --card: #161616; 
-            --input-bg: #222; 
-            --blue: #3498db; 
-            --danger: #ff5959; 
-            --green: #2ecc71; 
-        }
-        * { box-sizing: border-box; font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; margin: 0; padding-bottom: 110px; }
-
-        /* الهيدر العلوي */
-        .header { 
-            padding: 20px 15px; background: var(--card); border-bottom: 2px solid var(--gold); 
-            display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-        }
-        .header .back-link { color: #fff; font-size: 1.2rem; text-decoration: none; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
-        .header h2 { margin: 0; color: var(--gold); font-weight: 900; font-size: 1.3rem; flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .header .placeholder-div { width: 35px; }
-
-        .container { padding: 15px; max-width: 600px; margin: auto; }
-        
-        /* شريط جاهزية الإعلان الذكي */
-        .progress-container { background: #222; border-radius: 10px; height: 6px; margin: 10px 0 20px; overflow: hidden; display: none; }
-        .progress-bar { background: linear-gradient(90deg, var(--gold), var(--green)); width: 0%; height: 100%; transition: 0.4s; }
-        .progress-text { font-size: 0.75rem; color: #aaa; text-align: left; margin-top: -15px; margin-bottom: 15px; font-weight: bold; }
-
-        .section-title { color: var(--gold); font-size: 0.95rem; font-weight: 900; margin: 25px 0 15px; display: flex; align-items: center; gap: 10px; border-right: 4px solid var(--gold); padding-right: 10px; }
-
-        label { display: block; margin-bottom: 8px; font-size: 0.85rem; font-weight: 700; color: #aaa; }
-        .input-box { width: 100%; padding: 16px; background: var(--input-bg); border: 1px solid #333; border-radius: 15px; color: #fff; outline: none; margin-bottom: 15px; font-size: 0.9rem; transition: 0.3s; font-weight: 700; font-family: 'Cairo'; }
-        .input-box:focus { border-color: var(--gold); background: #2a2a2a; }
-        textarea.input-box { min-height: 120px; resize: none; }
-
-        /* أزرار الاختيار الفرعي */
-        .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-        .sel-btn { background: #222; border: 1px solid #333; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; font-size: 0.9rem; color: #fff; font-weight: 900; transition: 0.3s; }
-        .sel-btn.active { border-color: var(--gold); background: rgba(252, 201, 99, 0.1); color: var(--gold); box-shadow: 0 4px 15px rgba(252, 201, 99, 0.15); }
-
-        /* منطقة الرفع وعداد الصور التفاعلي */
-        .photo-counter-badge { float: left; font-size: 0.75rem; padding: 2px 8px; border-radius: 20px; background: #222; color: var(--danger); font-weight: 700; transition: 0.3s; }
-        .photo-counter-badge.ready { color: var(--green); background: rgba(46, 204, 113, 0.1); }
-        .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 25px; clear: both; }
-        .img-slot { aspect-ratio: 1; background: #151515; border: 2px dashed #444; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; transition: 0.3s; }
-        .img-slot:active { transform: scale(0.95); border-color: var(--gold); }
-        .img-slot i { font-size: 1.4rem; color: var(--gold); margin-bottom: 5px; }
-        .img-slot span { font-size: 0.65rem; color: #777; font-weight: 700; text-align: center; }
-        .img-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; z-index: 10; }
-        .hidden-file { display: none; }
-
-        /* زر النشر */
-        .btn-publish { background: var(--gold); color: #000; border: none; width: 100%; padding: 18px; border-radius: 18px; font-weight: 900; font-size: 1.15rem; cursor: pointer; box-shadow: 0 10px 25px rgba(252,201,99,0.25); margin-top: 20px; transition: 0.3s; font-family: 'Cairo'; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-publish:disabled { background: #444; color: #777; cursor: not-allowed; box-shadow: none; }
-
-        /* نظام التنبيهات المخصص (Toast) */
-        .toast-notification {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: #1c1c1c; border: 1px solid var(--gold); color: #fff;
-            padding: 15px 25px; border-radius: 16px; min-width: 290px; max-width: 90%;
-            display: flex; align-items: center; gap: 12px; z-index: 4000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7); font-weight: 700; font-size: 0.9rem;
-            transition: cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s;
-        }
-        .toast-notification.show { top: 25px; }
-        .toast-notification i { color: var(--gold); font-size: 1.2rem; }
-
-        /* نافذة النجاح المخصصة المعتمدة */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 3000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-card { background: #1c1c1c; border: 1px solid var(--gold); border-radius: 25px; padding: 30px; text-align: center; width: 100%; max-width: 380px; animation: popUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .modal-icon { width: 70px; height: 70px; background: rgba(252,201,99,0.1); border: 2px solid var(--gold); color: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px; }
-        .modal-card h3 { margin: 0 0 10px; color: #fff; font-size: 1.4rem; font-weight: 900; }
-        .modal-card p { margin: 0; color: #aaa; font-size: 0.9rem; font-weight: 700; line-height: 1.6; }
-
-        /* البار السفلي الموحد */
-        .bottom-nav { 
-            position: fixed; bottom: 0; width: 100%; background: #121212; 
-            display: flex; justify-content: space-around; padding: 12px 0 18px; 
-            border-top: 1px solid #222; z-index: 2000; box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
-        }
-        .nav-btn { color: #666; text-decoration: none; text-align: center; font-size: 0.75rem; font-weight: 700; position: relative; transition: 0.2s; flex: 1; }
-        .nav-btn i { display: block; font-size: 1.35rem; margin-bottom: 6px; transition: 0.3s; }
-        .nav-btn.active { color: var(--gold); }
-        
-        .nav-add-btn { background: var(--gold); color: #000 !important; width: 50px; height: 50px; border-radius: 50%; display: flex !important; align-items: center; justify-content: center; margin-top: -25px; border: 5px solid #121212; box-shadow: 0 5px 15px rgba(252,201,99,0.3); transition: 0.3s; }
-        .nav-add-btn i { font-size: 1.4rem !important; margin: 0 !important; }
-
-        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0a14">
+<title>إعلان جديد | السوق الكبير</title>
+<style id="authGate">html{visibility:hidden}</style>
+<script type="module">import{requireAuth}from'./auth.js';requireAuth();</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="shell.css">
+<script src="config.js"></script>
+<style>
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.stepno{font-size:.85rem;color:var(--muted);min-width:44px;text-align:center}
+.prog{height:3px;background:var(--raise)}
+.prog i{display:block;height:100%;width:33%;background:linear-gradient(90deg,var(--violet),var(--gold));transition:width .4s var(--ease)}
+.wrap{max-width:720px}
+.step{display:none}.step.on{display:block;animation:in .35s var(--ease) both}
+@keyframes in{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+h2{font-size:1.25rem;margin:6px 0 4px}.lead{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 6px;color:var(--text);font:inherit;font-size:.78rem;line-height:1.4;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all .2s var(--ease)}
+.tile i{font-size:1.5rem;color:var(--muted);transition:color .2s}
+.tile.on{border-color:var(--gold);background:linear-gradient(160deg,#2a2036,var(--surface));box-shadow:0 8px 24px rgba(242,184,75,.16);transform:translateY(-2px)}
+.tile.on i{color:var(--gold)}
+.grp{margin-top:18px}.grp label,.lab{display:block;font-size:.88rem;color:var(--gold-soft);margin:14px 0 8px}
+.hint{color:var(--muted);font-size:.78rem;margin-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+textarea{resize:vertical;min-height:130px;line-height:1.8}
+.cnt{text-align:end;color:var(--muted);font-size:.76rem;margin-top:4px}
+.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ph{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--surface);border:1px solid var(--line)}
+.ph img{width:100%;height:100%;object-fit:cover}
+.ph .x{position:absolute;top:6px;inset-inline-end:6px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer}
+.ph .cv{position:absolute;bottom:6px;inset-inline-start:6px;background:var(--gold);color:#1b1200;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:999px}
+.ph .st{position:absolute;inset:0;display:grid;place-items:center;background:rgba(15,10,20,.62);font-size:.8rem}
+.ph .st.err{background:rgba(74,26,31,.8)}
+.add{display:grid;place-items:center;border:2px dashed rgba(242,184,75,.45);background:rgba(242,184,75,.05);color:var(--gold-soft);cursor:pointer;font:inherit;font-size:.8rem;gap:4px;text-align:center}
+.add i{font-size:1.4rem}
+.meter{margin:18px 0 6px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.meter .row{display:flex;justify-content:space-between;font-size:.88rem}
+.bar2{height:8px;background:var(--raise);border-radius:8px;margin-top:8px;overflow:hidden}.bar2 i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--gold));transition:width .4s var(--ease)}
+.tip{color:var(--muted);font-size:.78rem;margin-top:8px}
+.act{position:fixed;inset-inline:0;bottom:0;z-index:50;display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(15,10,20,.97);border-top:1px solid var(--line)}
+.act .btn{flex:1;height:52px}.act #prev{flex:.45}
+.done{position:fixed;inset:0;z-index:200;background:radial-gradient(circle at 50% 30%,#2a1740,#0f0a14 65%);display:grid;place-items:center;padding:24px;text-align:center;animation:in .4s both}
+.done .box{max-width:380px}
+.ring{width:96px;height:96px;margin:0 auto 18px;border-radius:50%;border:3px solid var(--gold);display:grid;place-items:center;animation:pop .6s var(--ease) both}
+.ring svg{width:46px;height:46px;stroke:var(--gold);stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:48;stroke-dashoffset:48;animation:draw .6s .3s ease forwards}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}@keyframes draw{to{stroke-dashoffset:0}}
+.done h2{font-size:1.5rem;margin-bottom:6px}.done p{color:var(--muted);margin-bottom:20px}
+.done .btn{width:100%;margin-top:10px}
+@media (min-width:900px){.tiles{grid-template-columns:repeat(4,1fr)}.photos{grid-template-columns:repeat(4,1fr)}}
+</style>
 </head>
 <body>
-
-<div id="customToast" class="toast-notification">
-    <i class="fas fa-exclamation-circle"></i>
-    <span id="toastMessage">الرجاء ملء الحقول المطلوبة!</span>
+<header class="bar">
+  <button class="ib" id="close" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+  <h1>إعلان جديد</h1><span class="stepno" id="stepno">1/3</span>
+</header>
+<div class="prog"><i id="fill"></i></div>
+<main class="wrap">
+  <section class="step on" id="s1">
+    <h2>ماذا تريد أن تعرض؟</h2><p class="lead">اختر القسم المناسب ليصل إعلانك للمشترين الصحيحين.</p>
+    <div class="tiles" id="tiles" role="radiogroup" aria-label="القسم"></div>
+    <div id="subs"></div>
+  </section>
+  <section class="step" id="s2">
+    <h2>تفاصيل الإعلان</h2><p class="lead">كلما كان الوصف أوضح، زادت فرصة البيع السريع.</p>
+    <div class="two"><label class="field"><select id="fState" aria-label="الولاية"></select></label><label class="field"><select id="fCity" aria-label="المدينة"></select></label></div>
+    <span class="lab">الوصف</span>
+    <label class="field"><textarea id="desc" maxlength="1500" aria-label="الوصف"></textarea></label>
+    <div class="cnt"><span id="dc">0</span> / 1500</div>
+    <span class="lab">السعر (ج.س)</span>
+    <label class="field"><i class="fa-solid fa-tag"></i><input id="price" inputmode="numeric" placeholder="0" aria-label="السعر"></label>
+    <span class="lab">رقم واتساب للتواصل</span>
+    <label class="field"><i class="fa-brands fa-whatsapp"></i><input id="wa" type="tel" inputmode="tel" dir="ltr" placeholder="0912345678" aria-label="رقم واتساب"></label>
+    <p class="hint">سيظهر للمشترين كزر تواصل مباشر. يمكنك تغييره لهذا الإعلان فقط.</p>
+  </section>
+  <section class="step" id="s3">
+    <h2>الصور</h2><p class="lead">أضف ٣ صور على الأقل (حتى ٦). الصورة الأولى هي الغلاف.</p>
+    <div class="photos" id="photos"></div>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+    <div class="meter"><div class="row"><b>جودة الإعلان</b><span id="q">0%</span></div><div class="bar2"><i id="qb"></i></div><div class="tip" id="tip"></div></div>
+    <span class="lab">معاينة كما سيراه المشترون</span>
+    <div style="max-width:220px" id="prev"></div>
+  </section>
+  <p class="msg err" id="err" role="alert" hidden></p>
+</main>
+<div class="act"><button class="btn ghost" id="back" type="button">السابق</button><button class="btn" id="next" type="button">التالي</button></div>
+<div class="done" id="done" hidden>
+  <div class="box"><div class="ring"><svg viewBox="0 0 48 48"><path d="M10 25l9 9 19-20"/></svg></div>
+    <h2>تم نشر إعلانك!</h2><p>إعلانك الآن ظاهر لمستخدمي السوق الكبير.</p>
+    <a class="btn" id="view" href="#">عرض إعلاني</a>
+    <button class="btn ghost" id="share" type="button">مشاركة الإعلان</button>
+    <a class="btn ghost" href="plans.html">رقِّ إعلانك ليصبح مميزًا</a>
+    <a class="btn ghost" href="add-product.html">إضافة إعلان آخر</a>
+  </div>
 </div>
-
-<div class="header">
-    <a href="index.html" class="back-link"><i class="fas fa-arrow-right"></i></a>
-    <h2><i class="fas fa-rocket"></i> السوق الكبير 🇸🇩</h2>
-    <div class="placeholder-div"></div>
-</div>
-
-<div class="container">
-    
-    <div class="progress-container" id="progWrapper">
-        <div class="progress-bar" id="progressBar"></div>
-    </div>
-    <div class="progress-text" id="progressText" style="display:none;">جاهزية الإعلان: 0%</div>
-
-    <div class="section-title">تصنيف الإعلان</div>
-    <label>القسم الرئيسي للمنتج أو الخدمة</label>
-    <select id="mainCat" class="input-box" onchange="renderLogic(); calculateProgress();">
-        <option value="">-- اختر القسم --</option>
-        <option value="1">1/ الهواتف و الملحقات</option>
-        <option value="2">2/ الحواسيب والطابعات</option>
-        <option value="3">3/ الاستارلينك وملحقاته</option>
-        <option value="4">4/ الالكتروني والكهربائيه</option>
-        <option value="5">5/ الملبوسات و الأحذية</option>
-        <option value="6">6/ ادوات البناء</option>
-        <option value="7">7/ العربات و الاليات</option>
-        <option value="8">8/ المواتر و ملحقاته</option>
-        <option value="9">9/ العقارات والاراضي</option>
-        <option value="10">10/ المواشي والاعلاف</option>
-        <option value="11">11/ الأثاث والأواني</option>
-        <option value="12">12/ الحبوب والمحاصيل</option>
-    </select>
-    <div id="dynamicLogic"></div>
-
-    <div class="section-title">الموقع الجغرافي النشط</div>
-    <label>الولاية</label>
-    <select id="stateSelect" class="input-box" onchange="updateCities(); calculateProgress();">
-        <option value="">-- اختر الولاية --</option>
-    </select>
-    
-    <label>المنطقة / المحلية</label>
-    <select id="citySelect" class="input-box" onchange="calculateProgress();">
-        <option value="">-- اختر المنطقة --</option>
-    </select>
-
-    <div class="section-title">بيانات المنتج والسعر</div>
-    <label>الوصف الكامل للمنتج</label>
-    <textarea id="adDesc" class="input-box" placeholder="اكتب التفاصيل بدقة وبأسلوب جذاب لجذب المشترين الفوريين..." oninput="calculateProgress();"></textarea>
-    
-    <label>السعر المطلوب (ج.س)</label>
-    <input type="number" id="adPrice" class="input-box" placeholder="0.00" oninput="calculateProgress();">
-    
-    <label>رقم الواتساب الفعال للتواصل الشفّاف</label>
-    <input type="tel" id="adWhatsapp" class="input-box" placeholder="09xxxxxxxx" oninput="formatWhatsApp(this); calculateProgress();">
-
-    <div class="section-title">
-        صور المنتج 
-        <span class="photo-counter-badge" id="photoBadge">تم رفع 0 من 3 صور كحد أدنى</span>
-    </div>
-    <div class="upload-grid" id="photoContainer"></div>
-
-    <button id="submitBtn" class="btn-publish" onclick="validateAndPublish()">
-        <span>نشر الإعلان في المنصة 🚀</span>
-    </button>
-</div>
-
-<div id="successModal" class="modal">
-    <div class="modal-card">
-        <div class="modal-icon"><i class="fas fa-check"></i></div>
-        <h3>تم النشر بنجاح!</h3>
-        <p>إعلانك الآن قيد المراجعة الآلية السريعة وسيظهر لكافة مستخدمي فلاتر <b>السوق الكبير</b> فوراً.</p>
-    </div>
-</div>
-
-<nav class="bottom-nav">
-    <a href="index.html" class="nav-btn"><i class="fas fa-home"></i>الرئيسية</a>
-    <a href="categories.html" class="nav-btn"><i class="fas fa-th-large"></i>الأقسام</a>
-    <a href="add-product.html" class="nav-btn nav-add-btn active"><i class="fas fa-plus"></i></a>
-    <a href="chat.html" class="nav-btn"><i class="fas fa-comments"></i>الدردشة</a>
-    <a href="profile.html" class="nav-btn"><i class="fas fa-user"></i>حسابي</a>
-</nav>
-
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { firebaseApp as app, onUser, getProfile, normalizePhone } from './auth.js';
+import { SUDAN, DB_URL } from './geo.js';
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+const db = getDatabase(app, DB_URL), $ = id => document.getElementById(id);
+const COND = ['جديد (كرتونة)', 'مستعمل بحالة ممتازة', 'مستعمل بحالة جيدة'];
+const CATS = [
+  { id: '1', n: 'هواتف وملحقات', i: 'fa-mobile-screen', g: [['الحالة', COND]] },
+  { id: '2', n: 'حواسيب وطابعات', i: 'fa-laptop', g: [['الحالة', COND]] },
+  { id: '3', n: 'ستارلينك وملحقاته', i: 'fa-satellite-dish', g: [['الفئة', ['جهاز Starlink كامل', 'ملحقات وقطع وصحون', 'كروت إنترنت وإعادة شحن']]] },
+  { id: '4', n: 'إلكترونيات وكهربائيات', i: 'fa-plug', g: [['الحالة', COND]] },
+  { id: '5', n: 'ملبوسات وأحذية', i: 'fa-shirt', g: [['الحالة', ['جديد', 'مستعمل']]] },
+  { id: '6', n: 'أدوات البناء', i: 'fa-screwdriver-wrench', g: [['الحالة', ['جديد', 'مستعمل']]] },
+  { id: '7', n: 'عربات وآليات', i: 'fa-car', g: [['الحالة', COND]] },
+  { id: '8', n: 'مواتر وملحقاتها', i: 'fa-motorcycle', g: [['الحالة', COND]] },
+  { id: '9', n: 'عقارات وأراضي', i: 'fa-house', g: [['نوع المعاملة', ['بيع وعقد مسجل', 'إيجار شهري']], ['حالة العقار', ['أرض خالية / فضاء', 'مبنى جاهز / أساس خرساني']]] },
+  { id: '10', n: 'مواشي وأعلاف', i: 'fa-paw', g: [['النوع', ['مواشي للبيع', 'أعلاف ومستلزمات بيطرية']]] },
+  { id: '11', n: 'أثاث وأواني', i: 'fa-couch', g: [['التصنيف', ['أثاث منزلي / مكتبي', 'أواني ومستلزمات مطبخ']]] },
+  { id: '12', n: 'حبوب ومحاصيل', i: 'fa-seedling', g: [['النوع', ['إنتاج محلي جاهز', 'حبوب وبذور للزراعة']]] }
+];
+const HINT = { '1': 'اذكر الموديل والسعة والبطارية والضمان', '7': 'اذكر الموديل وسنة الصنع والمسافة والحالة', '9': 'اذكر المساحة والموقع بدقة ونوع الملكية', '10': 'اذكر النوع والعمر والعدد وسبب البيع' };
+let step = 1, cat = '', sel = {}, photos = [], user = null, busy = false, me = {};
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const vib = () => { try { navigator.vibrate && navigator.vibrate(8); } catch (e) {} };
+const lsGet = k => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
+const err = m => { const p = $('err'); p.textContent = m || ''; p.hidden = !m; if (m) p.scrollIntoView({ block: 'center', behavior: 'smooth' }); };
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
-        authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
-        databaseURL: "https://alsouq-alkabeer-2052c-default-rtdb.firebaseio.com", 
-        projectId: "alsouq-alkabeer-2052c",
-        storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
-        messagingSenderId: "835295635291",
-        appId: "1:835295635291:web:e1f09baff25b50fac11c7e"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-
-    let currentUser = null;
-
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-        }
-    });
-
-    window.validateAndPublish = async function() {
-        const mainCat = document.getElementById('mainCat').value;
-        const stateSelectVal = document.getElementById('stateSelect').value;
-        const citySelectVal = document.getElementById('citySelect').value;
-        const adDesc = document.getElementById('adDesc').value.trim();
-        const adPrice = document.getElementById('adPrice').value;
-        const adWhatsapp = document.getElementById('adWhatsapp').value.trim();
-
-        if(!mainCat) { showToast("من فضلك اختر التصنيف الرئيسي للإعلان أولاً!"); return; }
-        if(!stateSelectVal || !citySelectVal) { showToast("الرجاء تحديد الموقع الجغرافي كاملاً!"); return; }
-        if(adDesc.length < 10) { showToast("الرجاء كتابة وصف واضح لا يقل عن 10 أحرف!"); return; }
-        if(!adPrice || adPrice <= 0) { showToast("الرجاء إدخال السعر المطلوب بشكل صحيح!"); return; }
-        if(!adWhatsapp || adWhatsapp.length < 9) { showToast("رقم الواتساب غير مكتمل أو مطلوب للتواصل!"); return; }
-        if(uploadedCount < 3) { showToast("لحفظ جودة المنصة، يرجى رفع 3 صور للمنتج على الأقل! 📸"); return; }
-
-        let selectedSubFeature = "عام";
-        const activeBtn = document.querySelector('.sel-btn.active');
-        if (activeBtn) {
-            selectedSubFeature = activeBtn.innerText;
-        }
-
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري رفع الصور... 📸`;
-
-        const uploadedImageUrls = [];
-        const imgbbKey = "16e939aed75b765aabf807a8304f53f5"; 
-
-        try {
-            for (let file of rawPhotoFiles) {
-                if (file !== null) {
-                    const imgFormData = new FormData();
-                    imgFormData.append('image', file);
-
-                    const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
-                        method: 'POST',
-                        body: imgFormData
-                    });
-
-                    const imgbbData = await imgbbResponse.json();
-                    if (imgbbData.success) {
-                        uploadedImageUrls.push(imgbbData.data.url); 
-                    }
-                }
-            }
-
-            submitBtn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> جاري حفظ الإعلان... ⏳`;
-
-            const adData = {
-                userId: currentUser ? currentUser.uid : "guest",
-                category_id: mainCat,
-                state: stateSelectVal,
-                city: citySelectVal,
-                description: adDesc,
-                price: parseFloat(adPrice),
-                whatsapp: adWhatsapp,
-                sub_category: selectedSubFeature, 
-                images: uploadedImageUrls, 
-                timestamp: Date.now()
-            };
-
-            const adsNodeRef = ref(db, 'ads');
-            const newPostRef = push(adsNodeRef);
-            
-            await set(newPostRef, adData);
-            
-            submitBtn.innerHTML = `تم النشر بنجاح! 🎉`;
-            showSuccessModal();
-
-        } catch (error) {
-            console.error('Critical Upload or DB Error:', error);
-            showToast("حدث خطأ غير متوقع. يرجى مراجعة الاتصال والمحاولة مرة أخرى.");
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `<span>نشر الإعلان في المنصة 🚀</span>`;
-        }
-    }
+// ---- الأقسام ----
+CATS.forEach(c => {
+  const b = el('button', 'tile'); b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.id = c.id;
+  const i = el('i', 'fa-solid ' + c.i); i.setAttribute('aria-hidden', 'true'); b.append(i, document.createTextNode(c.n));
+  b.onclick = () => { cat = c.id; sel = {}; vib(); drawCats(); drawSubs(); $('desc').placeholder = HINT[c.id] || 'اكتب التفاصيل التي يريد المشتري معرفتها'; err(''); save(); };
+  $('tiles').append(b);
+});
+function drawCats() { document.querySelectorAll('.tile').forEach(t => { const on = t.dataset.id === cat; t.classList.toggle('on', on); t.setAttribute('aria-checked', on); }); }
+function drawSubs() {
+  const box = $('subs'); box.replaceChildren(); const c = CATS.find(x => x.id === cat); if (!c) return;
+  c.g.forEach(([label, opts], gi) => {
+    const g = el('div', 'grp'), l = el('label', null, label), row = el('div', 'chips'); row.style.flexWrap = 'wrap';
+    opts.forEach(o => { const b = el('button', 'chip' + (sel[gi] === o ? ' on' : ''), o); b.type = 'button'; b.onclick = () => { sel[gi] = o; vib(); drawSubs(); save(); }; row.append(b); });
+    g.append(l, row); box.append(g);
+  });
+}
+// ---- الموقع ----
+Object.keys(SUDAN).forEach(s => { const o = el('option', null, s); o.value = s; $('fState').append(o); });
+function cities(st, city) { const c = $('fCity'); c.replaceChildren(); (SUDAN[st] || []).forEach(x => { const o = el('option', null, x); o.value = x; c.append(o); }); if (city && (SUDAN[st] || []).includes(city)) c.value = city; }
+$('fState').onchange = () => { cities($('fState').value); save(); };
+$('fCity').onchange = save;
+// ---- الحقول ----
+$('desc').oninput = () => { $('dc').textContent = $('desc').value.length; save(); quality(); };
+$('price').oninput = e => { const d = e.target.value.replace(/[^\d]/g, '').slice(0, 12); e.target.value = d ? Number(d).toLocaleString('en-US') : ''; save(); quality(); };
+$('wa').oninput = () => { save(); quality(); };
+const priceVal = () => Number($('price').value.replace(/,/g, '')) || 0;
+// ---- المسودة ----
+function save() { try { localStorage.setItem('souq_draft', JSON.stringify({ cat, sel, st: $('fState').value, ct: $('fCity').value, d: $('desc').value, p: $('price').value, w: $('wa').value })); } catch (e) {} }
+function restore() {
+  try { const d = JSON.parse(localStorage.getItem('souq_draft') || 'null'); if (!d) return false;
+    cat = d.cat || ''; sel = d.sel || {}; if (SUDAN[d.st]) $('fState').value = d.st; cities($('fState').value, d.ct);
+    $('desc').value = d.d || ''; $('price').value = d.p || ''; $('wa').value = d.w || ''; $('dc').textContent = $('desc').value.length; return true; } catch (e) { return false; }
+}
+// ---- الصور: ضغط قبل الرفع ----
+async function compress(file) {
+  let src = await createImageBitmap(file).catch(() => null), w, h;
+  if (src) { w = src.width; h = src.height; }
+  else { src = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = URL.createObjectURL(file); }); w = src.naturalWidth; h = src.naturalHeight; }
+  const k = Math.min(1, 1280 / Math.max(w, h)), c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.82));
+}
+$('file').onchange = async e => {
+  const files = [...e.target.files].filter(f => f.type.startsWith('image/')).slice(0, 6 - photos.length); e.target.value = '';
+  for (const f of files) { try { const blob = await compress(f); if (blob) photos.push({ blob, url: URL.createObjectURL(blob), status: 'idle', remote: '' }); } catch (x) {} }
+  drawPhotos(); quality();
+};
+function drawPhotos() {
+  const g = $('photos'); g.replaceChildren();
+  photos.forEach((p, i) => {
+    const d = el('div', 'ph'), im = el('img'); im.src = p.url; im.alt = ''; d.append(im);
+    if (i === 0) d.append(el('span', 'cv', 'الغلاف'));
+    const x = el('button', 'x'); x.type = 'button'; x.setAttribute('aria-label', 'حذف الصورة'); x.append(el('i', 'fa-solid fa-xmark')); x.onclick = () => { if (busy) return; URL.revokeObjectURL(p.url); photos.splice(i, 1); drawPhotos(); quality(); }; d.append(x);
+    if (p.status === 'up') d.append(el('div', 'st', 'جارٍ الرفع…')); if (p.status === 'err') d.append(el('div', 'st err', 'فشل الرفع'));
+    g.append(d);
+  });
+  if (photos.length < 6) { const a = el('button', 'ph add'); a.type = 'button'; a.append(el('i', 'fa-solid fa-camera'), el('span', null, 'إضافة صور')); a.onclick = () => $('file').click(); g.append(a); }
+}
+// ---- الجودة والمعاينة ----
+function quality() {
+  const d = $('desc').value.trim().length, n = photos.length, w = !!normalizePhone($('wa').value);
+  const s = Math.round((cat ? 15 : 0) + 15 + Math.min(d, 200) / 200 * 25 + (priceVal() > 0 ? 10 : 0) + (w ? 10 : 0) + Math.min(n, 6) / 6 * 25);
+  $('q').textContent = s + '%'; $('qb').style.width = s + '%';
+  $('tip').textContent = n < 3 ? 'أضف ' + (3 - n) + ' صور على الأقل' : d < 60 ? 'أضف وصفًا أطول يزيد الثقة' : n < 6 ? 'المزيد من الصور يرفع فرصة البيع' : 'إعلانك ممتاز!';
+  const c = el('div', 'card'), im = el('img', 'ph'); im.alt = ''; if (photos[0]) im.src = photos[0].url; const m = el('div', 'meta');
+  m.append(el('div', 't', $('desc').value.trim().slice(0, 60) || 'وصف الإعلان'), el('div', 'p', priceVal() ? priceVal().toLocaleString('en-US') + ' ج.س' : ''), el('div', 'loc', $('fCity').value + ' - ' + $('fState').value)); c.append(im, m); $('prev').replaceChildren(c);
+}
+// ---- التنقل بين الخطوات ----
+function go(n) {
+  step = n; document.querySelectorAll('.step').forEach((s, i) => s.classList.toggle('on', i + 1 === n)); $('stepno').textContent = n + '/3'; $('fill').style.width = n * 33.4 + '%';
+  $('back').style.visibility = n === 1 ? 'hidden' : 'visible'; $('next').textContent = n === 3 ? 'نشر الإعلان' : 'التالي'; err(''); scrollTo({ top: 0, behavior: 'smooth' }); if (n === 3) { drawPhotos(); quality(); }
+}
+function valid(n) {
+  if (n === 1) { if (!cat) return 'اختر القسم أولًا'; const c = CATS.find(x => x.id === cat); if (c.g.some((_, gi) => !sel[gi])) return 'أكمل خيارات القسم'; }
+  if (n === 2) {
+    if ($('desc').value.trim().length < 10) return 'اكتب وصفًا واضحًا لا يقل عن ١٠ أحرف';
+    if (priceVal() <= 0) return 'أدخل السعر بشكل صحيح';
+    if (!normalizePhone($('wa').value)) return 'رقم واتساب غير صحيح. مثال: 0912345678';
+  }
+  if (n === 3 && photos.length < 3) return 'ارفع ٣ صور على الأقل لجودة الإعلان';
+  return '';
+}
+$('next').onclick = () => { if (busy) return; const m = valid(step); if (m) return err(m); step < 3 ? go(step + 1) : publish(); };
+$('back').onclick = () => { if (!busy && step > 1) go(step - 1); };
+$('close').onclick = () => { if (busy) return; if (!($('desc').value || photos.length) || confirm('سيتم حفظ بياناتك كمسودة. هل تريد الخروج؟')) history.length > 1 ? history.back() : location.href = 'index.html'; };
+addEventListener('beforeunload', e => { if (busy) { e.preventDefault(); e.returnValue = ''; } });
+// ---- النشر ----
+async function upload(p) {
+  const key = (window.SOUQ_CONFIG || {}).imgbbKey; if (!key) throw new Error('nokey');
+  for (let a = 0; a < 3; a++) {
+    try { const fd = new FormData(); fd.append('image', p.blob, 'img.jpg'); const r = await fetch('https://api.imgbb.com/1/upload?key=' + encodeURIComponent(key), { method: 'POST', body: fd }); const j = await r.json(); if (j.success) return j.data.url; } catch (e) {}
+    await new Promise(r => setTimeout(r, 700 * (a + 1)));
+  }
+  throw new Error('upload');
+}
+async function publish() {
+  if (!user) return location.href = 'login.html?next=add-product.html';
+  busy = true; $('next').disabled = true; $('next').textContent = 'جارٍ النشر…'; err('');
+  try {
+    const todo = photos.filter(p => !p.remote); let i = 0, fail = '';
+    const worker = async () => { while (i < todo.length) { const p = todo[i++]; p.status = 'up'; drawPhotos(); try { p.remote = await upload(p); p.status = 'ok'; } catch (e) { p.status = 'err'; fail = e.message; } drawPhotos(); } };
+    await Promise.all([worker(), worker(), worker()]);
+    if (fail === 'nokey') throw new Error('مفتاح رفع الصور غير مضبوط. أضفه في ملف config.js');
+    if (photos.some(p => !p.remote)) throw new Error('تعذر رفع بعض الصور. اضغط نشر مرة أخرى');
+    const w = normalizePhone($('wa').value), c = CATS.find(x => x.id === cat);
+    const ad = { userId: user.uid, category_id: cat, state: $('fState').value, city: $('fCity').value, description: $('desc').value.trim(), price: priceVal(), whatsapp: w, sub_category: sel[0] || 'عام', images: photos.map(p => p.remote), timestamp: Date.now() };
+    if (sel[1]) ad.sub_detail = sel[1];
+    const r = push(ref(db, 'ads')); await set(r, ad);
+    try { localStorage.removeItem('souq_draft'); localStorage.setItem('filteredState', ad.state); localStorage.setItem('filteredCity', ad.city); } catch (e) {}
+    busy = false; $('view').href = 'ad.html?id=' + r.key; $('share').onclick = () => { const u = new URL('ad.html?id=' + r.key, location.href).href; navigator.share ? navigator.share({ title: 'السوق الكبير', url: u }).catch(() => {}) : navigator.clipboard.writeText(u); }; $('done').hidden = false; vib();
+  } catch (e) { busy = false; $('next').disabled = false; $('next').textContent = 'نشر الإعلان'; err(e.message && e.message.length < 90 ? e.message : 'حدث خطأ غير متوقع. تحقق من الاتصال وحاول مرة أخرى'); }
+}
+// ---- البداية ----
+const had = restore();
+if (!had) { const st = lsGet('filteredState') || 'جنوب دارفور'; $('fState').value = SUDAN[st] ? st : 'جنوب دارفور'; cities($('fState').value, lsGet('filteredCity')); }
+drawCats(); drawSubs(); go(1);
+onUser(async u => { user = u; if (!u) return; const p = await getProfile(u.uid); me = p || {}; if (!$('wa').value && me.whatsapp) { $('wa').value = me.whatsapp; quality(); } });
 </script>
-
-<script>
-    const regionsData = {
-        "إقليم دارفور": {
-            "جنوب دارفور": ["نيالا", "كاس", "برام", "رهيد البردي", "تلس", "عد الفرسان"],
-            "شمال دارفور": ["الفاشر", "كتم", "كبكابية", "مليط", "أم كدادة"],
-            "غرب دارفور": ["الجنينة", "فوربرنقا", "كلبس", "كرينك", "هبيلا"],
-            "شرق دارفور": ["الضعين", "عسلاية", "أبو كارنكا", "عديلة", "شعيرية"],
-            "وسط دارفور": ["زالنجي", "نيرتتي", "قارسيلا", "وادي صالح", "مكجر"]
-        },
-        "إقليم كردفان": {
-            "شمال كردفان": ["الأبيض", "بارا", "أم روابة", "الرهد", "جبرة الشيخ"],
-            "جنوب كردفان": ["كادوقلي", "الدلنج", "العباسية", "تلودي", "أبو جبيهة"],
-            "غرب كردفان": ["الفولة", "النهود", "بابنوسة", "المنصورة", "غبيش"]
-        },
-        "الإقليم الشرقي": {
-            "البحر الأحمر": ["بورتسودان", "سواكن", "طوكر", "هيا", "جبيت", "سنكات"],
-            "كسلا": ["كسلا", "حلفا الجديدة", "خشم القربة", "أروما", "وقر"],
-            "القضارف": ["القضارف", "الدوكة", "الفاو", "الحواتة", "قلع النحل", "المفازة"]
-        },
-        "الإقليم الشمالي": {
-            "الشمالية": ["دنقلا", "كريمة", "مروي", "وادي حلفا", "الدبة", "دنقلا العجوز"],
-            "نهر النيل": ["عطبرة", "الدامر", "شندي", "بربر", "أبو حمد", "المتمة"]
-        },
-        "إقليم الوسط والجزيرة": {
-            "الجزيرة": ["ود مدني", "المناقل", "الحصاحيصا", "الكاملين", "رفاعة", "العقدة"],
-            "النيل الأبيض": ["ربك", "كستي", "الدويم", "القطينة", "تندلتي", "الجراري"],
-            "النيل الأزرق": ["الدمازين", "الروصيرص", "باو", "قيسان", "الكرمك"],
-            "سنار": ["سنار", "سنجة", "السوكي", "الدندر", "أبو حجار"]
-        },
-        "العاصمة": {
-            "الخرطوم": ["الخرطوم", "أم درمان", "بحري", "شرق النيل", "جبل أولياء"]
-        }
-    };
-
-    const cityData = {};
-    const stateSelect = document.getElementById('stateSelect');
-    
-    let rawPhotoFiles = [null, null, null, null, null, null];
-    let uploadedCount = 0;
-
-    for (const [regionName, states] of Object.entries(regionsData)) {
-        const group = document.createElement('optgroup');
-        group.label = regionName;
-        for (const [stateName, cities] of Object.entries(states)) {
-            cityData[stateName] = cities;
-            const opt = document.createElement('option');
-            opt.value = stateName;
-            opt.innerText = stateName;
-            group.appendChild(opt);
-        }
-        stateSelect.appendChild(group);
-    }
-
-    const photoGrid = document.getElementById('photoContainer');
-    for(let i=1; i<=6; i++) {
-        photoGrid.innerHTML += `
-            <input type="file" id="f${i}" class="hidden-file" accept="image/*" onchange="preview(this, 'v${i}', ${i-1})">
-            <div class="img-slot" onclick="document.getElementById('f${i}').click()">
-                <img id="v${i}"> <i class="fas fa-camera"></i> <span>صورة ${i}</span>
-            </div>`;
-    }
-
-    function updateCities(callback) {
-        const state = stateSelect.value;
-        const citySelect = document.getElementById('citySelect');
-        citySelect.innerHTML = '<option value="">-- اختر المنطقة --</option>';
-        if(state && cityData[state]) {
-            cityData[state].forEach(city => {
-                const opt = document.createElement('option');
-                opt.value = city; opt.innerText = city;
-                citySelect.appendChild(opt);
-            });
-        }
-        if(callback) callback();
-    }
-
-    function syncUserLocation() {
-        const savedState = localStorage.getItem('filteredState');
-        const savedCity = localStorage.getItem('filteredCity');
-        if(savedState) {
-            stateSelect.value = savedState;
-            updateCities(() => {
-                if(savedCity) {
-                    document.getElementById('citySelect').value = savedCity;
-                }
-                calculateProgress();
-            });
-        }
-    }
-
-    window.onload = () => {
-        syncUserLocation();
-        document.getElementById('progWrapper').style.display = 'block';
-        document.getElementById('progressText').style.display = 'block';
-    };
-
-    function preview(input, imgId, index) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            rawPhotoFiles[index] = file;
-
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = document.getElementById(imgId);
-                img.src = e.target.result;
-                img.style.display = 'block';
-                
-                uploadedCount = rawPhotoFiles.filter(f => f !== null).length;
-                
-                const badge = document.getElementById('photoBadge');
-                if(uploadedCount >= 3) {
-                    badge.innerText = `ممتاز، تم رفع ${uploadedCount} صور 🌟`;
-                    badge.classList.add('ready');
-                } else {
-                    badge.innerText = `تم رفع ${uploadedCount} من 3 صور كحد أدنى`;
-                    badge.classList.remove('ready');
-                }
-                calculateProgress();
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function formatWhatsApp(input) {
-        let value = input.value.replace(/[^0-9+]/g, '');
-        if(value.startsWith('+249')) {
-            value = '0' + value.substring(4);
-        }
-        input.value = value;
-    }
-
-    function showToast(message) {
-        const toast = document.getElementById('customToast');
-        document.getElementById('toastMessage').innerText = message;
-        toast.classList.add('show');
-        setTimeout(() => { toast.classList.remove('show'); }, 3500);
-    }
-
-    function calculateProgress() {
-        let score = 0;
-        if(document.getElementById('mainCat').value) score += 15;
-        if(stateSelect.value) score += 15;
-        if(document.getElementById('citySelect').value) score += 15;
-        if(document.getElementById('adDesc').value.trim().length >= 10) score += 15;
-        if(parseFloat(document.getElementById('adPrice').value) > 0) score += 15;
-        if(document.getElementById('adWhatsapp').value.trim().length >= 9) score += 10;
-        
-        if(uploadedCount >= 3) score += 15;
-        else if(uploadedCount > 0) score += (uploadedCount * 4);
-
-        document.getElementById('progressBar').style.width = score + '%';
-        document.getElementById('progressText').innerText = `جاهزية الإعلان: ${score}%`;
-    }
-
-    function renderLogic() {
-        const cat = document.getElementById('mainCat').value;
-        const area = document.getElementById('dynamicLogic');
-        let html = "";
-        if (cat === "9") {
-            html += `<label>نوع المعاملة العقارية</label>
-                    <div class="selector-grid">
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">بيع وعقد مسجل</div>
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">إيجار شهري</div>
-                    </div>
-                    <label>حالة العقار الحالي</label>
-                    <div class="selector-grid">
-                        <div class="sel-btn" data-type="sub2" onclick="setActive(this)">أرض خالية / فضاء</div>
-                        <div class="sel-btn" data-type="sub2" onclick="setActive(this)">مبنى جاهز / أساس خرساني</div>
-                    </div>`;
-        } else if (cat === "3") {
-            html += `<label>فئة منتج الاستارلينك</label>
-                    <div class="selector-grid">
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">بيع جهاز Starlink كاملاً</div>
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">ملحقات، قطع وصحون</div>
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">كروت إنترنت وإعادة شحن</div>
-                    </div>`;
-        } else if (["1", "7", "8"].includes(cat)) {
-            html += `<label>حالة الاستخدام والامتداد</label>
-                    <div class="selector-grid">
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">جديد (كرت كرتونة)</div>
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">مستعمل بحالة ممتازة</div>
-                    </div>`;
-        } else if (cat === "11") {
-            html += `<label>تصنيف الأثاث والأواني</label>
-                    <div class="selector-grid">
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">أثاث منزلي / مكتبي</div>
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">أواني ومستلزمات مطبخ</div>
-                    </div>`;
-        } else if (cat === "12") {
-            html += `<label>نوع المحاصيل الحالية</label>
-                    <div class="selector-grid">
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">إنتاج محلي جاهز</div>
-                        <div class="sel-btn" data-type="sub1" onclick="setActive(this)">حبوب وبذور للزراعة</div>
-                    </div>`;
-        }
-        area.innerHTML = html;
-        calculateProgress();
-    }
-
-    function setActive(el) {
-        el.parentElement.querySelectorAll('.sel-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        calculateProgress();
-    }
-
-    function showSuccessModal() {
-        const modal = document.getElementById('successModal');
-        modal.style.display = 'flex';
-        setTimeout(() => {
-            window.location.href = 'categories.html';
-        }, 2500);
-    }
-</script>
-</body><script src="shared.js"></script>
+<script src="app.js" defer></script>
+<script src="shell.js" defer></script>
+</body>
 </html>

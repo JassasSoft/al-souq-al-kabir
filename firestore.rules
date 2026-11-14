@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+
+    // تجربة التاجر المجانية: مرة واحدة فقط ومدتها ١٥ يومًا كحد أقصى
+    function trialOk(d) {
+      return d.subscriptionType == 'free_trial' && d.subscriptionStatus == 'active'
+        && d.isApprovedTrader == true && d.traderBadge == 'trial'
+        && d.trialStartDate is timestamp && d.subscriptionEndDate is timestamp
+        && d.trialStartDate >= request.time - duration.value(1, 'd')
+        && d.trialStartDate <= request.time + duration.value(1, 'd')
+        && d.subscriptionEndDate <= d.trialStartDate + duration.value(16, 'd');
+    }
+    function typeOk(d) { return d.get('type', 'consumer') in ['merchant', 'consumer']; }
+
+    // قائمة المشرفين: تُضاف يدويًا من لوحة Firebase فقط
+    function isFounder() { return isAdmin() && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.get('role', 'owner') == 'owner'; }
+    match /admins/{uid} {
+      allow read: if isOwner(uid) || isFounder();
+      allow write: if isFounder();
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['name','phone','email','whatsapp','type','city','state','createdAt','subscriptionType','subscriptionStatus','trialStartDate','subscriptionEndDate','isApprovedTrader','traderBadge'])
+        && typeOk(request.resource.data)
+        && (!('subscriptionType' in request.resource.data) || trialOk(request.resource.data));
+      allow update: if isAdmin() || (isOwner(uid) && (
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','whatsapp','type','city','state']) && typeOk(request.resource.data))
+        || (!('trialStartDate' in resource.data)
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['subscriptionType','subscriptionStatus','trialStartDate','subscriptionEndDate','isApprovedTrader','traderBadge'])
+            && trialOk(request.resource.data))));
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // الإعلان المتحرك: قراءة للجميع، وكتابة للمشرف فقط
+    match /ads/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // عداد العرض الترويجي
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+      allow create: if doc == 'promo' && signedIn()
+        && request.resource.data.keys().hasOnly(['claimedTradersCount'])
+        && request.resource.data.claimedTradersCount == 1;
+      allow update: if doc == 'promo' && signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['claimedTradersCount'])
+        && request.resource.data.claimedTradersCount == resource.data.claimedTradersCount + 1;
+    }
+  }
+}

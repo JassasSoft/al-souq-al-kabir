@@ -1,285 +1,89 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إعلاناتي المعروضة - السوق الكبير</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg: #0f0214;
-            --card: #190924;
-            --gold: #ffbd59;
-            --border: rgba(255, 189, 89, 0.25);
-            --danger: #ff4757;
-            --success: #2ed573;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Cairo', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: #ffffff;
-            padding: 15px;
-            min-height: 100vh;
-        }
-
-        /* الهيدر العلوي */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
-
-        .header-title {
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: var(--gold);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .back-btn {
-            background: rgba(255, 189, 89, 0.1);
-            border: 1px solid var(--border);
-            color: var(--gold);
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        /* شريط التبويب / الفلترة */
-        .tabs-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            color: #ccc;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .tab-btn.active {
-            background: var(--gold);
-            color: #000;
-            border-color: var(--gold);
-        }
-
-        /* قائمة الإعلانات */
-        .ads-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .ad-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px;
-            display: flex;
-            gap: 12px;
-            position: relative;
-        }
-
-        .ad-img {
-            width: 85px;
-            height: 85px;
-            border-radius: 8px;
-            object-fit: cover;
-            background: #251233;
-        }
-
-        .ad-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .ad-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-
-        .ad-price {
-            color: var(--gold);
-            font-weight: 900;
-            font-size: 0.9rem;
-        }
-
-        .ad-status {
-            display: inline-block;
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 4px;
-            width: fit-content;
-        }
-
-        .status-active { background: rgba(46, 213, 115, 0.15); color: var(--success); }
-        .status-pending { background: rgba(255, 189, 89, 0.15); color: var(--gold); }
-
-        .ad-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .btn-edit { background: rgba(255, 189, 89, 0.2); color: var(--gold); border: 1px solid var(--border); }
-        .btn-delete { background: rgba(255, 71, 87, 0.2); color: var(--danger); border: 1px solid rgba(255, 71, 87, 0.3); }
-
-        /* شاشة لا توجد إعلانات */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            display: none;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            color: var(--gold);
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
-
-        .empty-state p {
-            color: #aaa;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-        }
-
-        .add-now-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: var(--gold);
-            color: #000;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f0a14">
+<title>إعلاناتي | السوق الكبير</title>
+<style id="authGate">html{visibility:hidden}</style>
+<script type="module">import{requireAuth}from'./auth.js';requireAuth();</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="ui.css">
+<link rel="stylesheet" href="shell.css">
+<style>
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;text-align:center}
+.stat b{display:block;font-size:1.4rem;color:var(--gold)}.stat span{font-size:.78rem;color:var(--muted)}
+.list{display:grid;gap:12px;margin-top:6px}
+.row{display:flex;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px;position:relative}
+.row img{width:92px;height:92px;border-radius:12px;object-fit:cover;background:var(--raise);flex:none}
+.row .info{flex:1;min-width:0}
+.row .t{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .p{color:var(--gold);font-weight:700}
+.row .loc{color:var(--muted);font-size:.76rem}
+.acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.acts .btn{padding:7px 12px;font-size:.78rem;border-radius:10px}
+.tag{display:inline-block;font-size:.7rem;padding:2px 9px;border-radius:999px;background:var(--gold);color:#1b1200;font-weight:700;margin-inline-end:6px}
+.tag.sold{background:#4a1a1f;color:#ffd7d7}
+@media (min-width:900px){.list{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
-
-    <div class="header">
-        <div class="header-title">
-            <i class="fas fa-list-alt"></i> إعلاناتي المعروضة
-        </div>
-        <a href="index.html" class="back-btn"><i class="fas fa-arrow-right"></i></a>
-    </div>
-
-    <div class="tabs-container">
-        <div class="tab-btn active" onclick="filterAds('all')">الكل (2)</div>
-        <div class="tab-btn" onclick="filterAds('active')">النشطة</div>
-        <div class="tab-btn" onclick="filterAds('pending')">قيد المراجعة</div>
-    </div>
-
-    <div class="ads-list" id="adsContainer">
-        <!-- نموذج إعلان 1 -->
-        <div class="ad-card">
-            <img src="assets/images/sample.jpg" onerror="this.src='https://via.placeholder.com/150/190924/ffbd59?text=منتج'" class="ad-img" alt="صورة الإعلان">
-            <div class="ad-info">
-                <div>
-                    <div class="ad-title">هاتف أبل آيفون 13 برو ماكس</div>
-                    <div class="ad-price">450,000 ج.س</div>
-                </div>
-                <div>
-                    <span class="ad-status status-active"><i class="fas fa-check-circle"></i> نشط</span>
-                    <div class="ad-actions">
-                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i> تعديل</button>
-                        <button class="action-btn btn-delete" onclick="deleteAd(this)"><i class="fas fa-trash"></i> حذف</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- نموذج إعلان 2 -->
-        <div class="ad-card">
-            <img src="assets/images/sample2.jpg" onerror="this.src='https://via.placeholder.com/150/190924/ffbd59?text=جهاز'" class="ad-img" alt="صورة الإعلان">
-            <div class="ad-info">
-                <div>
-                    <div class="ad-title">طبق استارلينك جيل ثاني مكتمل</div>
-                    <div class="ad-price">1,200,000 ج.س</div>
-                </div>
-                <div>
-                    <span class="ad-status status-pending"><i class="fas fa-clock"></i> قيد المراجعة</span>
-                    <div class="ad-actions">
-                        <button class="action-btn btn-edit"><i class="fas fa-edit"></i> تعديل</button>
-                        <button class="action-btn btn-delete" onclick="deleteAd(this)"><i class="fas fa-trash"></i> حذف</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="empty-state" id="emptyState">
-        <i class="fas fa-box-open"></i>
-        <p>لا توجد إعلانات معروضة حالياً</p>
-        <a href="add-product.html" class="add-now-btn"><i class="fas fa-plus"></i> إضافة إعلان الآن</a>
-    </div>
-
-    <script>
-        function deleteAd(btn) {
-            if (confirm("هل أنت تأكد من رغبتك في حذف هذا الإعلان؟")) {
-                const card = btn.closest('.ad-card');
-                card.remove();
-                checkEmpty();
-            }
-        }
-
-        function checkEmpty() {
-            const container = document.getElementById('adsContainer');
-            const emptyState = document.getElementById('emptyState');
-            if (container.children.length === 0) {
-                emptyState.style.display = 'block';
-            }
-        }
-
-        function filterAds(type) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            // هنا يمكن إضافة فلترة العناصر بحسب الحالة
-        }
-    </script>
-</body><script src="shared.js"></script>
+<header class="bar">
+  <button class="ib" id="back" aria-label="رجوع"><i class="fa-solid fa-arrow-right"></i></button>
+  <h1>إعلاناتي</h1>
+  <button class="ib" onclick="toggleSidebar()" aria-label="القائمة"><i class="fa-solid fa-bars"></i></button>
+</header>
+<main class="wrap">
+  <div class="stats"><div class="stat"><b id="sAll">0</b><span>الكل</span></div><div class="stat"><b id="sAct">0</b><span>نشطة</span></div><div class="stat"><b id="sSold">0</b><span>مباعة</span></div></div>
+  <div class="chips" id="tabs"></div>
+  <div class="list" id="list" aria-busy="true"></div>
+  <div class="state" id="empty" hidden><i class="fa-regular fa-rectangle-list"></i><p>لم تنشر أي إعلان بعد.</p><a class="btn" href="add-product.html">أضف أول إعلان</a></div>
+</main>
+<script type="module">
+import { firebaseApp as app, onUser } from './auth.js';
+import { DB_URL } from './geo.js';
+import { getDatabase, ref, query, orderByChild, equalTo, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+const db = getDatabase(app, DB_URL), $ = id => document.getElementById(id);
+let ads = [], sold = {}, prem = new Set(), tab = 'all';
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const btn = (txt, cls, fn) => { const b = el('button', 'btn ' + cls, txt); b.type = 'button'; b.onclick = fn; return b; };
+function row(id, a) {
+  const r = el('div', 'row'), im = el('img'); im.alt = ''; im.loading = 'lazy';
+  const s = Array.isArray(a.images) ? a.images[0] : ''; if (typeof s === 'string' && /^https:\/\//.test(s)) im.src = s;
+  const i = el('div', 'info'), tags = el('div');
+  if (prem.has(id)) tags.append(el('span', 'tag', 'مميز')); if (sold[id]) tags.append(el('span', 'tag sold', 'تم البيع'));
+  i.append(tags, el('div', 't', String(a.description || '').slice(0, 80)), el('div', 'p', isFinite(a.price) ? Number(a.price).toLocaleString('en-US') + ' ج.س' : ''), el('div', 'loc', [a.city, a.state].filter(Boolean).join(' - ')));
+  const acts = el('div', 'acts'), v = el('a', 'btn ghost', 'عرض'); v.href = 'ad.html?id=' + encodeURIComponent(id);
+  acts.append(v,
+    btn(sold[id] ? 'إعادة كمتاح' : 'تم البيع', 'ghost', async () => { const st = sold[id] ? 'available' : 'sold'; try { await update(ref(db, 'ads_status/' + id), { status: st }); sold[id] = st === 'sold'; draw(); } catch (e) { alert('تعذر تحديث الحالة'); } }),
+    btn('حذف', 'danger', async () => { if (!confirm('حذف هذا الإعلان نهائيًا؟')) return; try { await remove(ref(db, 'ads_status/' + id)).catch(() => {}); await remove(ref(db, 'ads/' + id)); } catch (e) { alert('تعذر الحذف'); } }));
+  i.append(acts); r.append(im, i); return r;
+}
+function draw() {
+  const act = ads.filter(([id]) => !sold[id]).length;
+  $('sAll').textContent = ads.length; $('sAct').textContent = act; $('sSold').textContent = ads.length - act;
+  const tabs = $('tabs'); tabs.replaceChildren();
+  [['all', 'الكل'], ['act', 'نشطة'], ['sold', 'مباعة']].forEach(([k, l]) => { const c = el('button', 'chip' + (tab === k ? ' on' : ''), l); c.type = 'button'; c.onclick = () => { tab = k; draw(); }; tabs.append(c); });
+  const list = ads.filter(([id]) => tab === 'all' || (tab === 'sold') === !!sold[id]);
+  const box = $('list'); box.replaceChildren(); box.setAttribute('aria-busy', 'false');
+  list.forEach(([id, a]) => box.append(row(id, a))); $('empty').hidden = ads.length > 0;
+}
+let off = null;
+onUser(u => {
+  if (!u || off) return;
+  off = onValue(query(ref(db, 'ads'), orderByChild('userId'), equalTo(u.uid)), async snap => {
+    ads = []; snap.forEach(c => { ads.push([c.key, c.val()]); }); ads.sort((x, y) => (y[1].timestamp || 0) - (x[1].timestamp || 0));
+    await Promise.all(ads.map(async ([id]) => { try { const s = await get(ref(db, 'ads_status/' + id)); sold[id] = !!(s.val() && s.val().status === 'sold'); } catch (e) {} }));
+    draw();
+  }, () => { $('list').textContent = 'تعذر تحميل إعلاناتك'; });
+  onValue(ref(db, 'premium_ads'), s => { prem = new Set(); s.forEach(c => { if (c.val() && c.val().until > Date.now()) prem.add(c.key); }); draw(); }, () => {});
+});
+$('back').onclick = () => history.length > 1 ? history.back() : location.href = 'index.html';
+</script>
+<script src="app.js" defer></script>
+<script src="shell.js" defer></script>
+</body>
 </html>

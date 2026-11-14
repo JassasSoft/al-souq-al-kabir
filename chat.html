@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>غرفة التحكم والدعم والمساعد الذكي - السوق الكبير</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -115,6 +115,12 @@
         .badge-verified { background: var(--success-green); color: #000; }
         .badge-fake { background: var(--danger-red); color: #fff; }
     </style>
+<meta name="theme-color" content="#0f0a14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="theme.css">
+<style id="authGate">html{visibility:hidden}</style>
+<script type="module">import{requireAuth}from'./auth.js';requireAuth();</script>
+<script src="esc.js"></script>
 </head>
 <body>
 
@@ -309,14 +315,8 @@
         });
 
         function verifyAdminAccess(tabElement) {
-            let pass = prompt("الرجاء إدخال كلمة سر الآدمن لفتح لوحة فحص الإشعارات:");
-            if (pass === "123") {
-                switchPanel('adminPanelApproval', tabElement);
-                loadSubscriptionsForAdmin(); 
-            } else {
-                alert("كلمة المرور خاطئة!");
-                switchPanel('chatPanel', document.querySelectorAll('.tab-item')[0]);
-            }
+            // لوحة المشرف الآن في admin.html (تتطلب تسجيل دخول وصلاحية)
+            location.href = 'admin.html';
         }
 
         function switchPanel(panelId, tabElement) {
@@ -522,31 +522,31 @@
                 }
                 snapshot.forEach((childSnapshot) => {
                     const sub = childSnapshot.val();
-                    let imgHtml = sub.receiptImg ? `<img src="${sub.receiptImg}" class="receipt-preview-img" title="اضغط لمشاهدة الحجم الكامل" onclick="window.open(this.src)">` : "<p style='color:var(--danger-red); font-size:0.8rem;'>⚠️ لا توجد صورة مرفقة!</p>";
+                    let imgHtml = sub.receiptImg ? `<img src="${esc(sub.receiptImg)}" class="receipt-preview-img" title="اضغط لمشاهدة الحجم الكامل" onclick="window.open(this.src)">` : "<p style='color:var(--danger-red); font-size:0.8rem;'>⚠️ لا توجد صورة مرفقة!</p>";
                     let badgeClass = (sub.botCheck.includes("مشبوه")) ? "badge-fake" : "badge-verified";
 
                     adminListContainer.innerHTML += `
                         <div class="receipt-item">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <strong style="color:var(--primary-gold); font-size:0.95rem;">👤 ${sub.merchantName}</strong>
+                                <strong style="color:var(--primary-gold); font-size:0.95rem;">👤 ${esc(sub.merchantName)}</strong>
                                 <span class="badge-status badge-pending">إشعار معلق</span>
                             </div>
                             <div style="font-size:0.85rem; margin-top:6px; color:#fff; line-height:1.5;">
-                                📞 الهاتف: ${sub.merchantPhone}<br>
-                                📦 الباقة المطلوبة: <span style="color:var(--primary-gold);">${sub.subType}</span><br>
-                                🔢 رقم المرجع: <span style="color:var(--success-green); font-weight:900;">${sub.transactionRef}</span>
+                                📞 الهاتف: ${esc(sub.merchantPhone)}<br>
+                                📦 الباقة المطلوبة: <span style="color:var(--primary-gold);">${esc(sub.subType)}</span><br>
+                                🔢 رقم المرجع: <span style="color:var(--success-green); font-weight:900;">${esc(sub.transactionRef)}</span>
                             </div>
                             
                             <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:8px; margin-top:8px; border-left:3px solid var(--primary-gold);">
                                 <span style="font-size:0.75rem; color:var(--text-muted);">🤖 تقييم البوت الآلي للفحص:</span><br>
-                                <span class="badge-status ${badgeClass}">${sub.botCheck}</span><br>
-                                <span style="font-size:0.75rem; color:#fff;">💡 التوجيه: ${sub.botAdvice}</span>
+                                <span class="badge-status ${badgeClass}">${esc(sub.botCheck)}</span><br>
+                                <span style="font-size:0.75rem; color:#fff;">💡 التوجيه: ${esc(sub.botAdvice)}</span>
                             </div>
 
                             ${imgHtml}
                             
                             <div style="margin-top:12px; display:flex; gap:8px;">
-                                <button onclick="approveSubscription('${sub.merchantId}', '${sub.subscriptionId}', '${sub.subType}')" style="flex:1; background:var(--success-green); color:#000; border:none; padding:8px; border-radius:6px; font-size:0.8rem; font-weight:900; cursor:pointer;">✅ حقيقي وتفعيل الآن</button>
+                                <button onclick="approveSubscription('${escJs(sub.merchantId)}', '${escJs(sub.subscriptionId)}', '${escJs(sub.subType)}')" style="flex:1; background:var(--success-green); color:#000; border:none; padding:8px; border-radius:6px; font-size:0.8rem; font-weight:900; cursor:pointer;">✅ حقيقي وتفعيل الآن</button>
                                 <button onclick="rejectSubscription('${sub.merchantId}', '${sub.subscriptionId}')" style="flex:1; background:var(--danger-red); color:#fff; border:none; padding:8px; border-radius:6px; font-size:0.8rem; font-weight:900; cursor:pointer;">❌ إشعار مضروب ومرفوض</button>
                             </div>
                         </div>
@@ -579,5 +579,6 @@
 
         function openWhatsApp() { window.open('https://wa.me/249923211001', '_blank'); }
     </script>
-</body><script src="shared.js"></script>
+<script src="app.js" defer></script>
+</body>
 </html>

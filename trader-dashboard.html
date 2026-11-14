@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>السوق الكبير | لوحة التحكم الجغرافية</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght=400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -103,6 +103,13 @@
 
         .btn-save { width: 100%; background: var(--gold); color: #000; border: none; padding: 18px; border-radius: 20px; font-weight: 900; font-size: 1.1rem; margin-top: 25px; box-shadow: 0 4px 15px rgba(255,189,89,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Cairo'; }
     </style>
+<meta name="theme-color" content="#0f0a14">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="theme.css">
+<style id="authGate">html{visibility:hidden}</style>
+<script type="module">import{requireAuth}from'./auth.js';requireAuth();</script>
+<script src="esc.js"></script>
+<link rel="stylesheet" href="shell.css">
 </head>
 <body onload="startApp()">
 
@@ -241,12 +248,12 @@
     <script>
         // === 1. تهيئة Firebase ===
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyB8WmKff45q2jRlFm5xkGytJgt-_5Cx3J8",
+            authDomain: "alsouq-alkabeer-2052c.firebaseapp.com",
+            projectId: "alsouq-alkabeer-2052c",
+            storageBucket: "alsouq-alkabeer-2052c.firebasestorage.app",
+            messagingSenderId: "835295635291",
+            appId: "1:835295635291:web:e1f09baff25b50fac11c7e"
         };
         
         if (!firebase.apps.length) {
@@ -390,5 +397,7 @@
             checkUserSubscription();
         }
     </script>
-</body><script src="shared.js"></script>
+<script src="app.js" defer></script>
+<script src="shell.js" defer></script>
+</body>
 </html>
